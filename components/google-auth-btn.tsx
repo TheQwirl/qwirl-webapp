@@ -11,7 +11,7 @@ export function GoogleAuthBtn() {
       onClick={handleGoogleSignIn}
       className="flex items-center justify-center w-full px-4 py-2 bg-white border border-gray-300 rounded-lg "
     >
-      <GrGoogle size={24} className="mr-3" />
+      <GrGoogle size={18} className="mr-3" />
       <span className="text-gray-700 font-medium">Continue with Google</span>
     </button>
   );
