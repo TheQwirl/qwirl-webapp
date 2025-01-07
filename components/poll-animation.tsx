@@ -64,7 +64,7 @@ const PollAnimation: React.FC = () => {
           (prevIndex) => (prevIndex + 1) % pollQuestions.length
         );
       }
-    }, 5000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [isAnimating]);
@@ -90,84 +90,93 @@ const PollAnimation: React.FC = () => {
   const currentQuestion = pollQuestions[currentQuestionIndex];
 
   return (
-    <div className="flex items-center justify-center h-full gap-4 w-full">
-      <div className="flex-grow">
-        <AnimatePresence
-          mode="wait"
-          onExitComplete={() => setIsAnimating(false)}
-        >
-          <motion.div
-            key={currentQuestionIndex}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.5 }}
-            onAnimationStart={() => setIsAnimating(true)}
-            onAnimationComplete={() => setIsAnimating(false)}
-            className="w-full"
+    <motion.div
+      layout
+      transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      className="flex items-center justify-center h-full gap-4 w-full relative"
+    >
+      <motion.div
+        layout
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className="flex-grow p-10 bg-secondary-foreground text-primary rounded-[60px]"
+      >
+        <div className="my-4">
+          <AnimatePresence
+            mode="wait"
+            onExitComplete={() => setIsAnimating(false)}
           >
-            <h2 className="mb-6 text-2xl font- text-gray-800 w-full">
-              {currentQuestion.question}
-            </h2>
-            <div className="space-y-4">
-              {currentQuestion.options.map((option, index) => (
-                <motion.div
-                  key={index}
-                  //   h-16
-                  className="relative h-12 border bg-white/50 rounded-lg w-full overflow-hidden"
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
+            <motion.div
+              key={currentQuestionIndex}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ duration: 0.5 }}
+              onAnimationStart={() => setIsAnimating(true)}
+              onAnimationComplete={() => setIsAnimating(false)}
+              className="w-full"
+            >
+              <h2 className="mb-6 text-3xl font-bold  w-full">
+                {currentQuestion.question}
+              </h2>
+              <div className="space-y-4">
+                {currentQuestion.options.map((option, index) => (
                   <motion.div
-                    className="absolute top-0 left-0 h-full bg-amber-400"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${option.percentage}%` }}
-                    transition={{
-                      delay: 0.5 + index * 0.1,
-                      duration: 0.5,
-                      ease: "easeInOut",
-                      bounce: 0.5,
-                    }}
-                  />
-                  <div className="absolute top-0 left-0 flex items-center justify-between w-full h-full px-4">
-                    <span className="font-semibold text-gray-800">
-                      {option.text}
-                    </span>
-                    <span className="font-semibold text-gray-800">
-                      {option.percentage}%
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </AnimatePresence>
-        <div className="flex justify-end gap-4 mt-8">
-          <button
-            onClick={() =>
-              setCurrentQuestionIndex(
-                (prevIndex) =>
-                  (prevIndex - 1 + pollQuestions.length) % pollQuestions.length
-              )
-            }
-            className="p-2 text-gray-800 bg-gray-400/60 rounded-full hover:text-gray-800 focus:outline-none"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <button
-            onClick={() =>
-              setCurrentQuestionIndex(
-                (prevIndex) => (prevIndex + 1) % pollQuestions.length
-              )
-            }
-            className="p-2 text-gray-800 bg-gray-400/60 rounded-full hover:text-gray-800 focus:outline-none"
-          >
-            <ChevronRight size={24} />
-          </button>
+                    key={index}
+                    //   h-16
+                    className="relative h-12 bg-black/50 rounded-lg w-full overflow-hidden"
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <motion.div
+                      className="absolute top-0 left-0 h-full bg-primary/40"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${option.percentage}%` }}
+                      transition={{
+                        delay: 0.5 + index * 0.1,
+                        duration: 0.5,
+                        ease: "easeInOut",
+                        bounce: 0.5,
+                      }}
+                    />
+                    <div className="absolute top-0 left-0 flex items-center justify-between w-full h-full px-4">
+                      <span className="text-slate-200">{option.text}</span>
+                      <span className="text-slate-200">
+                        {option.percentage}%
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+          <div className=" flex text-slate-200 justify-end gap-4 mt-4">
+            <button
+              onClick={() =>
+                setCurrentQuestionIndex(
+                  (prevIndex) =>
+                    (prevIndex - 1 + pollQuestions.length) %
+                    pollQuestions.length
+                )
+              }
+              className="p-2  bg-gray-400/60 rounded-full hover: focus:outline-none"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              onClick={() =>
+                setCurrentQuestionIndex(
+                  (prevIndex) => (prevIndex + 1) % pollQuestions.length
+                )
+              }
+              className="p-2  bg-gray-400/60 rounded-full hover: focus:outline-none"
+            >
+              <ChevronRight size={24} />
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

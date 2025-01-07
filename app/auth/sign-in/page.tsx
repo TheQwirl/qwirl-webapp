@@ -7,7 +7,7 @@ const SignIn = () => {
   return (
     <main className="min-h-screen relative bg-background overflow-hidden grid grid-cols-2">
       <div className="absolute -bottom-10 -right-20 w-72 h-72 bg-primary rounded-full mix-blend-multiply blur-xl opacity-30 animate-blob" />
-      <div className="relative hidden lg:block lg:col-span-1 bg-primary rounded-r-2xl"></div>
+      <div className="relative hidden lg:block lg:col-span-1 bg-primary rounded-tr-[60px]"></div>
       <div className="flex flex-col p-4 md:p-10 justify-center items-center col-span-full lg:col-span-1 relative">
         <div className="relative w-full">
           <div className="absolute inset-0.5 bg-primary rounded-2xl blur animate-pulse"></div>

@@ -85,6 +85,10 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        poppins: ["Poppins", "sans-serif"],
+        rochester: ["Rochester", "cursive"],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
