@@ -12,13 +12,14 @@ import ProfileHeader from "./sidebar/profile-header";
 import { MENU_ITEMS } from "@/constants/data-sidebar";
 import SidebarSingleMenuItem from "./sidebar/sidebar-single-menu-item";
 import GroupSidebarMenuItem from "./sidebar/group-sidebar-menu-item";
+import { LogoutComponent } from "../logout-component";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
-      variant="sidebar"
+      // variant="sidebar"
       className="rounded-r-[40px] border-none shadow-lg"
-      collapsible="offcanvas"
+      // collapsible="offcanvas"
       {...props}
     >
       <div className="px-8 py-8">
@@ -36,7 +37,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter />
+        <SidebarFooter>
+          <LogoutComponent
+            username="John Doe"
+            email="john@example.com"
+            avatarUrl="/placeholder.svg?height=40&width=40"
+            onLogout={() => {}}
+          />
+        </SidebarFooter>
       </div>
     </Sidebar>
   );

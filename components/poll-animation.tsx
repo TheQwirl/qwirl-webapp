@@ -116,10 +116,10 @@ const PollAnimation: React.FC = () => {
               className="w-full"
             >
               <h2 className="mb-6 text-3xl font-bold  w-full">
-                {currentQuestion.question}
+                {currentQuestion?.question}
               </h2>
               <div className="space-y-4">
-                {currentQuestion.options.map((option, index) => (
+                {currentQuestion?.options.map((option, index) => (
                   <motion.div
                     key={index}
                     //   h-16

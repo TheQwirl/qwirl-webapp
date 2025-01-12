@@ -3,14 +3,14 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
-// import { PanelLeft } from "lucide-react"
 import { IoMdMenu } from "react-icons/io";
+import { IoClose } from "react-icons/io5";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
@@ -195,9 +195,11 @@ const Sidebar = React.forwardRef<
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+          <SheetTitle className="hidden"></SheetTitle>
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
+            aria-describedby=""
             className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             style={
               {
@@ -263,7 +265,7 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, openMobile } = useSidebar();
 
   return (
     <Button
@@ -271,20 +273,33 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-10 w-10 ml-5 mt-5", className)}
+      className={cn(
+        "h-10 w-10 p-3 rounded-full bg-primary text-primary-foreground",
+        className
+      )}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
       }}
       {...props}
     >
-      <IoMdMenu
-        style={{
-          width: "30px",
-          height: "30px",
-          fill: "currentColor",
-        }}
-      />
+      {openMobile ? (
+        <IoClose
+          style={{
+            width: "26px",
+            height: "26px",
+            fill: "currentColor",
+          }}
+        />
+      ) : (
+        <IoMdMenu
+          style={{
+            width: "26px",
+            height: "26px",
+            fill: "currentColor",
+          }}
+        />
+      )}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

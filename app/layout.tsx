@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Rochester } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -25,14 +26,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className="overflow-y-auto overflow-x-hidden scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-background scrollbar-track-transparent"
-    >
+    <html lang="en" className="">
       <body
-        className={` ${poppins.variable} ${rochester.variable} antialiased`}
+        className={` ${poppins.variable} ${rochester.variable} scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-background scrollbar-track-transparent overflow-y-auto overflow-x-hidden antialiased`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
