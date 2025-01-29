@@ -11,15 +11,13 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
   return (
     <QueryProvider>
-      <SidebarProvider>
-        {isMobile && (
-          <SidebarTrigger className="absolute top-3 left-3 z-[1000]" />
-        )}
+      <SidebarProvider className="min-h-screen overflow-hidden">
+        {isMobile && <SidebarTrigger className="absolute top-3 left-3 z-50" />}
         <AppSidebar />
         <main
           className={clsx(
-            isMobile && "mt-6",
-            "flex-grow min-h-screen overflow-hidden"
+            isMobile && "",
+            "flex-grow  overflow-hidden overflow-x-hidden"
           )}
         >
           {children || <ComingSoon />}

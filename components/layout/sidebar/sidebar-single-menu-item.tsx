@@ -10,7 +10,11 @@ const SidebarSingleMenuItem = ({
   const pathname = usePathname();
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={pathname === item?.url}>
+      <SidebarMenuButton
+        className="hover:text-white duration-300 transition-all"
+        asChild
+        isActive={pathname === item?.url}
+      >
         <a href={item.url}>
           <item.icon
             className="mr-2"

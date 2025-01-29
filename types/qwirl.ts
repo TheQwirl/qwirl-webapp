@@ -6,4 +6,5 @@ export interface Question {
   isHidden: boolean;
   userAnswer: number;
   position: number;
+  category: string;
 }

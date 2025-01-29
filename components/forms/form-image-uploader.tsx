@@ -108,7 +108,7 @@ export function FormImageUploader({
                       document.getElementById("image-upload")?.click()
                     }
                   >
-                    <Upload className="w-4 h-4 mr-2" />
+                    <Upload className="w-4 h-4" />
                     Replace
                   </Button>
                   <Button
@@ -116,7 +116,7 @@ export function FormImageUploader({
                     variant="destructive"
                     onClick={handleDelete}
                   >
-                    <Trash2 className="w-4 h-4 mr-2" />
+                    <Trash2 className="w-4 h-4" />
                     Delete
                   </Button>
                 </div>

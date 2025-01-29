@@ -33,6 +33,7 @@ const GroupSidebarMenuItem = ({ item }: GroupSidebarMenuItemProps) => {
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
+            className="group/collapsible hover:text-white duration-300 transition-all"
             isActive={item?.children
               ?.map((subItem) => subItem.url)
               .includes(pathname)}
@@ -53,6 +54,7 @@ const GroupSidebarMenuItem = ({ item }: GroupSidebarMenuItemProps) => {
                 <SidebarMenuSubButton
                   isActive={pathname === subItem.url}
                   asChild
+                  className="hover:text-white duration-300 transition-all"
                 >
                   <a href={subItem.url}>
                     <subItem.icon
