@@ -1,37 +1,28 @@
-import { useEffect } from "react";
-import useAuthStore from "@/stores/useAuthStore";
-import { useRouter } from "next/navigation";
-import refreshAccessToken from "../lib/auth/refreshToken";
+import { createContext, useContext, useEffect, ReactNode } from "react";
+import { useStore } from "zustand";
+import { authStore } from "@/stores/useAuthStore";
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const { setAuth, logout } = useAuthStore();
+const AuthContext = createContext<typeof authStore | null>(null);
 
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
-    // Set up refresh interval
-    const refreshInterval = setInterval(async () => {
-      try {
-        await refreshAccessToken();
-      } catch (error) {
-        console.error("Error refreshing token:", error);
-        logout();
-        router.push("/auth");
-      }
-    }, 14 * 60 * 1000); // Refresh every 14 minutes (before 15-minute expiry)
+    console.log("AuthProvider: Mounting, triggering initialize");
+    // const initialize = async () => {
+    //   await authStore.getState().initialize();
+    // };
+    // initialize();
+    return () => {
+      console.log("AuthProvider: Unmounting");
+    };
+  }, []);
 
-    return () => clearInterval(refreshInterval);
-  }, [router, logout]);
+  return (
+    <AuthContext.Provider value={authStore}>{children}</AuthContext.Provider>
+  );
+};
 
-  useEffect(() => {
-    // Handle token in URL (from OAuth callback)
-    const token = new URLSearchParams(window.location.search).get("token");
-    if (token) {
-      fetch("/api/auth/callback?token=" + token).then(() => {
-        router.replace(window.location.pathname);
-        setAuth(token);
-      });
-    }
-  }, [router, setAuth]);
-
-  return <>{children}</>;
-}
+export const useAuth = () => {
+  const store = useContext(AuthContext);
+  if (!store) throw new Error("useAuth must be used within an AuthProvider");
+  return useStore(store);
+};

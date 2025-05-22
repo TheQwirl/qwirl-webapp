@@ -1,6 +1,11 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
+import EngagementBreakdown from "@/components/qwirl-details/engegement-breakdown";
+import QuestionInsights from "@/components/qwirl-details/question-insights";
+import HistoricalTrends from "@/components/qwirl-details/historical-trends";
+import Suggestions from "@/components/qwirl-details/suggestions";
+import Footer from "@/components/qwirl-details/footer";
 
 const PrimaryQwirlDetails = () => {
   return (
@@ -10,7 +15,7 @@ const PrimaryQwirlDetails = () => {
       transition={{ duration: 0.5 }}
       className="mx-auto max-w-7xl space-y-8"
     >
-      <Header />
+      {/* <Header /> */}
       <EngagementBreakdown />
       <QuestionInsights />
       <HistoricalTrends />

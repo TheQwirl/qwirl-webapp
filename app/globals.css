@@ -196,4 +196,7 @@ body {
       transform: rotate3d(0, 0, 1, 0deg);
     }
   }
+  .glass-background {
+    @apply bg-white/10 rounded-[16px] shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-[4.2px] border border-white/20;
+  }
 }

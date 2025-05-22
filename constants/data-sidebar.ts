@@ -1,4 +1,3 @@
-import { FaRegNewspaper } from "react-icons/fa";
 import { FaCircleUser } from "react-icons/fa6";
 import { IoSettingsOutline } from "react-icons/io5";
 import { LuBadgeInfo } from "react-icons/lu";
@@ -6,12 +5,13 @@ import { PiSealQuestionFill } from "react-icons/pi";
 import { RiUserCommunityFill } from "react-icons/ri";
 import { TbEdit } from "react-icons/tb";
 import { TbMessageQuestion } from "react-icons/tb";
+import { GoHomeFill } from "react-icons/go";
 
 export // Menu items array
 const MENU_ITEMS = [
   {
-    title: "Feed",
-    icon: FaRegNewspaper,
+    title: "Home",
+    icon: GoHomeFill,
     url: "/feed",
     type: "single",
   },

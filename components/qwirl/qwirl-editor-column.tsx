@@ -16,7 +16,7 @@ const QwirlEditorColumn = ({
   return (
     <div
       className={clsx(
-        "overflow-y-hidden col-span-full lg:col-span-8",
+        "overflow-y-hidden col-span-full lg:col-span-full",
         false && "bg-primary/5  bg-blur rounded-lg  "
       )}
     >

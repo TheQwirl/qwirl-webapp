@@ -40,10 +40,10 @@ const GroupSidebarMenuItem = ({ item }: GroupSidebarMenuItemProps) => {
             tooltip=""
           >
             <item.icon
-              style={{ width: "20px", height: "20px" }}
+              style={{ width: "24px", height: "24px" }}
               className="mr-2"
             />
-            <span className="text-base">{item.title}</span>
+            <span className="text-lg">{item.title}</span>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>

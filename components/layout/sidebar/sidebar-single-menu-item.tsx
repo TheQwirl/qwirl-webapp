@@ -18,9 +18,9 @@ const SidebarSingleMenuItem = ({
         <a href={item.url}>
           <item.icon
             className="mr-2"
-            style={{ width: "20px", height: "20px" }}
+            style={{ width: "24px", height: "24px" }}
           />
-          <span className="text-base">{item.title}</span>
+          <span className="text-lg">{item.title}</span>
         </a>
       </SidebarMenuButton>
     </SidebarMenuItem>

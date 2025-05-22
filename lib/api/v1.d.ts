@@ -58,7 +58,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/submit-phone": {
+    "/api/v1/users/refresh-token": {
         parameters: {
             query?: never;
             header?: never;
@@ -68,17 +68,17 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Submit Phone Number
-         * @description Allow users to submit and update their phone number
+         * Refresh Access Token
+         * @description Refresh the access token using a valid refresh token.
          */
-        post: operations["submit_phone_number_api_v1_users_submit_phone_post"];
+        post: operations["refresh_access_token_api_v1_users_refresh_token_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/user/profile": {
+    "/api/v1/users/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -86,14 +86,98 @@ export interface paths {
             cookie?: never;
         };
         /** Get User Profile */
-        get: operations["get_user_profile_api_v1_users_user_profile_get"];
+        get: operations["get_user_profile_api_v1_users_me_get"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Update User Profile */
-        patch: operations["update_user_profile_api_v1_users_user_profile_patch"];
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update User */
+        patch: operations["update_user_api_v1_users__patch"];
+        trace?: never;
+    };
+    "/api/v1/users/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Profile Image */
+        post: operations["upload_profile_image_api_v1_users_avatar_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/primary-qwirl": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Primary Qwirl
+         * @description Get the user's primary Qwirl
+         *
+         *     Returns:
+         *         The user's primary Qwirl or an error if none is set
+         */
+        get: operations["get_primary_qwirl_api_v1_users_primary_qwirl_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User Posts
+         * @description Get posts created by a user
+         *
+         *     Args:
+         *         user_id: ID of the user whose posts to retrieve (defaults to authenticated user)
+         *         skip: Number of posts to skip for pagination
+         *         limit: Maximum number of posts to return
+         *
+         *     Returns:
+         *         List of posts created by the user
+         */
+        get: operations["get_user_posts_api_v1_users_posts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/qwirl/": {
@@ -108,7 +192,7 @@ export interface paths {
          * @description Get all qwirls of a user
          *
          *     Returns:
-         *         Properties
+         *         Qwirls
          */
         get: operations["get_qwirls_api_v1_qwirl__get"];
         put?: never;
@@ -219,15 +303,21 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/onboarding/user/onboarded": {
+    "/api/v1/question-categories/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Has Seen Onboarding */
-        get: operations["has_seen_onboarding_api_v1_onboarding_user_onboarded_get"];
+        /**
+         * Get Categories
+         * @description Get all categories
+         *
+         *     Returns:
+         *         Categories
+         */
+        get: operations["get_categories_api_v1_question_categories__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -236,15 +326,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/onboarding/user/update-onboarding": {
+    "/api/v1/question-bank/by-category": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Update Onboarding Status */
-        get: operations["update_onboarding_status_api_v1_onboarding_user_update_onboarding_get"];
+        /** Get Questions By Category */
+        get: operations["get_questions_by_category_api_v1_question_bank_by_category_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -253,18 +343,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/onboarding/user/categories": {
+    "/api/v1/question-bank/by-tag": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get All Available Categories */
-        get: operations["get_all_available_categories_api_v1_onboarding_user_categories_get"];
+        /** Get Questions By Tag */
+        get: operations["get_questions_by_tag_api_v1_question_bank_by_tag_get"];
         put?: never;
-        /** Update User Categories */
-        post: operations["update_user_categories_api_v1_onboarding_user_categories_post"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/post/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Post */
+        post: operations["create_post_api_v1_post__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/post/{post_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Post By Id */
+        get: operations["get_post_by_id_api_v1_post__post_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Post */
+        delete: operations["delete_post_api_v1_post__post_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Post */
+        patch: operations["update_post_api_v1_post__post_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/post/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List My Posts */
+        get: operations["list_my_posts_api_v1_post_me_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -292,23 +434,85 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** Body_update_user_profile_api_v1_users_user_profile_patch */
-        Body_update_user_profile_api_v1_users_user_profile_patch: {
-            /** Name */
-            name?: string | null;
-            /** Phone */
-            phone?: string | null;
-            /** Avatar */
-            avatar?: string | null;
-            /** Username */
-            username?: string | null;
-            /** Categories */
-            categories?: string[] | null;
+        /** AuthResponse */
+        AuthResponse: {
+            user: components["schemas"]["UserResponse"];
+            /** Access Token */
+            access_token: string;
+            /** Refresh Token */
+            refresh_token: string;
+        };
+        /** Body_upload_profile_image_api_v1_users_avatar_post */
+        Body_upload_profile_image_api_v1_users_avatar_post: {
+            /**
+             * File
+             * Format: binary
+             */
+            file: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** PostAttachment */
+        PostAttachment: {
+            /**
+             * Type
+             * @constant
+             */
+            type: "poll";
+            /** Text */
+            text?: string | null;
+            /** Options */
+            options?: string[] | null;
+            /** Tags */
+            tags?: string[] | null;
+            /** Image Src */
+            image_src?: string | null;
+        };
+        /** PostBase */
+        PostBase: {
+            /** Id */
+            id: number | null;
+            /** User Id */
+            user_id: number | null;
+            attachments: components["schemas"]["PostAttachment"];
+        };
+        /** PostCreate */
+        PostCreate: {
+            attachments: components["schemas"]["PostAttachment"];
+        };
+        /** PostResponse */
+        PostResponse: {
+            /** Id */
+            id: number;
+            /** Content */
+            content: string;
+            /** Media Urls */
+            media_urls?: string[] | null;
+            /** Created By */
+            created_by: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Likes Count
+             * @default 0
+             */
+            likes_count: number;
+            /**
+             * Comments Count
+             * @default 0
+             */
+            comments_count: number;
+            /**
+             * Is Liked
+             * @default false
+             */
+            is_liked: boolean | null;
         };
         /** QwirlAnswer */
         QwirlAnswer: {
@@ -389,6 +593,17 @@ export interface components {
              */
             is_deleted: boolean | null;
         };
+        /** QwirlResponse */
+        QwirlResponse: {
+            /** Id */
+            id: number;
+            /** Questions */
+            questions: components["schemas"]["QwirlQuestion"][] | null;
+            /** Tags */
+            tags: string[] | null;
+            /** Created By */
+            created_by: number | null;
+        };
         /** QwirlResponseBase */
         QwirlResponseBase: {
             /** Id */
@@ -411,9 +626,9 @@ export interface components {
         /** QwirlUpdate */
         QwirlUpdate: {
             /** Questions */
-            questions: components["schemas"]["QwirlQuestionUpdate"][] | null;
+            questions?: components["schemas"]["QwirlQuestionUpdate"][] | null;
             /** Tags */
-            tags: string[] | null;
+            tags?: string[] | null;
         };
         /** QwirlUser */
         QwirlUser: {
@@ -424,33 +639,15 @@ export interface components {
             /** Id */
             id: number | null;
         };
+        /** RefreshTokenOnly */
+        RefreshTokenOnly: {
+            /** Refresh Token */
+            refresh_token: string;
+        };
         /** ResponseBody */
         ResponseBody: {
             /** Message */
             message: string;
-        };
-        /** SignInResponse */
-        SignInResponse: {
-            /** Access Token */
-            access_token: string;
-            /** Refresh Token */
-            refresh_token: string;
-            /** Email */
-            email: string;
-            /** Full Name */
-            full_name: string;
-            /** Phone Number */
-            phone_number: string | null;
-        };
-        /** UserPhoneNumber */
-        UserPhoneNumber: {
-            /** Phone Number */
-            phone_number: string;
-        };
-        /** UserQuestionCategories */
-        UserQuestionCategories: {
-            /** Categories */
-            categories: string[];
         };
         /** UserResponse */
         UserResponse: {
@@ -466,11 +663,34 @@ export interface components {
             /** Name */
             name: string | null;
             /** Phone */
-            phone: string;
+            phone: string | null;
             /** Avatar */
             avatar: string | null;
+            /** Header Img */
+            header_img: string | null;
             /** Categories */
             categories: string[];
+            /** Has Seen Onboarding */
+            has_seen_onboarding: boolean | null;
+            /** Followers Count */
+            followers_count: number;
+            /** Following Count */
+            following_count: number;
+            /** Friends Count */
+            friends_count: number;
+        };
+        /** UserUpdate */
+        UserUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Username */
+            username?: string | null;
+            /** Has Seen Onboarding */
+            has_seen_onboarding?: boolean | null;
+            /** Categories */
+            categories?: string[] | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -545,6 +765,7 @@ export interface operations {
         parameters: {
             query: {
                 client_type: string;
+                url: string;
             };
             header?: never;
             path?: never;
@@ -558,7 +779,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SignInResponse"];
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
             /** @description Validation Error */
@@ -572,19 +793,16 @@ export interface operations {
             };
         };
     };
-    submit_phone_number_api_v1_users_submit_phone_post: {
+    refresh_access_token_api_v1_users_refresh_token_post: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UserPhoneNumber"];
+                "application/json": components["schemas"]["RefreshTokenOnly"];
             };
         };
         responses: {
@@ -594,7 +812,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponse"];
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
             /** @description Validation Error */
@@ -608,13 +826,10 @@ export interface operations {
             };
         };
     };
-    get_user_profile_api_v1_users_user_profile_get: {
+    get_user_profile_api_v1_users_me_get: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -629,6 +844,30 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponse"];
                 };
             };
+        };
+    };
+    update_user_api_v1_users__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -640,19 +879,16 @@ export interface operations {
             };
         };
     };
-    update_user_profile_api_v1_users_user_profile_patch: {
+    upload_profile_image_api_v1_users_avatar_post: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
-                "multipart/form-data": components["schemas"]["Body_update_user_profile_api_v1_users_user_profile_patch"];
+                "multipart/form-data": components["schemas"]["Body_upload_profile_image_api_v1_users_avatar_post"];
             };
         };
         responses: {
@@ -662,7 +898,60 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponse"];
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_primary_qwirl_api_v1_users_primary_qwirl_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlResponse"];
+                };
+            };
+        };
+    };
+    get_user_posts_api_v1_users_posts_get: {
+        parameters: {
+            query?: {
+                user_id?: number | null;
+                skip?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostResponse"][];
                 };
             };
             /** @description Validation Error */
@@ -679,10 +968,7 @@ export interface operations {
     get_qwirls_api_v1_qwirl__get: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -697,24 +983,12 @@ export interface operations {
                     "application/json": components["schemas"]["QwirlList"];
                 };
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
         };
     };
     add_qwirl_api_v1_qwirl__post: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -747,10 +1021,7 @@ export interface operations {
     get_qwirl_id_api_v1_qwirl__qwirl_id__get: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path: {
                 qwirl_id: number;
             };
@@ -781,10 +1052,7 @@ export interface operations {
     delete_qwirl_api_v1_qwirl__qwirl_id__delete: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path: {
                 qwirl_id: number;
             };
@@ -813,10 +1081,7 @@ export interface operations {
     update_qwirl_api_v1_qwirl__qwirl_id__patch: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path: {
                 qwirl_id: number;
             };
@@ -851,10 +1116,7 @@ export interface operations {
     add_qwirl_response_api_v1_qwirl_responses__post: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -887,10 +1149,7 @@ export interface operations {
     get_qwirl_response_by_id_api_v1_qwirl_responses__response_id__get: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path: {
                 response_id: number;
             };
@@ -921,10 +1180,7 @@ export interface operations {
     delete_qwirl_response_api_v1_qwirl_responses__response_id__delete: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
+            header?: never;
             path: {
                 response_id: number;
             };
@@ -950,71 +1206,7 @@ export interface operations {
             };
         };
     };
-    has_seen_onboarding_api_v1_onboarding_user_onboarded_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    update_onboarding_status_api_v1_onboarding_user_update_onboarding_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_all_available_categories_api_v1_onboarding_user_categories_get: {
+    get_categories_api_v1_question_categories__get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1034,21 +1226,16 @@ export interface operations {
             };
         };
     };
-    update_user_categories_api_v1_onboarding_user_categories_post: {
+    get_questions_by_category_api_v1_question_bank_by_category_get: {
         parameters: {
-            query?: never;
-            header?: {
-                /** @description Use 'Basic email@domain.com' */
-                Authentication?: unknown;
+            query: {
+                category: string;
             };
+            header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserQuestionCategories"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -1056,7 +1243,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": Record<string, never>[];
                 };
             };
             /** @description Validation Error */
@@ -1066,6 +1253,185 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_questions_by_tag_api_v1_question_bank_by_tag_get: {
+        parameters: {
+            query: {
+                tag: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_post_api_v1_post__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostBase"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_post_by_id_api_v1_post__post_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                post_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostBase"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_post_api_v1_post__post_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                post_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_post_api_v1_post__post_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                post_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostBase"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_my_posts_api_v1_post_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };

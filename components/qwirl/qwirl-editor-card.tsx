@@ -27,10 +27,6 @@ const QwirlEditorCard: React.FC<Props> = ({ question, className }) => {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-1">
             <SortableList.DragHandle />
-            <div className="flex items-center bg-apricot-sunrise rounded px-1 divide-x divide-card">
-              <IoIosArrowRoundUp className="h-6 w-6 cursor-pointer" />
-              <IoIosArrowRoundDown className="h-6 w-6 cursor-pointer" />
-            </div>
             <Badge className="bg-foreground text-primary rounded-full">
               {question?.category}
             </Badge>
@@ -40,6 +36,14 @@ const QwirlEditorCard: React.FC<Props> = ({ question, className }) => {
               <CiMenuKebab className=" hover:swing h-5 w-5 cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-40">
+              <DropdownMenuItem className="group/btn cursor-pointer">
+                <IoIosArrowRoundUp className="h-4 w-4" />
+                <span>Up</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="group/btn cursor-pointer">
+                <IoIosArrowRoundDown className="h-4 w-4" />
+                <span>Down</span>
+              </DropdownMenuItem>
               <DropdownMenuItem className="group/btn text-destructive  cursor-pointer">
                 <MdDeleteOutline className="h-4 w-4" />
                 <span>Delete</span>
