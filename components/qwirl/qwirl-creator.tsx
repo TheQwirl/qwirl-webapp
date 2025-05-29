@@ -88,11 +88,7 @@ const QwirlCreator = () => {
 
   return (
     <div className="p-6 max-w-4xl overl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
+      <div className="mb-6">
         <Button
           onClick={() => setIsModalOpen(true)}
           disabled={questions.length >= 35}
@@ -101,7 +97,7 @@ const QwirlCreator = () => {
           <Plus className="mr-2 group-hover:rotate-90 transition-transform" />
           Add Question
         </Button>
-      </motion.div>
+      </div>
 
       <Reorder.Group
         axis="y"

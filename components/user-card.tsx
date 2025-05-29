@@ -19,7 +19,7 @@ export default function UserCard({
     <Card>
       <CardContent className="flex items-center space-x-4 p-4">
         <Image
-          src={avatar || "/placeholder.svg"}
+          src={avatar}
           alt={name}
           width={50}
           height={50}

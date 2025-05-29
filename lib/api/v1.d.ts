@@ -89,7 +89,17 @@ export interface paths {
         get: operations["get_user_profile_api_v1_users_me_get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete User Account
+         * @description Delete the authenticated user's account
+         *
+         *     Args:
+         *         hard_delete: If True, permanently removes all user data. If False, soft-deletes the account.
+         *
+         *     Returns:
+         *         No content on success
+         */
+        delete: operations["delete_user_account_api_v1_users_me_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -180,6 +190,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User By Id
+         * @description Get a user's profile by user ID with relationship status
+         *
+         *     Args:
+         *         user_id: ID of the user to retrieve
+         *
+         *     Returns:
+         *         User profile with relationship status information
+         */
+        get: operations["get_user_by_id_api_v1_users__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/qwirl/": {
         parameters: {
             query?: never;
@@ -248,6 +284,32 @@ export interface paths {
          *         Qwirl
          */
         patch: operations["update_qwirl_api_v1_qwirl__qwirl_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/qwirl/user/{user_id}/primary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User Primary Qwirl
+         * @description Get the primary Qwirl of a specific user
+         *
+         *     Args:
+         *         user_id (int): The ID of the user whose primary Qwirl to retrieve
+         *
+         *     Returns:
+         *         The user's primary Qwirl or an appropriate error
+         */
+        get: operations["get_user_primary_qwirl_api_v1_qwirl_user__user_id__primary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/qwirl-responses/": {
@@ -407,6 +469,103 @@ export interface paths {
         get: operations["list_my_posts_api_v1_post_me_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/user_follows/followers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get User Followers */
+        get: operations["get_user_followers_api_v1_user_follows_followers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/user_follows/friends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User Friends
+         * @description Get list of user's friends
+         */
+        get: operations["get_user_friends_api_v1_user_follows_friends_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/user_follows/relationship/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Relationship
+         * @description Get relationship status with another user
+         */
+        get: operations["get_relationship_api_v1_user_follows_relationship__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/user_follows/follow/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Follow User
+         * @description Follow a user
+         */
+        post: operations["follow_user_api_v1_user_follows_follow__user_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/user_follows/unfollow/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unfollow User
+         * @description Unfollow a user
+         */
+        post: operations["unfollow_user_api_v1_user_follows_unfollow__user_id__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -644,10 +803,30 @@ export interface components {
             /** Refresh Token */
             refresh_token: string;
         };
+        /** RelationshipStatus */
+        RelationshipStatus: {
+            /** Is Following */
+            is_following: boolean;
+            /** Is Followed By */
+            is_followed_by: boolean;
+            /** Is Friend */
+            is_friend: boolean;
+        };
         /** ResponseBody */
         ResponseBody: {
             /** Message */
             message: string;
+        };
+        /** UserFollowerResponse */
+        UserFollowerResponse: {
+            /** Id */
+            id: number;
+            /** Username */
+            username: string;
+            /** Name */
+            name: string | null;
+            /** Avatar */
+            avatar: string | null;
         };
         /** UserResponse */
         UserResponse: {
@@ -691,6 +870,37 @@ export interface components {
             has_seen_onboarding?: boolean | null;
             /** Categories */
             categories?: string[] | null;
+        };
+        /** UserWithRelationshipResponse */
+        UserWithRelationshipResponse: {
+            /** Id */
+            id: number;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Username */
+            username: string;
+            /** Name */
+            name: string | null;
+            /** Phone */
+            phone: string | null;
+            /** Avatar */
+            avatar: string | null;
+            /** Header Img */
+            header_img: string | null;
+            /** Categories */
+            categories: string[];
+            /** Has Seen Onboarding */
+            has_seen_onboarding: boolean | null;
+            /** Followers Count */
+            followers_count: number;
+            /** Following Count */
+            following_count: number;
+            /** Friends Count */
+            friends_count: number;
+            relationship: components["schemas"]["RelationshipStatus"];
         };
         /** ValidationError */
         ValidationError: {
@@ -846,6 +1056,36 @@ export interface operations {
             };
         };
     };
+    delete_user_account_api_v1_users_me_delete: {
+        parameters: {
+            query?: {
+                /** @description Whether to permanently delete all user data */
+                hard_delete?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     update_user_api_v1_users__patch: {
         parameters: {
             query?: never;
@@ -952,6 +1192,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PostResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_user_by_id_api_v1_users__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserWithRelationshipResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1092,6 +1363,37 @@ export interface operations {
                 "application/json": components["schemas"]["QwirlUpdate"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlBase"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_user_primary_qwirl_api_v1_qwirl_user__user_id__primary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -1432,6 +1734,151 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_user_followers_api_v1_user_follows_followers_get: {
+        parameters: {
+            query?: {
+                skip?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_user_friends_api_v1_user_follows_friends_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserFollowerResponse"][];
+                };
+            };
+        };
+    };
+    get_relationship_api_v1_user_follows_relationship__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    follow_user_api_v1_user_follows_follow__user_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unfollow_user_api_v1_user_follows_unfollow__user_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

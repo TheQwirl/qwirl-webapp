@@ -28,31 +28,34 @@ const AuthCallback = () => {
         );
 
         if (error || !data) {
-          throw new Error("Authentication failed");
+          console.error("AuthCallback error or no data:", error, data);
+          throw new Error("Authentication callback failed: No data received.");
         }
 
-        console.log("Authentication successful:", data);
+        console.log("Authentication callback successful:", data);
 
-        // Update auth store with tokens and user data
         authStore.setState({
           accessToken: data.access_token,
           refreshToken: data.refresh_token,
           user: data.user as components["schemas"]["UserResponse"],
           isLoading: false,
+          isInitialized: true, // Important: Set as initialized
           error: null,
         });
 
-        // Redirect to feed
-        router.replace("/feed");
+        router.replace("/feed"); // Or a more dynamic redirect location
       } catch (err) {
-        console.error("Authentication error:", err);
-        // Update auth store with error state
+        console.error("Authentication callback error:", err);
         authStore.setState({
           accessToken: null,
           refreshToken: null,
           user: null,
           isLoading: false,
-          error: "Authentication failed",
+          isInitialized: true, // Still initialized, but with an error and no user
+          error:
+            err instanceof Error
+              ? err.message
+              : "Authentication failed during callback",
         });
         router.replace("/auth?error=auth_failed");
       }
@@ -60,11 +63,12 @@ const AuthCallback = () => {
 
     performAuthCallback();
   }, [windowUrl, router]);
+
   return (
     <div className="h-screen w-screen flex items-center justify-center flex-col text-center">
-      <div className="shadow bg-background text-card-foreground rounded-3xl p-6 flex flex-col  items-center justify-center border">
+      <div className="shadow bg-background text-card-foreground rounded-3xl p-6 flex flex-col items-center justify-center border">
         <Image src="/assets/loader.svg" alt="Loading" width={80} height={80} />
-        <div className=" animate-pulse">Logging you in</div>
+        <div className="animate-pulse">Logging you in...</div>
       </div>
     </div>
   );

@@ -23,3 +23,16 @@ export const getBaseUrl = () => {
 
   return "http://localhost:3000";
 };
+
+export function safeToNumber(
+  value: string,
+  fallback: number | null = null
+): number | null {
+  const trimmed = value.trim();
+
+  if (trimmed === "") return fallback;
+
+  const num = Number(trimmed);
+
+  return Number.isFinite(num) ? num : fallback;
+}

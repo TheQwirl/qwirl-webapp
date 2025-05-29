@@ -8,38 +8,37 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { useIsMobile } from "../../hooks/use-mobile";
 import QueryProvider from "@/components/query-provider";
 import ComingSoon from "@/components/coming-soon";
-import { AuthProvider, useAuth } from "@/components/auth-provider";
+import { AuthProvider } from "@/components/auth-provider";
 import { MobileNavBar } from "@/components/layout/mobile-navbar";
 import { useRouter } from "next/navigation";
 import PageLoader from "@/components/page-loader";
 import { toast } from "sonner";
+import { authStore } from "@/stores/useAuthStore";
 
 const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
-  const { user, isLoading, isInitialized } = useAuth();
+  const { user, isLoading, isInitialized, error } = authStore();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      toast("Authentication Required", {
-        description: "You need to be logged in to access this page.",
-        className: "bg-red-500 text-white",
-      });
+    if (!isInitialized) return;
+    if (!user) {
+      if (error) {
+        toast.error("Authentication Error", {
+          description: error,
+          className: "bg-red-500 text-white",
+        });
+      } else {
+        toast("Logged Out!", {
+          // description: "You need to be logged in to access this page.",
+          className: "bg-red-500 text-white",
+        });
+      }
+      console.log("layout.tsx: Redirecting to /auth due to no user");
       router.push("/auth");
     }
-  }, [isLoading, isInitialized, user, router]);
+  }, [isInitialized, isLoading, user, error, router]);
 
-  if (!isInitialized) {
-    console.log(
-      "AuthenticatedLayout: Waiting for initialization, rendering with current user"
-    );
-    // Render with current user (may be null, but no redirect yet)
-  } else if (!user) {
-    console.log(
-      "AuthenticatedLayout: No user after initialization, rendering null"
-    );
-    return null;
-  }
   return (
     <div className="max-w-7xl mx-auto relative">
       {!isMobile ? (
@@ -56,7 +55,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
             collapsible="none"
             className="border-r sticky top-0 h-screen"
           />
-          {isLoading && !isInitialized ? (
+          {isLoading && !isInitialized && !user ? (
             <PageLoader />
           ) : (
             <div className="flex-1">
@@ -68,7 +67,6 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
         <>
           <div className="min-h-screen pb-14">
             {" "}
-            {/* Add padding bottom to account for the nav bar */}
             <main className="p-4">{children || <ComingSoon />}</main>
           </div>
           <MobileNavBar />

@@ -13,7 +13,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   return (
     <div className="py-2 px-5 glass-background rounded sticky top-4 z-10">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap sm:flex-nowrap gap-y-3">
         <div>
           <h1 className="text-3xl font-bold">{pageTitle}</h1>
           <p className="text-muted-foreground text-sm">{pageSubTitle}</p>

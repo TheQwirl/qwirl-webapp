@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import UserCard from "../user-card";
 
 const dummyUsers = [
@@ -24,15 +23,10 @@ const dummyUsers = [
 
 export default function PeoplesTab() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.6 }}
-      className="space-y-4"
-    >
+    <div className="space-y-4">
       {dummyUsers.map((user, index) => (
         <UserCard key={index} {...user} />
       ))}
-    </motion.div>
+    </div>
   );
 }

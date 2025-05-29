@@ -104,19 +104,21 @@ export function FormImageUploader({
                   <Button
                     size="sm"
                     variant="secondary"
+                    icon={Upload}
+                    iconPlacement="left"
                     onClick={() =>
                       document.getElementById("image-upload")?.click()
                     }
                   >
-                    <Upload className="w-4 h-4" />
                     Replace
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
+                    icon={Trash2}
+                    iconPlacement="left"
                     onClick={handleDelete}
                   >
-                    <Trash2 className="w-4 h-4" />
                     Delete
                   </Button>
                 </div>

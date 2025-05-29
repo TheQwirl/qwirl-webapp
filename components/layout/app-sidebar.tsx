@@ -13,11 +13,17 @@ import { MENU_ITEMS } from "@/constants/data-sidebar";
 import SidebarSingleMenuItem from "./sidebar/sidebar-single-menu-item";
 import GroupSidebarMenuItem from "./sidebar/group-sidebar-menu-item";
 import { LogoutComponent } from "../logout-component";
-import { useAuth } from "../auth-provider";
+import { authStore } from "@/stores/useAuthStore";
+// import { useRouter } from "next/navigation";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { logout } = useAuth();
+  const { logout } = authStore();
+  // const router = useRouter();
 
+  const handleLogout = () => {
+    console.log("LogoutButton: Initiating logout");
+    logout();
+  };
   return (
     <Sidebar {...props}>
       <div className="px-8 py-8">
@@ -36,7 +42,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          <LogoutComponent onLogout={() => logout()} />
+          <LogoutComponent onLogout={() => handleLogout()} />
         </SidebarFooter>
       </div>
     </Sidebar>

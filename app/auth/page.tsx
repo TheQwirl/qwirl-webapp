@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { FaApple, FaGoogle } from "react-icons/fa6";
+import { toast } from "sonner";
 
 const Auth = () => {
   const router = useRouter();
@@ -24,7 +25,7 @@ const Auth = () => {
       router.push(redirectUrl);
     } catch (error) {
       console.error("Error during Google redirection:", error);
-      // You might want to show an error message to the user here
+      toast.error("Error during Google Authentication");
     }
   };
 

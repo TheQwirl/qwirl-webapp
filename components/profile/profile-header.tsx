@@ -1,17 +1,32 @@
-import UserAvatar from "../user-avatar";
+"use client";
 import CategoryList from "./category-list";
 import WavelengthIndicator from "../wavelength-indicator";
 import { Button } from "../ui/button";
 import { MdEdit } from "react-icons/md";
 import { useState } from "react";
 import { DialogUpdateUser } from "./dialog-update-user";
-import $api from "@/lib/api/client";
 import { Skeleton } from "../ui/skeleton";
 import { FaPlus } from "react-icons/fa6";
+import { EditableUserAvatar } from "../editable-user-avatar";
 
-export default function ProfileHeader() {
-  const userQuery = $api.useQuery("get", "/api/v1/users/me");
-  const user = userQuery?.data;
+interface ProfileHeaderProps {
+  user:
+    | {
+        id?: number;
+        name: string | null;
+        email: string | null;
+        avatar: string | null;
+        followers_count?: number;
+        following_count?: number;
+        friends_count?: number;
+        username: string | null;
+        categories?: string[];
+      }
+    | undefined;
+  isLoading: boolean;
+}
+
+export default function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
   const [openUpdateUserDialog, setOpenUpdateUserDialog] = useState(false);
 
   return (
@@ -33,20 +48,13 @@ export default function ProfileHeader() {
             <div className="h-full polka-background rounded-t-xl  z-10  w-full" />
           </div>
           <div className="absolute bottom-0 pl-4 translate-y-[30%]">
-            {userQuery?.isLoading ? (
-              <Skeleton className="h-32 w-32 rounded-full" />
-            ) : (
-              <div className="relative h-32 w-32">
-                <div className="absolute inset-0 rounded-full bg-white shadow-md" />
-                <div className="absolute inset-2 overflow-hidden rounded-full">
-                  <UserAvatar
-                    name={user?.name ?? "Name Unavailable"}
-                    image={user?.avatar ?? ""}
-                    className="h-full w-full object-cover text-xl"
-                  />
-                </div>
-              </div>
-            )}
+            <EditableUserAvatar
+              name={user?.name ?? "Name Unavailable"}
+              image={user?.avatar ?? ""}
+              className=""
+              size={"2xl"}
+              loading={isLoading}
+            />
           </div>
           <div className="absolute right-3 top-3">
             <Button
@@ -61,17 +69,17 @@ export default function ProfileHeader() {
         </div>
         <div className="mt-12 pl-4">
           <div className="flex justify-between">
-            {userQuery?.isLoading ? (
+            {isLoading ? (
               <div className="">
-                <Skeleton className="h-8 w-32 rounded-full" />
-                <Skeleton className="h-6 w-24 mt-2 rounded-full" />
+                <Skeleton className="h-6 w-48 rounded-full" />
+                <Skeleton className="h-4 w-28  mt-2 rounded-full" />
                 <div className="mt-4 flex  space-x-4">
-                  <Skeleton className="h-6 w-16 rounded-full" />
-                  <Skeleton className="h-6 w-16 rounded-full" />
+                  <Skeleton className="h-4 w-16  rounded-full" />
+                  <Skeleton className="h-4 w-16  rounded-full" />
                 </div>
-                <div className="mt-4">
-                  <Skeleton className="h-6 w-32 rounded-full" />
-                </div>
+                {/* <div className="mt-4">
+                  <Skeleton className="h-6 w-32  rounded-full" />
+                </div> */}
               </div>
             ) : (
               <div className=" ">
@@ -98,7 +106,7 @@ export default function ProfileHeader() {
                     effect="ringHover"
                     icon={FaPlus}
                     iconPlacement="left"
-                    className="rounded-full border-black/50 bg-white"
+                    className="rounded-full  bg-white hover:bg-white"
                   >
                     Follow
                   </Button>

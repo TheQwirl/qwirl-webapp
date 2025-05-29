@@ -6,15 +6,14 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Question } from "@/types/qwirl";
 import clsx from "clsx";
-// import { Reorder } from "framer-motion";
 import { PlusIcon } from "lucide-react";
 import React, { useState } from "react";
-import { TbMessageCircleQuestion } from "react-icons/tb";
 
 import QwirlEditorColumn from "@/components/qwirl/qwirl-editor-column";
 import { RadialProgress } from "@/components/ui/radial-progress";
 import HorizontalBarGraph from "@/components/ui/horizontal-bar-graph";
 import PageHeader from "@/components/layout/page-header";
+import $api from "@/lib/api/client";
 
 const PrimaryQwirlEditor = () => {
   const [questions, setQuestions] = useState<Question[]>([
@@ -39,6 +38,10 @@ const PrimaryQwirlEditor = () => {
       category: "Pets",
     },
   ]);
+
+  const questionz = $api.useQuery("get", "/api/v1/users/primary-qwirl");
+  console.log(questionz);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleDelete = (id: string) => {
     const updatedQuestions = questions.filter((q) => q.id !== id);
@@ -67,8 +70,8 @@ const PrimaryQwirlEditor = () => {
         )}
       >
         <PageHeader
-          pageTitle="Qwirl Editor"
-          pageSubTitle="Edit your primary qwirl."
+          pageTitle="My Qwirl"
+          pageSubTitle="View and Edit primary qwirl."
           extraContent={
             <div className="flex items-center gap-4">
               <Button
@@ -80,11 +83,6 @@ const PrimaryQwirlEditor = () => {
               >
                 <span className="hidden md:block">Add Question</span>
               </Button>
-              {isMobile && (
-                <Button variant="outline" className="rounded-full">
-                  <TbMessageCircleQuestion />
-                </Button>
-              )}
             </div>
           }
         />
