@@ -15,9 +15,12 @@ const nextConfig: NextConfig = {
         hostname: "avatar.iran.liara.run",
       },
       {
-        // https://i.pravatar.cc
         protocol: "https",
         hostname: "i.pravatar.cc",
+      },
+      {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
       },
     ],
   },

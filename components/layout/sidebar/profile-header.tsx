@@ -5,7 +5,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { authStore } from "@/stores/useAuthStore";
 
 const ProfileHeader = () => {
-  const user = authStore((s) => s.user);
+  const { user } = authStore();
   return (
     <SidebarHeader>
       <div className="flex items-center justify-center flex-col">
@@ -24,7 +24,7 @@ const ProfileHeader = () => {
           </>
         ) : (
           <>
-            <Skeleton className="h-28 w-28 rounded-full" />
+            <Skeleton className="h-16 w-16 rounded-full" />
             <Skeleton className="h-4 w-48 rounded-full mt-3" />
             <Skeleton className="h-2 w-28 mt-2 rounded-full" />
           </>

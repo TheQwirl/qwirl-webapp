@@ -21,7 +21,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/external-login": {
+    "/users/external-login": {
         parameters: {
             query?: never;
             header?: never;
@@ -41,7 +41,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/auth-callback": {
+    "/users/auth-callback": {
         parameters: {
             query?: never;
             header?: never;
@@ -58,7 +58,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/refresh-token": {
+    "/users/refresh-token": {
         parameters: {
             query?: never;
             header?: never;
@@ -78,7 +78,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/me": {
+    "/users/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -106,7 +106,7 @@ export interface paths {
         patch: operations["update_user_api_v1_users_me_patch"];
         trace?: never;
     };
-    "/api/v1/users/avatar": {
+    "/users/avatar": {
         parameters: {
             query?: never;
             header?: never;
@@ -123,7 +123,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/primary-qwirl": {
+    "/users/primary-qwirl": {
         parameters: {
             query?: never;
             header?: never;
@@ -146,7 +146,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/posts": {
+    "/users/posts": {
         parameters: {
             query?: never;
             header?: never;
@@ -174,7 +174,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/{user_id}": {
+    "/users/{user_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -200,7 +200,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/qwirl/": {
+    "/qwirl/": {
         parameters: {
             query?: never;
             header?: never;
@@ -230,7 +230,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/qwirl/{qwirl_id}": {
+    "/qwirl/{qwirl_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -270,7 +270,7 @@ export interface paths {
         patch: operations["update_qwirl_api_v1_qwirl__qwirl_id__patch"];
         trace?: never;
     };
-    "/api/v1/qwirl/user/{user_id}/primary": {
+    "/qwirl/user/{user_id}/primary": {
         parameters: {
             query?: never;
             header?: never;
@@ -296,7 +296,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/qwirl-responses/": {
+    "/qwirl-responses/": {
         parameters: {
             query?: never;
             header?: never;
@@ -319,7 +319,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/qwirl-responses/{response_id}": {
+    "/qwirl-responses/{response_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -349,7 +349,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/question-categories/": {
+    "/question-categories/": {
         parameters: {
             query?: never;
             header?: never;
@@ -372,7 +372,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/question-bank/search": {
+    "/question-bank/search": {
         parameters: {
             query?: never;
             header?: never;
@@ -389,7 +389,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/post/": {
+    "/post/": {
         parameters: {
             query?: never;
             header?: never;
@@ -406,7 +406,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/post/{post_id}": {
+    "/post/{post_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -425,7 +425,7 @@ export interface paths {
         patch: operations["update_post_api_v1_post__post_id__patch"];
         trace?: never;
     };
-    "/api/v1/post/me": {
+    "/post/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -442,7 +442,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/followers": {
+    "/user_follows/followers": {
         parameters: {
             query?: never;
             header?: never;
@@ -459,7 +459,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/following": {
+    "/user_follows/following": {
         parameters: {
             query?: never;
             header?: never;
@@ -479,7 +479,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/friends": {
+    "/user_follows/friends": {
         parameters: {
             query?: never;
             header?: never;
@@ -499,7 +499,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/{user_id}/followers": {
+    "/user_follows/{user_id}/followers": {
         parameters: {
             query?: never;
             header?: never;
@@ -519,7 +519,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/{user_id}/following": {
+    "/user_follows/{user_id}/following": {
         parameters: {
             query?: never;
             header?: never;
@@ -539,7 +539,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/{user_id}/friends": {
+    "/user_follows/{user_id}/friends": {
         parameters: {
             query?: never;
             header?: never;
@@ -559,7 +559,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/relationship/{user_id}": {
+    "/user_follows/relationship/{user_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -579,7 +579,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/follow/{user_id}": {
+    "/user_follows/follow/{user_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -599,7 +599,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/unfollow/{user_id}": {
+    "/user_follows/unfollow/{user_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -619,7 +619,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user_follows/common_friends/{user_id}": {
+    "/user_follows/common_friends/{user_id}": {
         parameters: {
             query?: never;
             header?: never;

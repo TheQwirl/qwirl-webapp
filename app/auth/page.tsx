@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Card,
   CardDescription,
@@ -9,26 +7,10 @@ import {
 } from "@/components/ui/card";
 import { GalleryVerticalEnd } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { FaApple, FaGoogle } from "react-icons/fa6";
-import { toast } from "sonner";
+import { ExternalLoginButtons } from "@/components/external-login-buttons";
 
 const Auth = () => {
-  const router = useRouter();
-
-  const googleRedirect = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Prevent form submission
-    try {
-      const redirectUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/external-login?client_type=google`;
-      router.push(redirectUrl);
-    } catch (error) {
-      console.error("Error during Google redirection:", error);
-      toast.error("Error during Google Authentication");
-    }
-  };
-
   return (
     <div className="relative flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10 overflow-hidden">
       <div
@@ -48,6 +30,7 @@ const Auth = () => {
           Qwirl
         </Link>
       </div>
+
       <div className={cn("flex flex-col gap-6 relative z-10")}>
         <Card className="backdrop-blur-sm bg-card/95 shadow-lg">
           <CardHeader className="text-center space-y-4">
@@ -67,29 +50,9 @@ const Auth = () => {
                 Experience seamless collaboration and creativity
               </p>
             </div>
-            <form onSubmit={(e) => e.preventDefault()}>
-              <div className="grid gap-6">
-                <div className="flex flex-col gap-4">
-                  <Button
-                    icon={FaApple}
-                    iconPlacement="left"
-                    variant="outline"
-                    className="w-full hover:bg-muted transition-colors duration-200"
-                  >
-                    Login with Apple
-                  </Button>
-                  <Button
-                    icon={FaGoogle}
-                    iconPlacement="left"
-                    onClick={googleRedirect}
-                    variant="outline"
-                    className="w-full hover:bg-muted transition-colors duration-200"
-                  >
-                    Login with Google
-                  </Button>
-                </div>
-              </div>
-            </form>
+
+            <ExternalLoginButtons apiUrl={process.env.NEXT_PUBLIC_API_URL!} />
+
             <div className="pt-4 border-t border-border">
               <p className="text-xs text-center text-muted-foreground">
                 Trusted by thousands of users worldwide
@@ -97,6 +60,7 @@ const Auth = () => {
             </div>
           </CardContent>
         </Card>
+
         <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary">
           By clicking continue, you agree to our{" "}
           <Link href="/terms-of-service">Terms of Service</Link> and{" "}

@@ -19,7 +19,7 @@ const avatarVariants = cva("relative w-full h-full", {
       false: "rounded-lg",
     },
     ringed: {
-      true: "",
+      true: "border border-2",
       false: "",
     },
   },

@@ -47,17 +47,6 @@ const formSchema = z.object({
     .optional(),
 });
 
-// Sample categories for the select dropdown
-const availableCategories = [
-  "Technology",
-  "Health",
-  "Education",
-  "Finance",
-  "Entertainment",
-  "Sports",
-  "Travel",
-];
-
 // Props for the dialog component
 interface DialogUpdateUserProps {
   open: boolean;
@@ -69,15 +58,14 @@ export function DialogUpdateUser({
   onOpenChange,
 }: DialogUpdateUserProps) {
   const queryClient = useQueryClient();
-  const userQuery = $api.useQuery("get", "/api/v1/users/me");
+  const userQuery = $api.useQuery("get", "/users/me");
   const user = userQuery?.data;
-  const categoriesQuery = $api.useQuery("get", "/api/v1/question-categories/");
-  console.log(categoriesQuery.data);
+  const categoriesQuery = $api.useQuery("get", "/question-categories/");
 
-  const updateUserMutation = $api.useMutation("patch", "/api/v1/users/", {
+  const updateUserMutation = $api.useMutation("patch", "/users/me", {
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["get", "/api/v1/users/me", null],
+        queryKey: ["get", "/users/me", null],
         exact: true,
       });
       toast.success("Profile updated successfully");
@@ -212,15 +200,17 @@ export function DialogUpdateUser({
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableCategories.map((category) => (
-                          <SelectItem
-                            disabled={field.value?.includes(category)}
-                            key={category}
-                            value={category}
-                          >
-                            {category}
-                          </SelectItem>
-                        ))}
+                        {(categoriesQuery?.data as string[])?.map(
+                          (category) => (
+                            <SelectItem
+                              disabled={field.value?.includes(category)}
+                              key={category}
+                              value={category}
+                            >
+                              {category}
+                            </SelectItem>
+                          )
+                        )}
                       </SelectContent>
                     </Select>
                   </div>

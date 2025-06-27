@@ -7,9 +7,9 @@ import { UserAvatar } from "../user-avatar";
 interface CompactQuestionCardProps {
   question: string;
   answers: string[];
-  usageCount: number;
-  upvotes: number;
-  creator: {
+  usageCount?: number;
+  upvotes?: number;
+  creator?: {
     username: string;
     avatarUrl?: string;
   };
@@ -48,22 +48,32 @@ export function CompactQuestionCard({
 
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-          <div className="flex items-center space-x-1">
-            <Repeat className="h-3 w-3" />
-            <span className="text-xs">{usageCount} uses</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <ThumbsUp className="h-3 w-3" />
-            <span className="text-xs">{upvotes} upvotes</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <UserAvatar
-              size="xs"
-              image={creator.avatarUrl}
-              name={creator.username}
-            />
-            <span className="text-xs">{creator.username}</span>
-          </div>
+          {usageCount && (
+            <div className="flex items-center space-x-1">
+              <Repeat className="h-3 w-3" />
+              <span className="text-xs">{usageCount} uses</span>
+            </div>
+          )}
+          {upvotes && (
+            <div className="flex items-center space-x-1">
+              <ThumbsUp className="h-3 w-3" />
+              <span className="text-xs">{upvotes} upvotes</span>
+            </div>
+          )}
+          {creator ? (
+            <div className="flex items-center space-x-2">
+              <UserAvatar
+                size="xs"
+                image={creator.avatarUrl}
+                name={creator.username}
+              />
+              <span className="text-xs">{creator.username}</span>
+            </div>
+          ) : (
+            <div className="text-xs text-muted-foreground">
+              System-generated
+            </div>
+          )}
         </div>
 
         <div className="flex space-x-2">

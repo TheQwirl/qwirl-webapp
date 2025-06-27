@@ -1,55 +1,57 @@
 import { Button } from "@/components/ui/button";
-import { Plus, ThumbsUp, BookOpenCheck, BarChart2, Scale } from "lucide-react";
+import { Plus, BookOpenCheck } from "lucide-react";
 import { PollTemplate } from "./types";
+import { UseFieldArrayAppend, useFormContext } from "react-hook-form";
+import { PostCreatorData } from "./schema";
+import { generateInitialPollOptionId } from "@/lib/utils";
 
 const templates = [
   {
-    id: "yesno",
-    name: "Yes/No",
-    icon: ThumbsUp, // 👍
-    options: [
-      { id: "1", text: "Yes" },
-      { id: "2", text: "No" },
-    ],
-  },
-  {
     id: "questionbank",
     name: "Question Bank",
-    icon: BookOpenCheck, // 📚
+    icon: BookOpenCheck,
     options: [],
-  },
-  {
-    id: "choice",
-    name: "Multiple Choice",
-    icon: BarChart2, // 📊
-    options: [
-      { id: "1", text: "Option A" },
-      { id: "2", text: "Option B" },
-    ],
-  },
-  {
-    id: "thisorthat",
-    name: "This or That",
-    icon: Scale, // ⚖️
-    options: [
-      { id: "1", text: "This" },
-      { id: "2", text: "That" },
-    ],
   },
 ];
 
 interface PollTemplatesProps {
-  onSelectTemplate: (template: PollTemplate) => void;
-  onStartFromScratch: () => void;
+  onShowQuestionBank: () => void;
+  append: UseFieldArrayAppend<PostCreatorData, "pollOptions">;
 }
 
 export function PollTemplates({
-  onSelectTemplate,
-  onStartFromScratch,
+  onShowQuestionBank,
+  append,
 }: PollTemplatesProps) {
+  const { setValue } = useFormContext<PostCreatorData>();
+
+  const onStartFromScratch = () => {
+    const firstOptionId = generateInitialPollOptionId();
+    const secondOptionId = generateInitialPollOptionId();
+    setValue("selectedOption", firstOptionId);
+    append([
+      {
+        id: firstOptionId,
+        text: "Option 1",
+      },
+      {
+        id: secondOptionId,
+        text: "Option 2",
+      },
+    ]);
+  };
+
+  const onSelectTemplate = (template: PollTemplate) => {
+    if (template.id === "questionbank") {
+      onShowQuestionBank();
+      return;
+    }
+
+    setValue("pollOptions", template.options);
+    setValue("question", `What's your choice?`);
+  };
   return (
     <div className="space-y-3">
-      <p className="text-xs sm:text-sm ">Quick templates:</p>
       <div className="grid grid-cols-2 gap-2">
         {templates.map((template) => {
           return (
@@ -59,22 +61,20 @@ export function PollTemplates({
               icon={template.icon}
               iconPlacement="left"
               variant="ghost"
-              className="h-auto border p-2 sm:p-3  sm:gap-2"
+              className=" border p-2 sm:p-3  sm:gap-2"
               onClick={() => onSelectTemplate(template)}
             >
-              <span className="text-xs">{template.name}</span>
+              {template.name}
             </Button>
           );
         })}
-      </div>
-      <div className="text-center">
         <Button
           type="button"
           variant="ghost"
           icon={Plus}
           iconPlacement="left"
           onClick={onStartFromScratch}
-          className="text-xs sm:text-sm"
+          className=" border p-2 sm:p-3  sm:gap-2"
         >
           Start from scratch
         </Button>

@@ -1,127 +1,279 @@
 "use client";
-import CategoryList from "./category-list";
-import WavelengthIndicator from "../wavelength-indicator";
-import { Button } from "../ui/button";
-import { MdEdit } from "react-icons/md";
-import { useState } from "react";
-import { DialogUpdateUser } from "./dialog-update-user";
-import { Skeleton } from "../ui/skeleton";
-import { FaPlus } from "react-icons/fa6";
-import { EditableUserAvatar } from "../editable-user-avatar";
 
-interface ProfileHeaderProps {
-  user:
-    | {
-        id?: number;
-        name: string | null;
-        email: string | null;
-        avatar: string | null;
-        followers_count?: number;
-        following_count?: number;
-        friends_count?: number;
-        username: string | null;
-        categories?: string[];
-      }
-    | undefined;
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Edit, Users, MessageCircle, Settings } from "lucide-react";
+import { authStore } from "@/stores/useAuthStore";
+import { EditableUserAvatar } from "../editable-user-avatar";
+import { UserAvatar } from "../user-avatar";
+import WavelengthIndicator from "../wavelength-indicator";
+import { components } from "@/lib/api/v1";
+import { cn } from "@/lib/utils";
+import { DialogUpdateUser } from "./dialog-update-user";
+import $api from "@/lib/api/client";
+import { toast } from "sonner";
+
+interface ProfileHeaderBaseProps {
   isLoading: boolean;
+  for: "self" | "other";
 }
 
-export default function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
+interface ProfileHeaderSelfProps extends ProfileHeaderBaseProps {
+  user: components["schemas"]["UserResponse"];
+  for: "self";
+}
+
+interface ProfileHeaderOtherProps extends ProfileHeaderBaseProps {
+  user: components["schemas"]["UserWithRelationshipResponse"];
+  for: "other";
+}
+
+type ProfileHeaderProps = ProfileHeaderSelfProps | ProfileHeaderOtherProps;
+
+const ProfileHeader = ({ user, isLoading }: ProfileHeaderProps) => {
+  const { user: currentUser } = authStore();
   const [openUpdateUserDialog, setOpenUpdateUserDialog] = useState(false);
+  const [relationshipStatus, setRelationshipStatus] = useState<
+    "following" | "followed_by" | "friends" | "none"
+  >();
+  const followMutation = $api.useMutation(
+    "post",
+    "/user_follows/follow/{user_id}"
+  );
+
+  const unfollowMutation = $api.useMutation(
+    "post",
+    "/user_follows/unfollow/{user_id}"
+  );
+
+  const isOwnProfile = currentUser?.id === user?.id;
+
+  // Mock wavelength - replace with actual API call
+  const wavelength = isOwnProfile ? null : Math.floor(Math.random() * 100) + 1;
+  const isShowingWavelength = !isOwnProfile && wavelength;
+
+  const handleFollow = () => {
+    if (relationshipStatus === "following") {
+      unfollowMutation.mutate(
+        {
+          params: {
+            path: { user_id: user?.id },
+          },
+        },
+        {
+          onSuccess: () => {
+            setRelationshipStatus("followed_by");
+          },
+          onError: () => {
+            toast.error("An error occurred while unfollowing the user");
+            console.error("Error unfollowing user:", unfollowMutation.error);
+          },
+        }
+      );
+    } else {
+      followMutation.mutate(
+        {
+          params: {
+            path: { user_id: user?.id },
+          },
+        },
+        {
+          onSuccess: () => {
+            setRelationshipStatus("following");
+          },
+          onError: () => {
+            toast.error("An error occurred while following the user");
+            console.error("Error following user:", unfollowMutation.error);
+          },
+        }
+      );
+    }
+  };
+
+  const handleMessage = () => {
+    // Implement message logic
+    console.log("Message user");
+  };
+
+  const handleEditHeaderImage = () => {
+    // Will be implemented later
+    console.log("Edit header image");
+  };
 
   return (
     <>
-      <div className="mb-8">
-        <div className="relative polka-background pb-16 rounded-3xl">
-          <div className="h-48 overflow-hidden">
-            {/* {headerImage ? (
-            <Image
-              src={headerImage}
-              alt="Header"
-              width={800}
-              height={200}
-              className="w-full object-cover"
-            />
-          ) : (
-            <div className="h-full polka-background rounded-t-xl  z-10  w-full" />
-          )} */}
-            <div className="h-full polka-background rounded-t-xl  z-10  w-full" />
+      <Card className="overflow-hidden">
+        <div className="relative">
+          {/* Header Image */}
+          <div
+            className="h-48 bg-accent relative"
+            style={{
+              backgroundImage: user?.header_img
+                ? `url(${user?.header_img})`
+                : undefined,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            {isOwnProfile && (
+              <Button
+                variant="secondary"
+                size="icon"
+                className="absolute z-10 top-4 right-4 bg-black/20 hover:bg-black/40 text-white border-0"
+                onClick={handleEditHeaderImage}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+            {/* <div className="absolute inset-0 bg-black/20" /> */}
           </div>
-          <div className="absolute bottom-0 pl-4 translate-y-[30%]">
-            <EditableUserAvatar
-              name={user?.name ?? "Name Unavailable"}
-              image={user?.avatar ?? ""}
-              className=""
-              size={"2xl"}
-              loading={isLoading}
-            />
-          </div>
-          <div className="absolute right-3 top-3">
-            <Button
-              variant={"outline"}
-              size={"icon"}
-              onClick={() => setOpenUpdateUserDialog(true)}
-              className=" hover:bg-white/100"
-            >
-              <MdEdit className="text-xl" />
-            </Button>
-          </div>
-        </div>
-        <div className="mt-12 pl-4">
-          <div className="flex justify-between">
-            {isLoading ? (
-              <div className="">
-                <Skeleton className="h-6 w-48 rounded-full" />
-                <Skeleton className="h-4 w-28  mt-2 rounded-full" />
-                <div className="mt-4 flex  space-x-4">
-                  <Skeleton className="h-4 w-16  rounded-full" />
-                  <Skeleton className="h-4 w-16  rounded-full" />
-                </div>
-                {/* <div className="mt-4">
-                  <Skeleton className="h-6 w-32  rounded-full" />
-                </div> */}
+
+          {/* Profile Content */}
+          <div className="relative pt-0 px-4">
+            <div className="flex flex-row items-center gap-4 -mt-[95px] relative z-10">
+              {/* Avatar */}
+              <div className="flex-shrink-0">
+                {isOwnProfile ? (
+                  <EditableUserAvatar
+                    name={user?.name ?? "Name Unavailable"}
+                    image={user?.avatar ?? ""}
+                    className=""
+                    size="2xl"
+                    loading={isLoading}
+                    ringed
+                  />
+                ) : (
+                  <UserAvatar
+                    name={user?.name ?? "Name Unavailable"}
+                    image={user?.avatar ?? ""}
+                    size="lg"
+                    ringed
+                    loading={isLoading}
+                    className=" object-cover text-xl"
+                  />
+                )}
               </div>
-            ) : (
-              <div className=" ">
-                <h1 className="text-2xl font-bold">{user?.name}</h1>
-                <p className="text-gray-500">@{user?.username}</p>
-                <div className="mt-4 flex  space-x-4">
-                  <div>
-                    <span className="font-bold">{user?.followers_count}</span>{" "}
-                    <span className="text-gray-500">Followers</span>
+              <div className="flex-shrink-0 flex-1 ">
+                <div className="flex items-center justify-between">
+                  {/* User Info */}
+                  <div className="">
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {user?.name}
+                    </h1>
+                    <div className="text-gray-600">@{user?.username}</div>
                   </div>
-                  <div>
-                    <span className="font-bold">{user?.friends_count}</span>{" "}
-                    <span className="text-gray-500">Friends</span>
+                  <div className="flex flex-row sm:items-center sm:justify-end gap-4">
+                    {/* Action Buttons */}
+                    <div className={cn("flex  gap-2")}>
+                      {isOwnProfile ? (
+                        <Button
+                          icon={Settings}
+                          iconPlacement="left"
+                          onClick={() => setOpenUpdateUserDialog(true)}
+                          variant="secondary"
+                          size={"sm"}
+                          className="gap-2 z-10"
+                        >
+                          Edit Profile
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            icon={Users}
+                            iconPlacement="left"
+                            onClick={handleFollow}
+                            className="gap-2 "
+                          >
+                            {relationshipStatus === "friends"
+                              ? "Friends"
+                              : relationshipStatus === "following"
+                              ? "Following"
+                              : "Follow"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={handleMessage}
+                            className="gap-2"
+                            icon={MessageCircle}
+                            iconPlacement="left"
+                          >
+                            Message
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <CategoryList categories={user?.categories ?? []} />
+              </div>
+            </div>
+          </div>
+          <div className="px-4 pb-2">
+            {/* Categories */}
+            {user?.categories && user?.categories?.length > 0 && (
+              <div className="flex justify-center flex-wrap gap-3 mt-4">
+                {user?.categories.slice(0, 3).map((category) => (
+                  <Badge key={category} variant="secondary" className="text-xs">
+                    {category}
+                  </Badge>
+                ))}
+                {user?.categories.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{user?.categories.length - 3} more
+                  </Badge>
+                )}
               </div>
             )}
-            <div className="flex flex-col gap-4 justify-between h-full">
-              {true ? (
-                <div className="flex items-center gap-4 justify-end">
-                  <Button
-                    variant="outline"
-                    effect="ringHover"
-                    icon={FaPlus}
-                    iconPlacement="left"
-                    className="rounded-full  bg-white hover:bg-white"
-                  >
-                    Follow
-                  </Button>
+            <div className="">
+              {/* <div className="flex-1 min-w-0 mt-4 sm:mt-0 ">Stats</div> */}
+              <div className="grid grid-cols-3 gap-6  my-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">
+                    {user?.followers_count}
+                  </div>
+                  <div className="text-sm text-gray-600 font-medium">
+                    Followers
+                  </div>
                 </div>
-              ) : (
-                <WavelengthIndicator wavelength={1} />
-              )}
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">
+                    {user?.following_count}
+                  </div>
+                  <div className="text-sm text-gray-600 font-medium">
+                    Following
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">
+                    {user?.friends_count}
+                  </div>
+                  <div className="text-sm text-gray-600 font-medium">
+                    Friends
+                  </div>
+                </div>
+              </div>
+              <div className="px-6">
+                {/* Wavelength Indicator */}
+                {isShowingWavelength && (
+                  <div className="">
+                    <WavelengthIndicator
+                      wavelength={wavelength ?? 1}
+                      userName={user?.name ?? ""}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Card>
       <DialogUpdateUser
         open={openUpdateUserDialog}
         onOpenChange={(open: boolean) => setOpenUpdateUserDialog(open)}
       />
     </>
   );
-}
+};
+
+export default ProfileHeader;

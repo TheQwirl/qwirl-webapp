@@ -39,7 +39,7 @@ const PrimaryQwirlEditor = () => {
     },
   ]);
 
-  const questionz = $api.useQuery("get", "/api/v1/users/primary-qwirl");
+  const questionz = $api.useQuery("get", "/users/primary-qwirl");
   console.log(questionz);
 
   const [isModalOpen, setIsModalOpen] = useState(false);

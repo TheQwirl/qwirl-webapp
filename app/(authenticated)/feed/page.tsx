@@ -3,16 +3,14 @@ import PageHeader from "@/components/layout/page-header";
 import PostCreator from "@/components/posts/post-creator/post-creator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import clsx from "clsx";
-import { FiClock, FiUsers, FiTrendingUp } from "react-icons/fi";
+import { FiClock, FiTrendingUp } from "react-icons/fi";
 
 import React from "react";
 
 const Feed = () => {
   const isMobile = useIsMobile();
-  const [tab, setTab] = React.useState<"recent" | "friends" | "popular">(
-    "recent"
-  );
-  const handleTabChange = (tab: "recent" | "friends" | "popular") => {
+  const [tab, setTab] = React.useState<"recent" | "explore">("recent");
+  const handleTabChange = (tab: "recent" | "explore") => {
     setTab(tab);
   };
   return (
@@ -40,21 +38,10 @@ const Feed = () => {
               </button>
 
               <button
-                onClick={() => handleTabChange("friends")}
+                onClick={() => handleTabChange("explore")}
                 className={clsx(
                   "text-xs flex items-center gap-1 cursor-pointer hover:bg-gray-300 hover:text-black duration-300 transition-all px-2 py-1 rounded",
-                  tab === "friends" && "bg-gray-300 text-black"
-                )}
-              >
-                <FiUsers size={16} />
-                <span className="hidden sm:inline">Friends</span>
-              </button>
-
-              <button
-                onClick={() => handleTabChange("popular")}
-                className={clsx(
-                  "text-xs flex items-center gap-1 cursor-pointer hover:bg-gray-300 hover:text-black duration-300 transition-all px-2 py-1 rounded",
-                  tab === "popular" && "bg-gray-300 text-black"
+                  tab === "explore" && "bg-gray-300 text-black"
                 )}
               >
                 <FiTrendingUp size={16} />

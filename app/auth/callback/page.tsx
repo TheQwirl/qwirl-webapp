@@ -1,77 +1,74 @@
-"use client";
-import Image from "next/image";
-import React, { useEffect } from "react";
+"use server";
 import { fetchClient } from "@/lib/api/client";
-import { authStore } from "@/stores/useAuthStore";
-import { useRouter } from "next/navigation";
-import { components } from "@/lib/api/v1";
+import { queryToString } from "@/lib/utils";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-const AuthCallback = () => {
-  const windowUrl = typeof window !== "undefined" ? window.location.href : "";
-  const router = useRouter();
+// This component will run entirely on the server.
+// It should render a loading state, as it will redirect before showing anything.
+export default async function AuthCallbackPage({
+  searchParams,
+}: {
+  searchParams: { code: string; state: string };
+}) {
+  const searchparams = await searchParams;
+  const headerList = await headers();
+  const host = headerList.get("host");
+  const pathname = headerList.get("x-current-path");
+  const protocol = headerList.get("x-forwarded-proto") || "http";
+  const fullUrl = `${protocol}://${host}${pathname}${queryToString(
+    searchparams
+  )}`;
 
-  useEffect(() => {
-    if (!windowUrl) return;
+  // If Google doesn't return a code, redirect to an error page or login
+  if (!searchparams?.code || !searchparams?.state || !fullUrl) {
+    redirect("/auth?error=No code received from Google");
+    return;
+  }
 
-    const performAuthCallback = async () => {
-      try {
-        const { data, error } = await fetchClient.GET(
-          "/api/v1/users/auth-callback",
-          {
-            params: {
-              query: {
-                client_type: "google",
-                url: windowUrl,
-              },
-            },
-          }
-        );
+  const fastapiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!fastapiUrl) {
+    throw new Error("NEXT_PUBLIC_API_URL is not set in environment variables");
+  }
 
-        if (error || !data) {
-          console.error("AuthCallback error or no data:", error, data);
-          throw new Error("Authentication callback failed: No data received.");
-        }
+  try {
+    const tokenResponse = await fetchClient.GET("/users/auth-callback", {
+      params: {
+        query: {
+          client_type: "google",
+          url: fullUrl,
+        },
+      },
+    });
 
-        console.log("Authentication callback successful:", data);
+    if (!tokenResponse.response?.ok) {
+      console.error("Failed to exchange code for tokens:", tokenResponse);
+      redirect(`/auth?error=Failed to authenticate with backend`);
+      return;
+    }
 
-        authStore.setState({
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
-          user: data.user as components["schemas"]["UserResponse"],
-          isLoading: false,
-          isInitialized: true, // Important: Set as initialized
-          error: null,
-        });
+    if (
+      !tokenResponse?.data?.access_token ||
+      !tokenResponse?.data?.refresh_token
+    ) {
+      redirect(`/auth?error=Invalid token response from backend`);
+      return;
+    }
 
-        router.replace("/feed"); // Or a more dynamic redirect location
-      } catch (err) {
-        console.error("Authentication callback error:", err);
-        authStore.setState({
-          accessToken: null,
-          refreshToken: null,
-          user: null,
-          isLoading: false,
-          isInitialized: true, // Still initialized, but with an error and no user
-          error:
-            err instanceof Error
-              ? err.message
-              : "Authentication failed during callback",
-        });
-        router.replace("/auth?error=auth_failed");
-      }
-    };
+    // 2. Set the tokens as HttpOnly cookies. The browser will now store them securely.
+    // await setAuthCookies(
+    //   tokenResponse.data.access_token,
+    //   tokenResponse.data.refresh_token
+    // );
+  } catch (error) {
+    console.error("Error in auth callback:", error);
+    redirect("/auth?error=An unexpected error occurred");
+    return;
+  }
 
-    performAuthCallback();
-  }, [windowUrl, router]);
+  // 3. Redirect the user to a protected page. The flow is complete.
+  redirect("/feed");
 
-  return (
-    <div className="h-screen w-screen flex items-center justify-center flex-col text-center">
-      <div className="shadow bg-background text-card-foreground rounded-3xl p-6 flex flex-col items-center justify-center border">
-        <Image src="/assets/loader.svg" alt="Loading" width={80} height={80} />
-        <div className="animate-pulse">Logging you in...</div>
-      </div>
-    </div>
-  );
-};
-
-export default AuthCallback;
+  // This part will not be rendered due to the redirect, but it's good practice to have a fallback.
+  return <div>Loading...</div>;
+}

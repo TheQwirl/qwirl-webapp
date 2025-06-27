@@ -36,9 +36,19 @@ const avatarVariants = cva("relative w-full h-full rounded-lg group", {
       "2xl": "h-24 w-24",
       "3xl": "h-32 w-32",
     },
+    rounded: {
+      true: "rounded-full",
+      false: "rounded-lg",
+    },
+    ringed: {
+      true: "",
+      false: "",
+    },
   },
   defaultVariants: {
     size: "md",
+    rounded: true,
+    ringed: true,
   },
 });
 
@@ -69,6 +79,7 @@ export function EditableUserAvatar({
   onDelete,
   loading = false,
   size = "md",
+  ...props
 }: EditableUserAvatarProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -129,30 +140,26 @@ export function EditableUserAvatar({
     }
   };
 
-  const uploadAvatarMutation = $api.useMutation(
-    "post",
-    "/api/v1/users/avatar",
-    {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: ["get", "/api/v1/users/me", null],
-          exact: true,
-        });
-        setIsDialogOpen(false);
-        setImageSrc(null);
-        setZoom(1);
-        setCrop({ x: 0, y: 0 });
-        toast("Profile picture updated", {
-          description: "Your profile picture has been updated successfully.",
-        });
-      },
-      onError: () => {
-        toast.error("Failed to update profile picture", {
-          description: "There was an error updating your profile picture.",
-        });
-      },
-    }
-  );
+  const uploadAvatarMutation = $api.useMutation("post", "/users/avatar", {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["get", "/users/me", null],
+        exact: true,
+      });
+      setIsDialogOpen(false);
+      setImageSrc(null);
+      setZoom(1);
+      setCrop({ x: 0, y: 0 });
+      toast("Profile picture updated", {
+        description: "Your profile picture has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast.error("Failed to update profile picture", {
+        description: "There was an error updating your profile picture.",
+      });
+    },
+  });
 
   const onCropComplete = (
     _croppedArea: CropArea,
@@ -254,9 +261,15 @@ export function EditableUserAvatar({
           loading={loading}
           size={size}
           className={className}
+          {...props}
         />
         {isHovered && (
-          <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center gap-2">
+          <div
+            className={cn(
+              props?.rounded,
+              "absolute inset-0 bg-black/50 flex rounded-full items-center justify-center gap-2"
+            )}
+          >
             <Button
               size="icon"
               variant="ghost"
@@ -376,17 +389,10 @@ export function EditableUserAvatar({
                   </Button>
                   <Button
                     onClick={handleSave}
-                    disabled={isUploading}
+                    loading={isUploading}
                     className="w-full sm:w-auto"
                   >
-                    {isUploading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      "Save"
-                    )}
+                    {isUploading ? <>Saving...</> : "Save"}
                   </Button>
                 </div>
               </>

@@ -110,10 +110,7 @@ export default function Footer() {
               Subscribe to our newsletter
             </p>
             <div className="flex gap-2">
-              <Input
-                placeholder="Enter your email"
-                className="bg-white/10 border-white/20 text-white"
-              />
+              <Input placeholder="Enter your email" className=" bg-white" />
               <Button className="bg-[#B4E7E6] text-black hover:bg-[#9CD5D4]">
                 Subscribe
               </Button>

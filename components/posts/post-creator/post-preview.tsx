@@ -2,22 +2,16 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share } from "lucide-react";
 import { authStore } from "@/stores/useAuthStore";
-import { PostCreatorData } from "./schema";
 import { UserAvatar } from "@/components/user-avatar";
+import { useFormContext } from "react-hook-form";
+import { PostCreatorData } from "./schema";
 
-interface PostPreviewProps {
-  content: string;
-  question: string;
-  pollOptions: PostCreatorData["pollOptions"];
-}
-
-export function PostPreview({
-  content,
-  question,
-  pollOptions,
-}: PostPreviewProps) {
+export function PostPreview() {
   const user = authStore((s) => s.user);
-
+  const { getValues } = useFormContext<PostCreatorData>();
+  const content = getValues("content");
+  const question = getValues("question");
+  const pollOptions = getValues("pollOptions");
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}

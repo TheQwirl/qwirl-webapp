@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-api-types": "npx openapi-typescript https://qwirl-engine-166058399567.asia-south2.run.app/openapi.json -o ./lib/api/v1.d.ts"
+    "generate-api-types": "npx openapi-typescript https://qwirl-engine-166058399567.asia-south2.run.app/openapi.json -o ./lib/api/v1.d.ts",
+    "strip-api-v1:unix": "sed 's|/api/v1||g' ./lib/api/v1.d.ts > ./lib/api/v1-client-side.d.ts",
+    "strip-api-v1:win": "powershell -Command \"(Get-Content ./lib/api/v1.d.ts) -replace '/api/v1', '' | Set-Content ./lib/api/v1-client-side.d.ts\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -36,12 +38,12 @@
     "date-fns": "^3.6.0",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.469.0",
-    "next": "15.1.2",
+    "next": "^15.3.3",
     "next-themes": "^0.4.6",
-    "openapi-fetch": "^0.13.4",
-    "openapi-react-query": "^0.2.9",
+    "openapi-fetch": "^0.14.0",
+    "openapi-react-query": "^0.5.0",
     "react": "^19.0.0",
-    "react-day-picker": "^8.10.1",
+    "react-day-picker": "^9.7.0",
     "react-dom": "^19.0.0",
     "react-easy-crop": "^5.4.2",
     "react-hook-form": "^7.54.2",

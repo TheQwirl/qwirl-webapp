@@ -8,6 +8,7 @@ import {
   Controller,
   FormProvider,
   useFieldArray,
+  // useFieldArray,
 } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ import { PostCreatorData, PostCreatorSchema } from "./schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QuestionInput } from "./question-input";
 import { PostActions } from "./post-actions";
-import { PollTemplate } from "./types";
+import Image from "next/image";
 
 interface Question {
   id: string;
@@ -35,9 +36,6 @@ interface Question {
   tags: string[];
   category: string;
 }
-
-const generateInitialPollOptionId = () =>
-  Date.now().toString() + Math.random().toString(36).substring(2, 7);
 
 const PostCreator = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -57,21 +55,20 @@ const PostCreator = () => {
       pollOptions: [],
     },
   });
-  const { control, handleSubmit, watch, setValue, reset } = methods;
-  const { fields, append, update, remove } = useFieldArray({
+
+  const { control, handleSubmit, setValue, reset } = methods;
+
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "pollOptions",
     keyName: "keyId",
   });
 
-  const content = watch("content");
-  const question = watch("question");
-  const pollOptions = watch("pollOptions");
-  console.log(selectedTemplate);
-
   const handleExpand = () => {
     setIsExpanded(true);
   };
+
+  if (selectedTemplate) console.log(selectedTemplate);
 
   const handleCollapse = () => {
     setIsExpanded(false);
@@ -92,59 +89,17 @@ const PostCreator = () => {
     setShowPreview(false);
   };
 
-  const selectTemplate = (template: PollTemplate) => {
-    if (template.id === "questionbank") {
-      setShowQuestionBank(true);
-      return;
-    }
-
-    setSelectedTemplate(template.id);
-    setValue("pollOptions", template.options);
-    setValue("question", `What's your choice?`);
-  };
-
   const selectQuestionFromBank = (question: Question) => {
     const options = question.options.map((opt, index) => ({
       id: (index + 1).toString(),
       text: opt,
     }));
-
+    setValue("selectedOption", options?.[0]?.id ?? "");
     setValue("pollOptions", options);
     setValue("question", question.text);
     setSelectedTemplate("questionbank");
     setImportedFromBank(true);
     setShowQuestionBank(false);
-  };
-
-  const addOption = () => {
-    const newOptionData = {
-      id: generateInitialPollOptionId(),
-      text: `Option ${fields.length + 1}`,
-    };
-    append(newOptionData);
-  };
-  const updateOptionText = (optionId: string, newText: string) => {
-    const optionIndex = fields.findIndex((field) => field.id === optionId);
-    if (optionIndex !== -1) {
-      const currentOptionData = fields[optionIndex];
-      update(optionIndex, {
-        ...currentOptionData,
-        id: optionId,
-        text: newText,
-      });
-    } else {
-      console.warn(`Option with id "${optionId}" not found for updating.`);
-    }
-  };
-
-  const removeOptionByIndex = (index: number) => {
-    if (fields.length > 2) {
-      remove(index);
-    } else {
-      console.warn(
-        "Cannot remove option. A poll requires at least two options."
-      );
-    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,10 +115,9 @@ const PostCreator = () => {
 
   const onSubmit = (data: PostCreatorData) => {
     const post = {
-      id: Date.now().toString(),
       content: data.content,
       question: data.question,
-      options: pollOptions,
+      options: data.pollOptions,
       duration: data.duration,
       image: postImage,
       timestamp: new Date().toISOString(),
@@ -190,35 +144,41 @@ const PostCreator = () => {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
-                  <PostCreatorHeader
-                    hasPollOptions={pollOptions.length > 0}
-                    onCollapse={handleCollapse}
-                    onTogglePreview={() => setShowPreview(!showPreview)}
-                    showPreview={showPreview}
-                  />
-                  <FormProvider {...methods}>
+                <FormProvider {...methods}>
+                  <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                    <PostCreatorHeader
+                      hasPollOptions={fields.length > 0}
+                      onCollapse={handleCollapse}
+                      onTogglePreview={() => setShowPreview(!showPreview)}
+                      showPreview={showPreview}
+                    />
                     <form
                       onSubmit={handleSubmit(onSubmit)}
                       className="space-y-3 sm:space-y-4"
                     >
-                      {/* Content Input */}
-                      <Controller
-                        name="content"
-                        control={control}
-                        render={({ field }) => (
-                          <Textarea
-                            {...field}
-                            placeholder="Share your thoughts... (optional)"
-                            className="border-0 resize-none text-base sm:text-lg shadow-none focus-visible:ring-0 min-h-[60px] sm:min-h-[80px]"
-                            rows={2}
-                          />
-                        )}
-                      />
+                      <motion.div
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <Controller
+                          name="content"
+                          control={control}
+                          render={({ field }) => (
+                            <Textarea
+                              {...field}
+                              placeholder="Share your thoughts... (optional)"
+                              className="border-0 resize-none text-base sm:text-lg shadow-none focus-visible:ring-0 min-h-[60px] sm:min-h-[80px]"
+                              rows={2}
+                            />
+                          )}
+                        />
+                      </motion.div>
 
                       {postImage && (
                         <div className="relative">
-                          <img
+                          <Image
+                            width={500}
+                            height={200}
                             src={postImage}
                             alt="Post"
                             className="w-full h-32 sm:h-48 object-cover rounded-lg"
@@ -254,7 +214,7 @@ const PostCreator = () => {
                           </div>
 
                           {/* Back to Templates Button */}
-                          {pollOptions.length > 0 && (
+                          {fields.length > 0 && (
                             <Button
                               type="button"
                               variant="ghost"
@@ -273,29 +233,28 @@ const PostCreator = () => {
                         </div>
 
                         {/* Poll Templates */}
-                        {pollOptions.length === 0 && (
+                        {fields.length === 0 && (
                           <PollTemplates
-                            onSelectTemplate={selectTemplate}
-                            onStartFromScratch={addOption}
+                            append={append}
+                            onShowQuestionBank={() => setShowQuestionBank(true)}
                           />
                         )}
 
                         {/* Question Input */}
-                        {pollOptions.length > 0 && <QuestionInput />}
+                        {fields.length > 0 && <QuestionInput />}
 
                         {/* Poll Options */}
-                        {pollOptions.length > 0 && (
+                        {fields.length > 0 && (
                           <PollOptions
-                            onAddOption={addOption}
-                            options={pollOptions}
-                            onUpdateOption={updateOptionText}
-                            onRemoveOption={removeOptionByIndex}
+                            options={fields}
+                            append={append}
+                            remove={remove}
                           />
                         )}
                       </div>
 
                       {/* Poll Settings */}
-                      {pollOptions.length > 0 && <PollSettings />}
+                      {fields.length > 0 && <PollSettings />}
 
                       {/* Actions */}
                       <PostActions
@@ -303,28 +262,22 @@ const PostCreator = () => {
                         onCancel={handleCollapse}
                         onImageUploadClick={() => fileInputRef.current?.click()}
                         onSubmit={handleSubmit(onSubmit)}
-                        isSubmitDisabled={!question || pollOptions.length < 2}
+                        isSubmitDisabled={fields.length < 2}
                       />
                     </form>
-                  </FormProvider>
 
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-                </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                  </div>
 
-                {/* Preview */}
-                {showPreview && pollOptions.length > 0 && (
-                  <PostPreview
-                    content={content ?? ""}
-                    question={question}
-                    pollOptions={pollOptions}
-                  />
-                )}
+                  {/* Preview */}
+                  {showPreview && fields.length > 0 && <PostPreview />}
+                </FormProvider>
               </motion.div>
             )}
           </AnimatePresence>
