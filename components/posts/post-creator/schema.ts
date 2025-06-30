@@ -6,13 +6,13 @@ export const PollOptionSchema = z.object({
 });
 
 export const PostCreatorSchema = z.object({
-  content: z.string().optional(),
-  question: z.string().min(1, { message: "A poll question is required." }),
+  text_content: z.string().optional(),
+  question_text: z.string().min(1, { message: "A poll question is required." }),
   duration: z.enum(["1h", "6h", "24h", "7d"], {
     required_error: "Poll duration is required.",
     invalid_type_error: "Please select a valid duration.",
   }),
-  selectedOption: z.string(),
+  selected_option_index: z.number(),
   pollOptions: z
     .array(PollOptionSchema)
     .min(2, { message: "A poll must have at least two options." })

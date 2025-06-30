@@ -21,9 +21,10 @@ interface PeoplesTabProps {
     | components["schemas"]["UserWithRelationshipResponse"];
 }
 
+type Users = components["schemas"]["UserFollowerResponse"][];
+
 export default function PeoplesTab({ user }: PeoplesTabProps) {
   const [activeTab, setActiveTab] = useState("friends");
-  console.log(user);
 
   return (
     <div className="">
@@ -42,7 +43,9 @@ export default function PeoplesTab({ user }: PeoplesTabProps) {
       {activeTab === "following" && (
         <UserList endpointKey="following" user={user} />
       )}
-      {/* {activeTab === "followers" && <UserList endpointKey="followers" />} */}
+      {activeTab === "followers" && (
+        <UserList endpointKey="followers" user={user} />
+      )}
     </div>
   );
 }
@@ -50,8 +53,10 @@ export default function PeoplesTab({ user }: PeoplesTabProps) {
 const tabToEndpoints = {
   friends: "/user_follows/{user_id}/friends",
   following: "/user_follows/{user_id}/following",
-  // followers: "/users/{user_id}/followers",
+  followers: "/user_follows/{user_id}/followers",
 } as const;
+
+const LIMIT = 10;
 export const UserList = ({
   endpointKey,
   user,
@@ -62,31 +67,27 @@ export const UserList = ({
     | components["schemas"]["UserWithRelationshipResponse"];
 }) => {
   const observer = useRef<IntersectionObserver | null>(null);
-  const limit = 10;
   const endpoint = tabToEndpoints[endpointKey];
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
     $api.useInfiniteQuery(
       "get",
       endpoint,
       {
-        params: { path: { user_id: user?.id ?? 1 }, query: { limit } },
+        params: {
+          path: { user_id: user?.id ?? 1 },
+          query: { limit: LIMIT, skip: 0 },
+        },
       },
       {
-        initialPageParam: 0,
-        getNextPageParam: (
-          lastPage: {
-            data: User[];
-            nextPage?: number;
+        getNextPageParam: (lastPage: Users, allPages: { data: Users }[]) => {
+          if (lastPage?.length < 10) {
+            return undefined;
           }
-          // allPages: {
-          //   data: User[];
-          //   nextPage?: number;
-          // }[]
-        ) => lastPage.nextPage,
+          return allPages.flat().length;
+        },
         enabled: !!user?.id,
       }
     );
-  console.log(data);
 
   const lastElementRef = useCallback(
     (node: HTMLElement | null) => {
@@ -148,156 +149,3 @@ export const UserList = ({
     </div>
   );
 };
-// const UserFollowers = () => {
-//   const { user } = authStore();
-//   const userFollowersQuery = $api.useQuery(
-//     "get",
-//     "/user_follows/{user_id}/following",
-//     {
-//       params: {
-//         path: {
-//           user_id: user?.id ?? 1,
-//         },
-//         query: {
-//           limit: 10,
-//           skip: 0,
-//         },
-//       },
-//     },
-//     {
-//       enabled: !!user?.id,
-//     }
-//   );
-
-//   if (userFollowersQuery?.isLoading) {
-//     return (
-//       <div className="space-y-4">
-//         {[1, 2, 3].map((index) => (
-//           <UserCardLoading key={index} variant="detailed" />
-//         ))}
-//       </div>
-//     );
-//   }
-
-//   if (!userFollowersQuery?.data?.length) {
-//     return (
-//       <Empty
-//         title="No Users Found"
-//         containerClassName="min-h-[300px]"
-//         imageClassName="w-32 h-32"
-//       />
-//     );
-//   }
-
-//   return (
-//     <div className="space-y-4">
-//       {userFollowersQuery?.data?.map((user, index) => (
-//         <UserCard key={index} user={user} variant="detailed" />
-//       ))}
-//     </div>
-//   );
-// };
-
-// const UserFriends = () => {
-//   const { user } = authStore();
-//   const userFriendsQuery = $api.useQuery(
-//     "get",
-//     "/user_follows/{user_id}/friends",
-//     {
-//       params: {
-//         path: {
-//           user_id: user?.id ?? 1,
-//         },
-//         query: {
-//           limit: 10,
-//           skip: 0,
-//         },
-//       },
-//     },
-//     {
-//       enabled: !!user?.id,
-//     }
-//   );
-
-//   if (userFriendsQuery?.isLoading) {
-//     return (
-//       <div className="space-y-4">
-//         {[1, 2, 3].map((index) => (
-//           <UserCardLoading key={index} variant="detailed" />
-//         ))}
-//       </div>
-//     );
-//   }
-//   if (!userFriendsQuery?.data?.length) {
-//     return (
-//       <Empty
-//         title="No Users Found"
-//         containerClassName="min-h-[300px]"
-//         imageClassName="w-32 h-32"
-//       />
-//     );
-//   }
-//   return (
-//     <div className="space-y-4">
-//       {userFriendsQuery?.data?.map((user, index) => (
-//         <UserCard key={index} user={user} variant="detailed" />
-//       ))}
-//     </div>
-//   );
-// };
-
-// const UserFollowing = () => {
-//   return (
-//     <Empty
-//       title="No Users Found"
-//       containerClassName="min-h-[300px]"
-//       imageClassName="w-32 h-32"
-//     />
-//   );
-//   // const { user } = authStore();
-//   // const userFollowingQuery = $api.useQuery(
-//   //   "get",
-//   //   "/users/{user_id}/following",
-//   //   {
-//   //     params: {
-//   //       path: {
-//   //         user_id: user?.id ?? 1,
-//   //       },
-//   //       query: {
-//   //         limit: 10,
-//   //         skip: 0,
-//   //       },
-//   //     },
-//   //   },
-//   //   {
-//   //     enabled: !!user?.id,
-//   //   }
-//   // );
-
-//   // if (userFollowingQuery?.isLoading) {
-//   //   return (
-//   //     <div className="space-y-4">
-//   //       {[1, 2, 3].map((index) => (
-//   //         <UserCardLoading key={index} variant="detailed" />
-//   //       ))}
-//   //     </div>
-//   //   );
-//   // }
-
-//   // if (!userFollowingQuery?.data?.length) {
-//   //   return (
-//   //     <Empty
-//   //       title="No Users Found"
-//   //       containerClassName="min-h-[300px]"
-//   //       imageClassName="w-32 h-32"
-//   //     />
-//   //   );
-//   // }
-//   // return (
-//   //   <div className="space-y-4">
-//   //     {userFollowingQuery?.data?.map((user, index) => (
-//   //       <UserCard key={index} user={user} variant="detailed" />
-//   //     ))}
-//   //   </div>
-//   // );
-// };

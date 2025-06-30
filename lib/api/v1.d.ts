@@ -296,6 +296,119 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/qwirl/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get My Profile Qwirl
+         * @description Get the current user's own Profile Qwirl for viewing or editing.
+         *
+         *     Returns:
+         *         The user's Profile Qwirl with all items (including soft-deleted ones)
+         */
+        get: operations["get_my_profile_qwirl_api_v1_qwirl_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/qwirl/me/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Profile Qwirl Item
+         * @description Adds a new poll item to the user's Profile Qwirl.
+         *
+         *     Args:
+         *         item_data: The question, options, and owner's answer
+         *
+         *     Returns:
+         *         The newly created QwirlItem
+         */
+        post: operations["add_profile_qwirl_item_api_v1_qwirl_me_items_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/qwirl/me/items/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Reorder Profile Qwirl Items
+         * @description Changes the order of multiple poll items in the user's Profile Qwirl.
+         *
+         *     Args:
+         *         reorder_data: List of items with their new positions
+         *
+         *     Returns:
+         *         200 OK if successful
+         */
+        patch: operations["reorder_profile_qwirl_items_api_v1_qwirl_me_items_reorder_patch"];
+        trace?: never;
+    };
+    "/api/v1/qwirl/me/items/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Profile Qwirl Item
+         * @description Permanently deletes a poll item from the user's Profile Qwirl.
+         *     This is a destructive action and will also remove all associated responses.
+         *
+         *     Args:
+         *         item_id: The ID of the item to delete
+         *
+         *     Returns:
+         *         204 No Content if successful
+         */
+        delete: operations["delete_profile_qwirl_item_api_v1_qwirl_me_items__item_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Profile Qwirl Item
+         * @description Updates a single Qwirl item (text, options, answer, or soft-delete status).
+         *
+         *     Args:
+         *         item_id: The ID of the item to update
+         *         update_data: The fields to update
+         *
+         *     Returns:
+         *         The updated QwirlItem
+         */
+        patch: operations["update_profile_qwirl_item_api_v1_qwirl_me_items__item_id__patch"];
+        trace?: never;
+    };
     "/api/v1/qwirl-responses/": {
         parameters: {
             query?: never;
@@ -349,7 +462,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/question-categories/": {
+    "/api/v1/question-categories": {
         parameters: {
             query?: never;
             header?: never;
@@ -363,7 +476,7 @@ export interface paths {
          *     Returns:
          *         Categories
          */
-        get: operations["get_categories_api_v1_question_categories__get"];
+        get: operations["get_categories_api_v1_question_categories_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -389,7 +502,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/post/": {
+    "/api/v1/post": {
         parameters: {
             query?: never;
             header?: never;
@@ -399,7 +512,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Create Post */
-        post: operations["create_post_api_v1_post__post"];
+        post: operations["create_post_api_v1_post_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -413,8 +526,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Post By Id */
-        get: operations["get_post_by_id_api_v1_post__post_id__get"];
+        get?: never;
         put?: never;
         post?: never;
         /** Delete Post */
@@ -425,7 +537,7 @@ export interface paths {
         patch: operations["update_post_api_v1_post__post_id__patch"];
         trace?: never;
     };
-    "/api/v1/post/me": {
+    "/api/v1/post/user/{post_owner_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -433,10 +545,45 @@ export interface paths {
             cookie?: never;
         };
         /** List My Posts */
-        get: operations["list_my_posts_api_v1_post_me_get"];
+        get: operations["list_my_posts_api_v1_post_user__post_owner_id__get"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/post/{post_id}/vote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Vote */
+        post: operations["add_vote_api_v1_post__post_id__vote_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/post/{post_id}/like": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Like Post */
+        post: operations["like_post_api_v1_post__post_id__like_post"];
+        /** Unlike Post */
+        delete: operations["unlike_post_api_v1_post__post_id__like_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -681,39 +828,109 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** ItemReorderEntry */
+        ItemReorderEntry: {
+            /** Item Id */
+            item_id: number;
+            /** New Position */
+            new_position: number;
+        };
         /** PostAttachment */
         PostAttachment: {
-            /**
-             * Type
-             * @constant
-             */
-            type: "poll";
-            /** Description */
-            description?: string | null;
-            /** Text */
-            text?: string | null;
-            /** Options */
-            options?: string[] | null;
-            /** Seleted Option */
-            seleted_option?: number | null;
-            /** Tags */
-            tags?: string[] | null;
+            /** Text Content */
+            text_content?: string | null;
+            /** Image Url */
+            image_url?: string | null;
+            /** Question Text */
+            question_text?: string | null;
             /** Duration */
-            duration?: string | null;
-            /** Image Src */
-            image_src?: string | null;
+            duration?: number | null;
+            /** Question Bank Id */
+            question_bank_id?: number | null;
         };
         /** PostBase */
         PostBase: {
-            /** Id */
-            id: number | null;
-            /** User Id */
-            user_id: number | null;
-            attachments: components["schemas"]["PostAttachment"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Text Content */
+            text_content?: string;
+            /** Question Text */
+            question_text?: string;
+            /** Question Bank Id */
+            question_bank_id?: number | null;
+            /** Options */
+            options?: string[] | null;
+            /** Selected Option Index */
+            selected_option_index?: number | null;
+            /**
+             * Is Mine
+             * @default true
+             */
+            is_mine: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Duration */
+            duration?: number | null;
+            /** Results */
+            results?: Record<string, never>[] | null;
         };
         /** PostCreate */
         PostCreate: {
-            attachments: components["schemas"]["PostAttachment"];
+            post_attachment: components["schemas"]["PostAttachment"];
+            /** Options */
+            options?: string[] | null;
+            /** Selected Option Index */
+            selected_option_index?: number | null;
+        };
+        /** PostFetchByID */
+        PostFetchByID: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Text Content */
+            text_content?: string;
+            /** Question Text */
+            question_text?: string;
+            /** Question Bank Id */
+            question_bank_id?: number | null;
+            /** Options */
+            options?: string[] | null;
+            /** Author Selected Option Index */
+            author_selected_option_index?: number | null;
+            /**
+             * Is Mine
+             * @default true
+             */
+            is_mine: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Duration */
+            duration?: number | null;
+            /** Results */
+            results?: Record<string, never>[] | null;
+            /** My Selected Option Index */
+            my_selected_option_index?: number | null;
         };
         /** PostResponse */
         PostResponse: {
@@ -797,6 +1014,26 @@ export interface components {
             questions: components["schemas"]["QwirlQuestionCreate"][];
             /** Tags */
             tags: string[];
+        };
+        /** QwirlItemCreate */
+        QwirlItemCreate: {
+            /** Question Text */
+            question_text: string;
+            /** Options */
+            options: string[];
+            /** Owner Answer */
+            owner_answer: string;
+        };
+        /** QwirlItemUpdate */
+        QwirlItemUpdate: {
+            /** Question Text */
+            question_text?: string;
+            /** Options */
+            options?: string[];
+            /** Owner Answer */
+            owner_answer?: string;
+            /** Is Soft Deleted */
+            is_soft_deleted?: boolean;
         };
         /** QwirlList */
         QwirlList: {
@@ -1565,6 +1802,175 @@ export interface operations {
             };
         };
     };
+    get_my_profile_qwirl_api_v1_qwirl_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlBase"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_profile_qwirl_item_api_v1_qwirl_me_items_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QwirlItemCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlQuestion"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reorder_profile_qwirl_items_api_v1_qwirl_me_items_reorder_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemReorderEntry"][];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_profile_qwirl_item_api_v1_qwirl_me_items__item_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_profile_qwirl_item_api_v1_qwirl_me_items__item_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QwirlItemUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlQuestion"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     add_qwirl_response_api_v1_qwirl_responses__post: {
         parameters: {
             query?: never;
@@ -1664,7 +2070,7 @@ export interface operations {
             };
         };
     };
-    get_categories_api_v1_question_categories__get: {
+    get_categories_api_v1_question_categories_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1718,7 +2124,7 @@ export interface operations {
             };
         };
     };
-    create_post_api_v1_post__post: {
+    create_post_api_v1_post_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -1753,43 +2159,12 @@ export interface operations {
             };
         };
     };
-    get_post_by_id_api_v1_post__post_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                post_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PostBase"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     delete_post_api_v1_post__post_id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                post_id: number;
+                post_id: string;
             };
             cookie?: {
                 access_token?: string | null;
@@ -1820,7 +2195,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                post_id: number;
+                post_id: string;
             };
             cookie?: {
                 access_token?: string | null;
@@ -1852,14 +2227,16 @@ export interface operations {
             };
         };
     };
-    list_my_posts_api_v1_post_me_get: {
+    list_my_posts_api_v1_post_user__post_owner_id__get: {
         parameters: {
             query?: {
                 skip?: number;
                 limit?: number;
             };
             header?: never;
-            path?: never;
+            path: {
+                post_owner_id: number;
+            };
             cookie?: {
                 access_token?: string | null;
             };
@@ -1872,7 +2249,108 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PostBase"][];
+                    "application/json": components["schemas"]["PostFetchByID"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_vote_api_v1_post__post_id__vote_post: {
+        parameters: {
+            query: {
+                poll_option_id: number;
+            };
+            header?: never;
+            path: {
+                post_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    like_post_api_v1_post__post_id__like_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                post_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unlike_post_api_v1_post__post_id__like_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                post_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

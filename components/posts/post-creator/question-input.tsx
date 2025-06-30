@@ -16,7 +16,7 @@ export function QuestionInput() {
         transition={{ type: "spring", stiffness: 300 }}
       >
         <Controller
-          name="question"
+          name="question_text"
           control={control}
           rules={{ required: true }}
           render={({ field }) => (

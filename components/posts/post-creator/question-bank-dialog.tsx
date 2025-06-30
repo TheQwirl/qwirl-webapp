@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -16,71 +15,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { CompactQuestionCard } from "@/components/qwirl/compact-question-card";
+import $api from "@/lib/api/client";
+import { components } from "@/lib/api/v1-client-side";
 
-interface Question {
-  id: string;
-  text: string;
-  options: string[];
-  tags: string[];
-  category: string;
-  creator: {
-    username: string;
-    avatarUrl: string;
-  };
-  usageCount: number;
-  upvotes: number;
-}
+type Question = components["schemas"]["QuestionSearchResponse"];
 
 interface QuestionBankDialogProps {
   showQuestionBank: boolean;
   setShowQuestionBank: (show: boolean) => void;
   selectQuestionFromBank: (question: Question) => void;
 }
-
-// Mock question bank data - replace with your API
-const mockQuestions: Question[] = [
-  {
-    id: "1",
-    text: "What's the best programming language for beginners?",
-    options: ["Python", "JavaScript", "Java", "C++"],
-    tags: ["programming", "beginner"],
-    category: "Technology",
-    creator: {
-      username: "coder123",
-      avatarUrl: "https://example.com/avatar1.png",
-    },
-    usageCount: 150,
-    upvotes: 75,
-  },
-  {
-    id: "2",
-    text: "Which social media platform do you use most?",
-    options: ["Instagram", "Twitter", "TikTok", "LinkedIn"],
-    tags: ["social", "lifestyle"],
-    category: "Social Media",
-    creator: {
-      username: "coder123",
-      avatarUrl: "https://example.com/avatar1.png",
-    },
-    usageCount: 150,
-    upvotes: 75,
-  },
-  {
-    id: "3",
-    text: "What's your preferred work style?",
-    options: ["Remote", "Hybrid", "In-office", "Flexible"],
-    tags: ["work", "lifestyle"],
-    category: "Work",
-    creator: {
-      username: "coder123",
-      avatarUrl: "https://example.com/avatar1.png",
-    },
-    usageCount: 150,
-    upvotes: 75,
-  },
-];
 
 export function QuestionBankDialog({
   showQuestionBank,
@@ -89,79 +35,76 @@ export function QuestionBankDialog({
 }: QuestionBankDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [questionBankResults, setQuestionBankResults] =
-    useState<Question[]>(mockQuestions);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    $api.useInfiniteQuery(
+      "get",
+      "/question-bank/search",
+      {
+        params: {
+          query: {
+            params: JSON.stringify({
+              text: searchQuery || "",
+              categories: selectedCategory === "all" ? [] : [selectedCategory],
+              tags: [],
+            }),
+
+            limit: 10,
+            skip: 0,
+          },
+        },
+      },
+      {
+        initialPageParam: 0,
+        pageParamName: "skip",
+        getNextPageParam: (
+          lastPage: Question[],
+          allPages: { data: Question[] }[]
+        ) => {
+          if (lastPage?.length < 10) {
+            return undefined;
+          }
+          return allPages.flat().length;
+        },
+      }
+    );
+
+  const observer = useRef<IntersectionObserver>(null);
+  const lastQuestionElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (isLoading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (
+          entries?.[0]?.isIntersecting &&
+          hasNextPage &&
+          !isFetchingNextPage
+        ) {
+          fetchNextPage();
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]
+  );
+
+  const questions = data?.pages.flatMap((page) => page?.flat()) ?? [];
 
   const categories = [
-    "All",
-    "Technology",
-    "Social Media",
-    "Work",
-    "Entertainment",
-  ];
-  const availableTags = [
-    "programming",
-    "beginner",
-    "social",
-    "lifestyle",
-    "work",
+    "Food and Beverages",
+    "Future and Imagination",
+    "Nature and Environment",
+    "Personal Preferences",
+    "Philosophy and Soul",
+    "Pop Culture and Entertainment",
+    "Relationships and Social Life",
+    "Sports and Games",
+    "Technology and Trends",
+    "Travel and Exploration",
   ];
 
-  const searchQuestionBank = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      // Simulate API call with filtering
-      let filtered = mockQuestions;
-
-      if (searchQuery) {
-        filtered = filtered.filter(
-          (q) =>
-            q.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            q.tags.some((tag) =>
-              tag.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        );
-      }
-
-      if (selectedCategory !== "all") {
-        filtered = filtered.filter(
-          (q) => q.category.toLowerCase() === selectedCategory.toLowerCase()
-        );
-      }
-
-      if (selectedTags.length > 0) {
-        filtered = filtered.filter((q) =>
-          selectedTags.some((tag) => q.tags.includes(tag))
-        );
-      }
-
-      setQuestionBankResults(filtered);
-    } catch (error) {
-      console.error("Error searching question bank:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchQuery, selectedCategory, selectedTags]);
-  // Search question bank
-  useEffect(() => {
-    if (showQuestionBank) {
-      searchQuestionBank();
-    }
-  }, [
-    searchQuery,
-    selectedCategory,
-    selectedTags,
-    showQuestionBank,
-    searchQuestionBank,
-  ]);
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
   return (
     <Dialog open={showQuestionBank} onOpenChange={setShowQuestionBank}>
       <DialogContent className="sm:max-w-4xl max-w-[95vw] max-h-[90vh] overflow-hidden">
@@ -201,26 +144,14 @@ export function QuestionBankDialog({
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((category) => (
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories?.map((category) => (
                     <SelectItem key={category} value={category.toLowerCase()}>
                       {category}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-
-              <div className="flex gap-1 flex-wrap">
-                {availableTags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant={selectedTags.includes(tag) ? "default" : "outline"}
-                    className="cursor-pointer text-xs"
-                    onClick={() => toggleTag(tag)}
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
             </div>
           </div>
 
@@ -234,84 +165,41 @@ export function QuestionBankDialog({
                     Searching...
                   </p>
                 </div>
-              ) : questionBankResults.length > 0 ? (
-                questionBankResults.map((question) => (
-                  <CompactQuestionCard
-                    key={question.id}
-                    answers={question.options}
-                    creator={question.creator}
-                    question={question.text}
-                    usageCount={question.usageCount || 0}
-                    upvotes={question.upvotes || 0}
-                    customActions={
-                      <Button
-                        onClick={() => selectQuestionFromBank(question)}
-                        size="sm"
-                        variant="default"
-                        className="text-xs"
-                      >
-                        Use Question
-                      </Button>
-                    }
-                  />
-                  // <Card
-                  //   key={question.id}
-                  //   className="cursor-pointer hover:shadow-md transition-all border hover:border-primary/50"
-                  //   onClick={() => selectQuestionFromBank(question)}
-                  // >
-                  //   <CardContent className="p-3 sm:p-4">
-                  //     <div className="space-y-2 sm:space-y-3">
-                  //       <div className="flex justify-between items-start gap-2">
-                  //         <p className="font-medium text-xs sm:text-sm leading-relaxed flex-1">
-                  //           {question.text}
-                  //         </p>
-                  //         {/* <Badge
-                  //           variant="outline"
-                  //           className="text-xs flex-shrink-0"
-                  //         >
-                  //           {question.difficulty}
-                  //         </Badge> */}
-                  //       </div>
-
-                  //       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2">
-                  //         {question.options.map((option, idx) => (
-                  //           <div
-                  //             key={idx}
-                  //             className={`text-xs p-2 rounded border bg-gray-50 border-gray-200`}
-                  //           >
-                  //             {option}
-                  //           </div>
-                  //         ))}
-                  //       </div>
-
-                  //       <div className="flex justify-between items-center">
-                  //         <div className="flex gap-1 flex-wrap">
-                  //           {question.tags.slice(0, 3).map((tag) => (
-                  //             <Badge
-                  //               key={tag}
-                  //               variant="secondary"
-                  //               className="text-xs"
-                  //             >
-                  //               {tag}
-                  //             </Badge>
-                  //           ))}
-                  //         </div>
-                  //         <Button
-                  //           size="sm"
-                  //           variant="outline"
-                  //           className="text-xs"
-                  //         >
-                  //           Use Question
-                  //         </Button>
-                  //       </div>
-                  //     </div>
-                  //   </CardContent>
-                  // </Card>
-                ))
+              ) : questions.length > 0 ? (
+                questions.map((question, index) => {
+                  const isLastElement = questions.length === index + 1;
+                  return (
+                    <CompactQuestionCard
+                      ref={isLastElement ? lastQuestionElementRef : null}
+                      key={question.id}
+                      answers={question.options}
+                      question={question.question_text}
+                      customActions={
+                        <Button
+                          onClick={() => selectQuestionFromBank(question)}
+                          size="sm"
+                          variant="default"
+                          className="text-xs"
+                        >
+                          Use Question
+                        </Button>
+                      }
+                    />
+                  );
+                })
               ) : (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground text-sm">
                     No questions found. Try adjusting your search.
+                  </p>
+                </div>
+              )}
+
+              {isFetchingNextPage && (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Loading more...
                   </p>
                 </div>
               )}

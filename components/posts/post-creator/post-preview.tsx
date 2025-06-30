@@ -9,8 +9,8 @@ import { PostCreatorData } from "./schema";
 export function PostPreview() {
   const user = authStore((s) => s.user);
   const { getValues } = useFormContext<PostCreatorData>();
-  const content = getValues("content");
-  const question = getValues("question");
+  const content = getValues("text_content");
+  const question = getValues("question_text");
   const pollOptions = getValues("pollOptions");
   return (
     <motion.div

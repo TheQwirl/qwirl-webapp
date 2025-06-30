@@ -21,25 +21,19 @@ interface PollOptionsProps {
 
 export function PollOptions({ options, append, remove }: PollOptionsProps) {
   const { control, watch, setValue } = useFormContext<PostCreatorData>();
+  const selectedOptionIndex = watch("selected_option_index");
 
   const removeOptionByIndex = (index: number) => {
     if (options.length > 2) {
-      const selectedOption = watch("selectedOption");
-
-      const removedOptionId = options[index]?.id;
       remove(index);
-      if (removedOptionId === selectedOption) {
-        let newSelectedOption = "";
 
-        // If index is still within bounds after removal, select next
-        if (index < options.length - 1) {
-          newSelectedOption = options[index + 1]?.id ?? "";
-        } else {
-          // Otherwise select previous
-          newSelectedOption = options[index - 1]?.id ?? "";
-        }
-
-        setValue("selectedOption", newSelectedOption ?? "");
+      if (selectedOptionIndex === index) {
+        // If removing the selected one, reselect another
+        const newIndex = index < options.length - 1 ? index : index - 1;
+        setValue("selected_option_index", newIndex);
+      } else if (selectedOptionIndex > index) {
+        // Shift selected index down if after removed one
+        setValue("selected_option_index", selectedOptionIndex - 1);
       }
     } else {
       console.warn(
@@ -56,7 +50,6 @@ export function PollOptions({ options, append, remove }: PollOptionsProps) {
     append(newOptionData);
   };
 
-  const selectedOption = watch("selectedOption");
   return (
     <div className="space-y-2">
       <Label className="text-sm">Options</Label>
@@ -71,14 +64,12 @@ export function PollOptions({ options, append, remove }: PollOptionsProps) {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 300 }}
-            className=""
           >
             <Checkbox
-              checked={option.id === selectedOption}
+              checked={index === selectedOptionIndex}
               onCheckedChange={() => {
-                const isChecked = option.id === selectedOption;
-                if (!isChecked) {
-                  setValue("selectedOption", option.id);
+                if (index !== selectedOptionIndex) {
+                  setValue("selected_option_index", index);
                 }
               }}
             />

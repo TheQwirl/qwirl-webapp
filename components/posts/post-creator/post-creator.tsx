@@ -28,14 +28,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { QuestionInput } from "./question-input";
 import { PostActions } from "./post-actions";
 import Image from "next/image";
+import { components } from "@/lib/api/v1-client-side";
+import $api from "@/lib/api/client";
+import { toast } from "sonner";
 
-interface Question {
-  id: string;
-  text: string;
-  options: string[];
-  tags: string[];
-  category: string;
-}
+type Question = components["schemas"]["QuestionSearchResponse"];
 
 const PostCreator = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -43,14 +40,14 @@ const PostCreator = () => {
   const [showQuestionBank, setShowQuestionBank] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [postImage, setPostImage] = useState<string | null>(null);
-  const [importedFromBank, setImportedFromBank] = useState(false);
+  const [importedFromBank, setImportedFromBank] = useState<null | number>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const methods = useForm<PostCreatorData>({
     resolver: zodResolver(PostCreatorSchema),
     defaultValues: {
-      content: "",
-      question: "",
+      text_content: "",
+      question_text: "",
       duration: "24h",
       pollOptions: [],
     },
@@ -77,28 +74,30 @@ const PostCreator = () => {
     setValue("pollOptions", []);
     setSelectedTemplate(null);
     setPostImage(null);
-    setImportedFromBank(false);
+    setImportedFromBank(null);
     reset();
   };
 
   const handleBackToTemplates = () => {
     setValue("pollOptions", []);
     setSelectedTemplate(null);
-    setImportedFromBank(false);
-    setValue("question", "");
+    setImportedFromBank(null);
+    setValue("question_text", "");
     setShowPreview(false);
   };
+
+  const createPostMutation = $api.useMutation("post", "/post");
 
   const selectQuestionFromBank = (question: Question) => {
     const options = question.options.map((opt, index) => ({
       id: (index + 1).toString(),
       text: opt,
     }));
-    setValue("selectedOption", options?.[0]?.id ?? "");
+    setValue("selected_option_index", 0);
     setValue("pollOptions", options);
-    setValue("question", question.text);
+    setValue("question_text", question.question_text);
     setSelectedTemplate("questionbank");
-    setImportedFromBank(true);
+    setImportedFromBank(question.id);
     setShowQuestionBank(false);
   };
 
@@ -113,20 +112,39 @@ const PostCreator = () => {
     }
   };
 
-  const onSubmit = (data: PostCreatorData) => {
-    const post = {
-      content: data.content,
-      question: data.question,
-      options: data.pollOptions,
-      duration: data.duration,
-      image: postImage,
-      timestamp: new Date().toISOString(),
-      votes: {},
-      totalVotes: 0,
-      importedFromBank,
-    };
-    console.log("Post created:", post);
-    handleCollapse();
+  const parseDuration = (duration: "1h" | "6h" | "24h" | "7d"): number => {
+    if (duration.endsWith("h")) return parseInt(duration);
+    if (duration.endsWith("d")) return parseInt(duration) * 24;
+    return 24;
+  };
+
+  const onSubmit = async (data: PostCreatorData) => {
+    toast.loading("Creating post...");
+    await createPostMutation.mutateAsync(
+      {
+        body: {
+          post_attachment: {
+            text_content: data.text_content,
+            image_url: postImage,
+            question_text: data.question_text,
+            duration: parseDuration(data.duration),
+            question_bank_id: importedFromBank,
+          },
+          selected_option_index: data.selected_option_index,
+          options: data.pollOptions?.map((opt) => opt.text),
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Post created successfully!");
+          handleCollapse();
+        },
+        onError: () => {
+          toast.error("An error occurred while creating the post");
+          console.error("Error creating post:", createPostMutation.error);
+        },
+      }
+    );
   };
 
   return (
@@ -152,16 +170,13 @@ const PostCreator = () => {
                       onTogglePreview={() => setShowPreview(!showPreview)}
                       showPreview={showPreview}
                     />
-                    <form
-                      onSubmit={handleSubmit(onSubmit)}
-                      className="space-y-3 sm:space-y-4"
-                    >
+                    <form className="space-y-3 sm:space-y-4">
                       <motion.div
                         whileTap={{ scale: 0.98 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
                         <Controller
-                          name="content"
+                          name="text_content"
                           control={control}
                           render={({ field }) => (
                             <Textarea
@@ -262,6 +277,7 @@ const PostCreator = () => {
                         onCancel={handleCollapse}
                         onImageUploadClick={() => fileInputRef.current?.click()}
                         onSubmit={handleSubmit(onSubmit)}
+                        isSubmitLoading={createPostMutation.isPending}
                         isSubmitDisabled={fields.length < 2}
                       />
                     </form>

@@ -6,6 +6,7 @@ interface PostActionsProps {
   onImageUploadClick: () => void;
   onCancel: () => void;
   onSubmit: () => void;
+  isSubmitLoading: boolean;
   isSubmitDisabled: boolean;
   fileInputRef: RefObject<HTMLInputElement | null>;
 }
@@ -15,6 +16,7 @@ export function PostActions({
   onCancel,
   onSubmit,
   isSubmitDisabled,
+  isSubmitLoading,
   fileInputRef,
 }: PostActionsProps) {
   return (
@@ -60,6 +62,7 @@ export function PostActions({
             type="submit"
             icon={Send}
             iconPlacement="left"
+            loading={isSubmitLoading}
             disabled={isSubmitDisabled}
             onClick={onSubmit}
             className="bg-primary hover:bg-primary/90 text-xs sm:text-sm px-2 sm:px-3"
