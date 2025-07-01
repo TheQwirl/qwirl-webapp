@@ -109,7 +109,7 @@ const DatePicker = ({ selectedDate, setSelectedDate }: DatePickerProps) => {
             setSelectedDate(e);
             setStringDate("");
           }}
-          captionLayout="dropdown-buttons"
+          // captionLayout="dropdown-buttons"
           disabled={(date) =>
             date > new Date() || date < new Date("1900-01-01")
           }

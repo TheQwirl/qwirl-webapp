@@ -79,13 +79,14 @@ export const UserList = ({
         },
       },
       {
+        initialPageParam: 0,
+        pageParamName: "skip",
         getNextPageParam: (lastPage: Users, allPages: { data: Users }[]) => {
           if (lastPage?.length < 10) {
             return undefined;
           }
           return allPages.flat().length;
         },
-        enabled: !!user?.id,
       }
     );
 
@@ -116,7 +117,7 @@ export const UserList = ({
     );
   }
 
-  if (users.length === 0 && !isLoading) {
+  if (users?.length === 0 && !isLoading) {
     return (
       <Empty
         title="No Users Found"

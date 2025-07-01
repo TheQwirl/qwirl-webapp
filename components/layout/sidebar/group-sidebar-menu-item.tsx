@@ -10,20 +10,12 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { MenuItem } from "@/constants/data-sidebar";
 import { ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { IconType } from "react-icons/lib";
 
 type GroupSidebarMenuItemProps = {
-  item: {
-    title: string;
-    icon: IconType;
-    children?: {
-      title: string;
-      url: string;
-      icon: IconType;
-    }[];
-  };
+  item: MenuItem;
 };
 
 const GroupSidebarMenuItem = ({ item }: GroupSidebarMenuItemProps) => {

@@ -3,7 +3,6 @@ import { Plus, BookOpenCheck } from "lucide-react";
 import { PollTemplate } from "./types";
 import { UseFieldArrayAppend, useFormContext } from "react-hook-form";
 import { PostCreatorData } from "./schema";
-import { generateInitialPollOptionId } from "@/lib/utils";
 
 const templates = [
   {
@@ -26,9 +25,9 @@ export function PollTemplates({
   const { setValue } = useFormContext<PostCreatorData>();
 
   const onStartFromScratch = () => {
-    const firstOptionId = generateInitialPollOptionId();
-    const secondOptionId = generateInitialPollOptionId();
-    setValue("selectedOption", firstOptionId);
+    const firstOptionId = 1;
+    const secondOptionId = 2;
+    setValue("selected_option_index", firstOptionId);
     append([
       {
         id: firstOptionId,
@@ -48,7 +47,7 @@ export function PollTemplates({
     }
 
     setValue("pollOptions", template.options);
-    setValue("question", `What's your choice?`);
+    setValue("question_text", `What's your choice?`);
   };
   return (
     <div className="space-y-3">

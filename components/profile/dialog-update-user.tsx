@@ -60,7 +60,7 @@ export function DialogUpdateUser({
   const queryClient = useQueryClient();
   const userQuery = $api.useQuery("get", "/users/me");
   const user = userQuery?.data;
-  const categoriesQuery = $api.useQuery("get", "/question-categories/");
+  const categoriesQuery = $api.useQuery("get", "/question-categories");
 
   const updateUserMutation = $api.useMutation("patch", "/users/me", {
     onSuccess: async () => {
