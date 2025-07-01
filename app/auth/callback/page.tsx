@@ -4,12 +4,12 @@ import { queryToString } from "@/lib/utils";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-// This component will run entirely on the server.
-// It should render a loading state, as it will redirect before showing anything.
+type tParams = Promise<{ code: string; state: string }>;
+
 export default async function AuthCallbackPage({
   searchParams,
 }: {
-  searchParams: { code: string; state: string };
+  searchParams: tParams;
 }) {
   const searchparams = await searchParams;
   const headerList = await headers();

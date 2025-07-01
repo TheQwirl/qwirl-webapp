@@ -1,7 +1,7 @@
 import { LucideIcon } from "lucide-react";
 
 export interface PollOption {
-  id: string;
+  id: number;
   text: string;
 }
 

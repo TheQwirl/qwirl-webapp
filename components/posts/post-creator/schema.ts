@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const PollOptionSchema = z.object({
-  id: z.string().min(1), // Assuming ID is always present and non-empty
+  id: z.number(),
   text: z.string().min(1, { message: "Option text cannot be empty." }),
 });
 

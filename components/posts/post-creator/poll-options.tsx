@@ -11,7 +11,6 @@ import {
   UseFieldArrayRemove,
   useFormContext,
 } from "react-hook-form";
-import { generateInitialPollOptionId } from "@/lib/utils";
 
 interface PollOptionsProps {
   options: PostCreatorData["pollOptions"];
@@ -44,7 +43,7 @@ export function PollOptions({ options, append, remove }: PollOptionsProps) {
 
   const addOption = () => {
     const newOptionData = {
-      id: generateInitialPollOptionId(),
+      id: options.length + 1,
       text: `Option ${options.length + 1}`,
     };
     append(newOptionData);

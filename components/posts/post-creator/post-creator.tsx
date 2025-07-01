@@ -89,7 +89,7 @@ const PostCreator = () => {
 
   const selectQuestionFromBank = (question: Question) => {
     const options = question.options.map((opt, index) => ({
-      id: (index + 1).toString(),
+      id: index + 1,
       text: opt,
     }));
     setValue("selected_option_index", 0);
