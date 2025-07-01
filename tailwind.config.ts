@@ -9,8 +9,29 @@ export default {
   ],
   theme: {
     extend: {
+      backgroundImage: {
+        // Gradients
+        "apricot-sunrise":
+          "linear-gradient(135deg, hsla(21, 100%, 85%, 1), hsla(12, 100%, 82%, 1))",
+        "sunset-glow":
+          "linear-gradient(135deg, hsla(12, 100%, 82%, 1), hsla(358, 60%, 75%, 1), hsla(348, 25%, 61%, 1))",
+        "warm-blush":
+          "linear-gradient(135deg, hsla(21, 100%, 85%, 1), hsla(358, 60%, 75%, 1), hsla(348, 25%, 61%, 1))",
+        "vibrant-peach":
+          "linear-gradient(135deg, hsla(21, 100%, 85%, 1), hsla(12, 100%, 82%, 1), hsla(263, 6%, 43%, 1))",
+        "rose-flame":
+          "linear-gradient(135deg, hsla(358, 60%, 75%, 1), hsla(348, 25%, 61%, 1), hsla(12, 100%, 82%, 1))",
+        "dim-glow":
+          "linear-gradient(135deg, hsla(263, 6%, 43%, 1), hsla(348, 25%, 61%, 1), hsla(21, 100%, 85%, 1))",
+        "peachy-horizon":
+          "linear-gradient(135deg, hsla(21, 100%, 85%, 1), hsla(358, 60%, 75%, 1), hsla(12, 100%, 82%, 1))",
+      },
       animation: {
         blob: "blob 4s infinite",
+        gradient: "gradient 15s ease infinite",
+        shine: "shine 3s ease-out infinite",
+        "gradient-flow":
+          "gradientFlow 10s ease 0s infinite normal none running",
       },
       keyframes: {
         blob: {
@@ -27,6 +48,32 @@ export default {
             transform: "translate(0px, 0px) scale(1)",
           },
         },
+        gradient: {
+          "0%, 100%": {
+            "background-position": "0% 50%",
+          },
+          "50%": {
+            "background-position": "100% 50%",
+          },
+        },
+        shine: {
+          "0%": { backgroundPosition: "200% 0" },
+          "25%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
+        gradientFlow: {
+          "0%": { "background-position": "0% 50%" },
+          "50%": { "background-position": "100% 50%" },
+          "100%": { "background-position": "0% 50%" },
+        },
+      },
+      boxShadow: {
+        sm: "var(--shadow-sm)",
+        DEFAULT: "var(--shadow)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        xl: "var(--shadow-xl)",
+        "2xl": "var(--shadow-2xl)",
       },
       colors: {
         background: "hsl(var(--background))",
@@ -84,6 +131,10 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        poppins: ["Poppins", "sans-serif"],
+        rochester: ["Rochester", "cursive"],
       },
     },
   },

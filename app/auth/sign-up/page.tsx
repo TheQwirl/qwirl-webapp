@@ -1,39 +1,22 @@
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-import SignUpForm from "@/components/forms/sign-up-form";
-import GoogleAuthBtn from "@/components/google-auth-btn";
-import PollAnimation from "@/components/poll-animation";
-import { Separator } from "@/components/ui/separator";
+import { GalleryVerticalEnd } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 const SignUp = () => {
   return (
-    <main className="min-h-screen relative bg-background overflow-hidden grid grid-cols-2">
-      <div className="absolute -bottom-10 -right-20 w-72 h-72 bg-primary rounded-full mix-blend-multiply blur-xl opacity-30 animate-blob" />
-      <div className="relative hidden lg:block lg:col-span-1 bg-gradient-to-r p-14 from-amber-200 to-yellow-400 rounded-r-2xl">
-        <div className="text-center  text-4xl">Top Trending Questions</div>
-        <div className="h-full">
-          <PollAnimation />
-        </div>
-      </div>
-      <div className="flex flex-col p-4 md:p-10  items-center col-span-full lg:col-span-1 relative">
-        <div className="relative w-full">
-          <div className="absolute inset-1 bg-primary rounded-2xl blur"></div>
-          <div className="bg-white shadow rounded-2xl p-10 w-full relative">
-            <h1 className="text-5xl font-bold text-center">Join Qwirl</h1>
-            <div className=" text-gray-400 text-center">
-              To find yourself and others like you.
-            </div>
-            <div className="mt-6 ">
-              <GoogleAuthBtn />
-              <Separator className="my-4" />
-              <SignUpForm />
-            </div>
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+      <div className="flex w-full max-w-sm flex-col gap-6">
+        <Link
+          href="/"
+          className="flex items-center gap-2 self-center font-medium"
+        >
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <GalleryVerticalEnd className="size-4" />
           </div>
-        </div>
+          Qwirl
+        </Link>
       </div>
-    </main>
+    </div>
   );
 };
 
