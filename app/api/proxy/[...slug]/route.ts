@@ -223,27 +223,26 @@ export {
   handleRequest as PUT,
   handleRequest as DELETE,
   handleRequest as PATCH,
-  handleOptionsRequest as OPTIONS,
 };
 
-export async function handleOptionsRequest(req: NextRequest) {
-  const headers = new Headers();
+// export async function handleOptionsRequest(req: NextRequest) {
+//   const headers = new Headers();
 
-  headers.set(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
+//   headers.set(
+//     "Access-Control-Allow-Methods",
+//     "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+//   );
 
-  const requestedHeaders = req.headers.get("Access-Control-Request-Headers");
-  if (requestedHeaders) {
-    headers.set("Access-Control-Allow-Headers", requestedHeaders);
-  }
+//   const requestedHeaders = req.headers.get("Access-Control-Request-Headers");
+//   if (requestedHeaders) {
+//     headers.set("Access-Control-Allow-Headers", requestedHeaders);
+//   }
 
-  headers.set("Access-Control-Allow-Origin", req.headers.get("Origin") || "*");
+//   headers.set("Access-Control-Allow-Origin", req.headers.get("Origin") || "*");
 
-  headers.set("Access-Control-Allow-Credentials", "true");
+//   headers.set("Access-Control-Allow-Credentials", "true");
 
-  headers.set("Access-Control-Max-Age", "86400");
+//   headers.set("Access-Control-Max-Age", "86400");
 
-  return new NextResponse(null, { status: 204, headers });
-}
+//   return new NextResponse(null, { status: 204, headers });
+// }
