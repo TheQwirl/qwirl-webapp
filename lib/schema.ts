@@ -43,9 +43,9 @@ export const signUpFormSchema = z.object({
           "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
       }
     ),
-  termsAccepted: z.boolean().refine((val) => val === true, {
-    message: "You must accept the terms and conditions",
-  }),
+  // termsAccepted: z.boolean().refine((val) => val === true, {
+  //   message: "You must accept the terms and conditions",
+  // }),
 });
 
 export const signInFormSchema = z.object({
