@@ -211,12 +211,12 @@ export function EditableUserAvatar({
     try {
       setIsUploading(true);
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-      const file = new File([croppedImage], "avatar.jpg", {
-        type: "image/jpeg",
-      });
-      const formData = new FormData();
-      formData.append("file", file);
-      uploadAvatarMutation.mutate({ body: formData });
+      // const file = new File([croppedImage], "avatar.jpg", {
+      //   type: "image/jpeg",
+      // });
+      const base64String = await blobToBase64(croppedImage);
+
+      uploadAvatarMutation.mutate({ body: { file: base64String } });
     } catch (error) {
       console.error("Error saving cropped image:", error);
     } finally {
@@ -429,3 +429,18 @@ export function EditableUserAvatar({
     </>
   );
 }
+
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (reader.result && typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject("Failed to convert blob to base64.");
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};

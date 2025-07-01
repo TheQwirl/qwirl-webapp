@@ -8,7 +8,7 @@ import {
 import { GalleryVerticalEnd } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ExternalLoginButtons } from "@/components/external-login-buttons";
+import { AuthForm } from "@/components/external-login-buttons";
 
 const Auth = () => {
   return (
@@ -51,7 +51,7 @@ const Auth = () => {
               </p>
             </div>
 
-            <ExternalLoginButtons apiUrl={process.env.NEXT_PUBLIC_API_URL!} />
+            <AuthForm apiUrl={process.env.NEXT_PUBLIC_API_URL!} />
 
             <div className="pt-4 border-t border-border">
               <p className="text-xs text-center text-muted-foreground">

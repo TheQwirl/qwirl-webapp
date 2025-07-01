@@ -5,6 +5,14 @@ import { RiUserCommunityFill } from "react-icons/ri";
 import { TbMessageQuestion } from "react-icons/tb";
 import { GoHomeFill } from "react-icons/go";
 
+export interface MenuItem {
+  title: string;
+  icon: React.ElementType;
+  url?: string;
+  type: "single" | "group";
+  children?: MenuItem[];
+}
+
 export // Menu items array
 const MENU_ITEMS = [
   {
@@ -44,4 +52,4 @@ const MENU_ITEMS = [
     url: "/settings",
     type: "single",
   },
-];
+] as MenuItem[];

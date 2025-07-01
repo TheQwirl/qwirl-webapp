@@ -29,14 +29,13 @@ function constructFastApiPath(slug: string[]): string {
 /**
  * Generic handler for all HTTP methods.
  */
-async function handleRequest(
-  req: NextRequest,
-  { params }: { params: { slug: string[] } }
-) {
+
+type tParams = Promise<{ slug: string[] }>;
+async function handleRequest(req: NextRequest, context: { params: tParams }) {
   const cookieStore = await cookies();
   let accessToken = cookieStore.get("access-token")?.value;
   const refreshToken = cookieStore.get("refresh-token")?.value;
-  const slug = (await params).slug;
+  const slug = (await context.params).slug;
 
   const fastApiPath = constructFastApiPath(slug) as keyof ServerPaths;
   const method = req.method.toUpperCase() as

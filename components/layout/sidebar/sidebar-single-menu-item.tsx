@@ -1,12 +1,8 @@
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { MenuItem } from "@/constants/data-sidebar";
 import { usePathname } from "next/navigation";
-import { IconType } from "react-icons/lib";
 
-const SidebarSingleMenuItem = ({
-  item,
-}: {
-  item: { title: string; url?: string; icon: IconType };
-}) => {
+const SidebarSingleMenuItem = ({ item }: { item: MenuItem }) => {
   const pathname = usePathname();
   return (
     <SidebarMenuItem>

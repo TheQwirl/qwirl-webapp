@@ -20,7 +20,7 @@ const flattenMenuItems = () => {
         icon: item.icon,
         url: item.url ?? "/",
       });
-    } else if (item.type === "group" && item.children) {
+    } else if (item.type === "group" && item?.children) {
       // For groups, add the first child
       if (item.children.length > 0) {
         items.push({

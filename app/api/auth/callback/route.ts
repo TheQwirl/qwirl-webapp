@@ -5,7 +5,6 @@ import { NextResponse, type NextRequest } from "next/server";
 const FRONTEND_SUCCESS_ROUTE = "/feed";
 
 export async function GET(request: NextRequest) {
-  // The request object has a 'nextUrl' property which contains the search params
   const searchParams = request.nextUrl.searchParams;
   const headerList = await headers();
   const host = headerList.get("host");
@@ -14,7 +13,6 @@ export async function GET(request: NextRequest) {
   const fullUrl = `${protocol}://${host}${pathname}?${searchParams.toString()}`;
 
   if (!protocol || !host || !pathname || !fullUrl) {
-    // Redirect to the login page with an error
     const loginUrl = new URL("/auth", request.url);
     loginUrl.searchParams.set("error", "authorization_code_missing");
     return NextResponse.redirect(loginUrl);
@@ -63,7 +61,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // 2. Set the tokens as HttpOnly cookies in the response headers.
     const cookieStore = await cookies();
     const cookieOptions = {
       httpOnly: true,
@@ -87,7 +84,6 @@ export async function GET(request: NextRequest) {
       maxAge: 7 * 24 * 60 * 60,
     });
 
-    // 3. Redirect the user to the success page. The cookies are now set.
     const redirectUrl = new URL(FRONTEND_SUCCESS_ROUTE, request.url);
     return NextResponse.redirect(redirectUrl);
   } catch (error) {

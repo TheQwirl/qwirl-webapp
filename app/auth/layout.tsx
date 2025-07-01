@@ -7,10 +7,10 @@ import PageLoader from "@/components/page-loader";
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
-  const { user, isLoading, isInitialized } = authStore();
+  const { user, isLoading } = authStore();
 
   useEffect(() => {
-    if (isInitialized && !isLoading) {
+    if (!isLoading) {
       if (user) {
         console.log(
           "Authenticated user found on an unauthenticated route. Redirecting to /feed."
@@ -18,13 +18,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         router.replace("/feed");
       }
     }
-  }, [user, isLoading, isInitialized, router]);
+  }, [user, isLoading, router]);
 
   //   if (isLoading || !isInitialized) {
   //     return <PageLoader description="Loading..." />;
   //   }
 
-  if (user && isInitialized) {
+  if (user) {
     return <PageLoader description="Redirecting..." />;
   }
 
