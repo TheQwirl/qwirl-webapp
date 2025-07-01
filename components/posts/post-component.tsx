@@ -4,12 +4,13 @@ import { forwardRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, Share, Clock } from "lucide-react";
+import { MessageCircle, Share, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { UserAvatar } from "../user-avatar";
 import { components } from "@/lib/api/v1-client-side";
+import { GoHeart, GoHeartFill } from "react-icons/go";
 
 dayjs.extend(relativeTime);
 
@@ -24,7 +25,7 @@ interface PostComponentProps {
     avatar?: string | null;
   };
   onOptionSelect?: (optionIndex: number) => void;
-  onLike?: () => void;
+  onLike?: (postId: string, isLiked: boolean) => void;
   onShare?: () => void;
   onComment?: () => void;
 }
@@ -230,10 +231,10 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={onLike}
-                  icon={Heart}
+                  onClick={() => onLike?.(post?.id, post?.is_liked ?? false)}
+                  icon={post?.is_liked ? GoHeartFill : GoHeart}
                   iconPlacement="left"
-                  className="text-gray-500 hover:text-red-500 hover:bg-red-50"
+                  className="text-gray-500 hover:text-red-500"
                 >
                   Like
                 </Button>
@@ -244,7 +245,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                   onClick={onComment}
                   icon={MessageCircle}
                   iconPlacement="left"
-                  className="text-gray-500 hover:text-blue-500 hover:bg-blue-50"
+                  className="text-gray-500 hover:text-blue-500"
                 >
                   Comment
                 </Button>
@@ -255,7 +256,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                   onClick={onShare}
                   icon={Share}
                   iconPlacement="left"
-                  className="text-gray-500 hover:text-green-500 hover:bg-green-50"
+                  className="text-gray-500 hover:text-green-500"
                 >
                   Share
                 </Button>

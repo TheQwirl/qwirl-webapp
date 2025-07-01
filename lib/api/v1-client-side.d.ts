@@ -906,6 +906,21 @@ export interface components {
             question_text?: string;
             /** Question Bank Id */
             question_bank_id?: number | null;
+            /**
+             * Likes Count
+             * @default 0
+             */
+            likes_count: number;
+            /**
+             * Comments Count
+             * @default 0
+             */
+            comments_count: number;
+            /**
+             * Shares Count
+             * @default 0
+             */
+            shares_count: number;
             /** Options */
             options?: string[] | null;
             /** Author Selected Option Index */
@@ -931,6 +946,11 @@ export interface components {
             results?: Record<string, never>[] | null;
             /** My Selected Option Index */
             my_selected_option_index?: number | null;
+            /**
+             * Is Liked
+             * @default false
+             */
+            is_liked: boolean | null;
         };
         /** PostResponse */
         PostResponse: {
