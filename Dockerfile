@@ -8,6 +8,7 @@ COPY package*.json ./
 RUN npm ci
 
 FROM base AS builder
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
