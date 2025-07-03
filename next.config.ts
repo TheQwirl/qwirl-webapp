@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   // `experimental: {
   //   typedRoutes: true,
   // },`
+  output: "standalone",
   images: {
     remotePatterns: [
       {
