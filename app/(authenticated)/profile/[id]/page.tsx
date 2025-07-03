@@ -26,6 +26,7 @@ export default async function Page({
     },
   });
   const user = userResponse.data;
+  console.log(userResponse, user);
 
   if (userResponse?.error) {
     return (

@@ -18,7 +18,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const fastapiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const fastapiUrl =
+    process.env.NODE_ENV === "production"
+      ? ""
+      : process.env.NEXT_PUBLIC_API_URL;
   if (!fastapiUrl) {
     throw new Error("NEXT_PUBLIC_API_URL is not set");
   }

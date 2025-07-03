@@ -50,7 +50,7 @@ const ExternalLoginButtons = ({ apiUrl }: ExternalLoginButtonsProps) => {
         variant="outline"
         className="w-full hover:bg-muted transition-colors duration-200"
       >
-        <FaApple className="mr-2" /> Login with Apple
+        Login with Apple
       </Button>
       <Button
         icon={FaGoogle}
@@ -59,7 +59,7 @@ const ExternalLoginButtons = ({ apiUrl }: ExternalLoginButtonsProps) => {
         variant="outline"
         className="w-full hover:bg-muted transition-colors duration-200"
       >
-        <FaGoogle className="mr-2" /> Login with Google
+        Login with Google
       </Button>
     </div>
   );
