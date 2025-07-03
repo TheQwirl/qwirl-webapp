@@ -1,62 +1,84 @@
+# .github/workflows/main.yml
+
 name: Deploy to Cloud Run
 
 env:
   SERVICE_NAME: qwirl-webapp
-  PROJECT_ID: qwirl-459617
-  DOCKER_IMAGE_URL: asia-south2-docker.pkg.dev/qwirl-459617/qwirl/qwirl-webapp
+  PROJECT_ID: qwirl-459617 # <-- Update with your GCP Project ID
+  REGION: asia-south2
   PORT: 3000
 
 on:
   push:
     branches:
-      - main
+      - "main"
   pull_request:
     branches:
-      - main
+      - "main"
 
 jobs:
-  dockerize-and-deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
+    # Grant permissions for GCloud auth (needed for Workload Identity Federation)
+    permissions:
+      contents: "read"
+      id-token: "write"
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Google Cloud Auth
+        id: auth
         uses: "google-github-actions/auth@v2"
         with:
+          # This workflow uses Workload Identity Federation, which is the recommended
+          # authentication method on GCP. It's more secure than using service account keys.
+          # Replace with your WIF provider and service account.
+          # workload_identity_provider: 'projects/YOUR_PROJECT_NUMBER/locations/global/workloadIdentityPools/YOUR_POOL/providers/YOUR_PROVIDER'
+          service_account: "your-service-account@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
           credentials_json: "${{ secrets.GCP_SA_KEY }}"
-          project_id: ${{ env.PROJECT_ID }}
 
       - name: Set up Cloud SDK
         uses: "google-github-actions/setup-gcloud@v2"
 
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker asia-south2-docker.pkg.dev
+      # Fetches the entire content of the secret. We assume it's in .env format (KEY=VALUE).
+      - name: Get .env file from Secret Manager
+        id: get_env_file
+        uses: "google-github-actions/get-secretmanager-secrets@v2"
+        with:
+          secrets: |-
+            env_vars:projects/${{ env.PROJECT_ID }}/secrets/webapp-env/versions/latest
 
-      - name: Fetch webapp-env secret from Secret Manager
-        run: |
-          gcloud secrets versions access latest --secret=webapp-env > .env
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker Image
-        run: |
-          docker build --env-file .env \
-                      -t ${{ env.DOCKER_IMAGE_URL }}:latest \
-                      -f Dockerfile .
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
-      - name: Push Docker Image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          docker push ${{ env.DOCKER_IMAGE_URL }}:latest
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          # Only push the image when merging to the main branch
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: |
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/qwirl/qwirl-webapp:latest
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/qwirl/qwirl-webapp:${{ github.sha }}
+          # Pass the fetched secrets as build arguments to Docker.
+          # This correctly and securely injects your variables.
+          build-args: |
+            ${{ steps.get_env_file.outputs.env_vars }}
 
       - name: Deploy to Cloud Run
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          echo SERVICE_NAME $SERVICE_NAME
-          gcloud run deploy $SERVICE_NAME \
-            --image ${{ env.DOCKER_IMAGE_URL }}:latest \
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/qwirl/qwirl-webapp:${{ github.sha }} \
             --platform managed \
-            --region asia-south2 \
+            --region ${{ env.REGION }} \
+            --port ${{ env.PORT }} \
             --allow-unauthenticated \
             --timeout=300s
