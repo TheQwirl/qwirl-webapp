@@ -122,7 +122,6 @@ const PollAnimation: React.FC = () => {
                 {currentQuestion?.options.map((option, index) => (
                   <motion.div
                     key={index}
-                    //   h-16
                     className="relative h-12 bg-black/50 rounded-lg w-full overflow-hidden"
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}

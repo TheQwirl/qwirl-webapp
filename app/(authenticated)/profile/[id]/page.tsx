@@ -26,7 +26,6 @@ export default async function Page({
     },
   });
   const user = userResponse.data;
-  console.log(userResponse, user);
 
   if (userResponse?.error) {
     return (
@@ -52,9 +51,9 @@ export default async function Page({
   return (
     <div className="grid grid-cols-12 gap-6">
       <div className="col-span-8">
-        <ProfileHeader for="other" user={user!} isLoading={!user} />
+        <ProfileHeader profileOf="other" initialUser={user} isLoading={!user} />
         <div className="mt-6 pl-5 pb-10">
-          <ProfileTabs user={user!} />
+          <ProfileTabs profileFor="other" user={user} />
         </div>
       </div>
       <div className="col-span-4">

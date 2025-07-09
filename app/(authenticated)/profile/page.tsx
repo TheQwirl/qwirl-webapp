@@ -32,9 +32,9 @@ const Profile = async () => {
   return (
     <div className="grid grid-cols-12 gap-6">
       <div className="col-span-8">
-        <ProfileHeader for="self" user={user!} isLoading={false} />
+        <ProfileHeader profileOf="self" initialUser={user} isLoading={false} />
         <div className="mt-6 pl-5 pb-10">
-          <ProfileTabs user={user!} />
+          <ProfileTabs profileFor="self" user={user!} />
         </div>
       </div>
       <div className="col-span-4">
