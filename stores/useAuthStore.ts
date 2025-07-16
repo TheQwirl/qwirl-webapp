@@ -1,9 +1,9 @@
-import { User } from "@/types/common";
+import { MyUser } from "@/components/profile/types";
 import { redirect } from "next/navigation";
 import { create } from "zustand";
 
 interface AuthState {
-  user: User | null;
+  user: MyUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   checkSession: () => Promise<void>;
@@ -23,7 +23,7 @@ export const authStore = create<AuthState>((set, get) => ({
     try {
       const response = await fetch("/api/me", { cache: "no-store" });
       if (response.ok) {
-        const userData: { user: User | null; isAuthenticated: boolean } =
+        const userData: { user: MyUser | null; isAuthenticated: boolean } =
           await response.json();
         console.log(userData);
         if (userData?.user && userData?.user?.id) {

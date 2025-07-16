@@ -3,12 +3,12 @@ import ProfileHeader from "@/components/profile/profile-header";
 import ProfileTabs from "@/components/profile/profile-tabs";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { User } from "@/types/common";
+import { MyUser } from "@/components/profile/types";
 
 const Profile = async () => {
   const cookieStore = await cookies();
   const userCookie = cookieStore.get("user")?.value;
-  const user: User = userCookie ? JSON.parse(userCookie) : null;
+  const user: MyUser = userCookie ? JSON.parse(userCookie) : null;
 
   if (!user?.id) {
     return (
