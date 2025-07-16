@@ -36,6 +36,7 @@ export async function middleware(request: NextRequest) {
   const refreshToken = requestCookieStore.get("refresh-token")?.value;
 
   const isApiPath = pathname.startsWith("/api/"); // Don't run full UI redirect logic for API routes
+  const base = process.env.NEXT_PUBLIC_BASE_URL || request.url;
 
   // If trying to access a protected path
   if (PROTECTED_ROUTES.some((path) => pathname.startsWith(path)) || isApiPath) {
@@ -64,7 +65,7 @@ export async function middleware(request: NextRequest) {
 
         if (!isApiPath) {
           // Only redirect UI paths
-          const loginUrl = new URL(AUTH_PATH, request.url);
+          const loginUrl = new URL(AUTH_PATH, base);
           loginUrl.searchParams.set("error", "session_expired");
           return NextResponse.redirect(loginUrl, {
             headers: { ...headers, ...response.headers },
@@ -88,7 +89,7 @@ export async function middleware(request: NextRequest) {
       console.log(
         `Middleware: Still no access token for protected UI path "${pathname}". Redirecting to login.`
       );
-      const loginUrl = new URL(AUTH_PATH, request.url);
+      const loginUrl = new URL(AUTH_PATH, base);
       loginUrl.searchParams.set("redirect_from", pathname);
       return NextResponse.redirect(loginUrl, { headers: response.headers });
     }
@@ -99,10 +100,9 @@ export async function middleware(request: NextRequest) {
     console.log(
       `Middleware: Authenticated user accessing login page. Redirecting to dashboard.`
     );
-    return NextResponse.redirect(
-      new URL(PROTECTED_ROUTES[0] || "/", request.url),
-      { headers: response.headers }
-    );
+    return NextResponse.redirect(new URL(PROTECTED_ROUTES[0] || "/", base), {
+      headers: response.headers,
+    });
   }
 
   // If we modified cookies (e.g., after a successful refresh), return the modified response
