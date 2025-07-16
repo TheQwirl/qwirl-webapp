@@ -5,7 +5,7 @@ import $api from "@/lib/api/client";
 import Empty from "../empty";
 import Image from "next/image";
 import { components } from "@/lib/api/v1";
-import { TabItemProp } from "./types";
+import { MyUser, TabItemProp, OtherUser } from "./types";
 
 type User = {
   id: number;
@@ -57,10 +57,7 @@ export const UserList = ({
   user,
 }: {
   endpointKey: keyof typeof tabToEndpoints;
-  user:
-    | components["schemas"]["UserResponse"]
-    | components["schemas"]["UserWithRelationshipResponse"]
-    | undefined;
+  user: MyUser | OtherUser | undefined;
 }) => {
   const observer = useRef<IntersectionObserver | null>(null);
   const endpoint = tabToEndpoints[endpointKey];
