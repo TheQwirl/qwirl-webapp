@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     cookieStore.set("access-token", tokenResponse?.data?.access_token, {
       ...cookieOptions,
       // maxAge for access token (e.g., 15 minutes)
-      maxAge: 15 * 60,
+      maxAge: 24 * 60 * 60,
     });
     cookieStore.set("refresh-token", tokenResponse?.data?.refresh_token, {
       ...cookieOptions,
