@@ -7,8 +7,6 @@ env:
   PROJECT_ID: qwirl-459617 # <-- Update with your GCP Project ID
   REGION: asia-south2
   PORT: 3000
-  # Define the secret name for easy reference
-  SECRET_NAME: webapp-env
 
 on:
   push:
@@ -22,6 +20,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    # Grant permissions for GCloud auth (needed for Workload Identity Federation)
     permissions:
       contents: "read"
       id-token: "write"
@@ -34,20 +33,23 @@ jobs:
         id: auth
         uses: "google-github-actions/auth@v2"
         with:
+          # This workflow uses Workload Identity Federation, which is the recommended
+          # authentication method on GCP. It's more secure than using service account keys.
+          # Replace with your WIF provider and service account.
+          # workload_identity_provider: 'projects/YOUR_PROJECT_NUMBER/locations/global/workloadIdentityPools/YOUR_POOL/providers/YOUR_PROVIDER'
           service_account: "your-service-account@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
           credentials_json: "${{ secrets.GCP_SA_KEY }}"
 
       - name: Set up Cloud SDK
         uses: "google-github-actions/setup-gcloud@v2"
 
-      # Fetches only the VALUE of the secret.
-      # IMPORTANT: Your secret should now just be the URL, e.g., "https://..."
-      - name: Get API URL from Secret Manager
-        id: get_api_url
+      # Fetches the entire content of the secret. We assume it's in .env format (KEY=VALUE).
+      - name: Get .env file from Secret Manager
+        id: get_env_file
         uses: "google-github-actions/get-secretmanager-secrets@v2"
         with:
           secrets: |-
-            api_url:projects/${{ env.PROJECT_ID }}/secrets/${{ env.SECRET_NAME }}/versions/latest
+            env_vars:projects/${{ env.PROJECT_ID }}/secrets/webapp-env/versions/latest
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -64,12 +66,9 @@ jobs:
           tags: |
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/qwirl/qwirl-webapp:latest
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/qwirl/qwirl-webapp:${{ github.sha }}
-          # ✅ FIXED: Explicitly set the build argument. This is more robust.
+
           build-args: |
-            NEXT_PUBLIC_API_URL=${{ steps.get_api_url.outputs.api_url }}
-          # Enable cache to speed up future builds
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ${{ steps.get_env_file.outputs.env_vars }}
 
       - name: Deploy to Cloud Run
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -80,6 +79,4 @@ jobs:
             --region ${{ env.REGION }} \
             --port ${{ env.PORT }} \
             --allow-unauthenticated \
-            --timeout=300s \
-            # ✅ FIXED: Set the environment variable for the running service.
-            --set-env-vars="NEXT_PUBLIC_API_URL=${{ steps.get_api_url.outputs.api_url }}"
+            --timeout=300s
