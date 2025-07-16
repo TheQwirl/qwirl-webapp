@@ -57,7 +57,7 @@ export async function attemptTokenRefresh(
 
         cookieStore.set("access-token", newAccessToken, {
           ...cookieOptions,
-          maxAge: 15 * 60,
+          maxAge: 24 * 60 * 60,
         });
         cookieStore.set("refresh-token", newRefreshToken, {
           ...cookieOptions,
