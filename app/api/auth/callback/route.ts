@@ -11,9 +11,10 @@ export async function GET(request: NextRequest) {
   const pathname = headerList.get("x-current-path");
   const protocol = headerList.get("x-forwarded-proto") || "http";
   const fullUrl = `${protocol}://${host}${pathname}?${searchParams.toString()}`;
+  const base = `${protocol}://${host}`;
 
   if (!protocol || !host || !pathname || !fullUrl) {
-    const loginUrl = new URL("/auth", request.url);
+    const loginUrl = new URL("/auth", base);
     loginUrl.searchParams.set("error", "authorization_code_missing");
     return NextResponse.redirect(loginUrl);
   }
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     if (!tokenResponse.response?.ok) {
       console.error("FastAPI token exchange failed:", tokenResponse?.response);
-      const loginUrl = new URL("/auth", request.url);
+      const loginUrl = new URL("/auth", base);
       loginUrl.searchParams.set("error", "token_exchange_failed");
       if (tokenResponse.response?.status === 401)
         loginUrl.searchParams.set(
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
         "Tokens missing from FastAPI response:",
         tokenResponse?.data
       );
-      const loginUrl = new URL("/auth", request.url);
+      const loginUrl = new URL("/auth", base);
       loginUrl.searchParams.set("error", "token_missing_in_response");
       return NextResponse.redirect(loginUrl);
     }
@@ -84,11 +85,14 @@ export async function GET(request: NextRequest) {
       maxAge: 7 * 24 * 60 * 60,
     });
 
-    const redirectUrl = new URL(FRONTEND_SUCCESS_ROUTE, request.url);
+    const redirectUrl = new URL(
+      FRONTEND_SUCCESS_ROUTE,
+      `${protocol}://${host}`
+    );
     return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error("Error in Next.js auth callback:", error);
-    const loginUrl = new URL("/auth", request.url);
+    const loginUrl = new URL("/auth", base);
     loginUrl.searchParams.set("error", "internal_callback_error");
     return NextResponse.redirect(loginUrl);
   }
