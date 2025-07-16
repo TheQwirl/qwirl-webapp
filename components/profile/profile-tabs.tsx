@@ -5,15 +5,18 @@ import TabView from "./tab-view";
 import QwirlTab from "./qwirl-tab";
 import PeoplesTab from "./peoples-tab";
 import PostsTab from "./posts-tab";
-import { components } from "@/lib/api/v1";
+import { MyUser, OtherUser } from "./types";
 
 interface ProfileTabsProps {
-  user:
-    | components["schemas"]["UserResponse"]
-    | components["schemas"]["UserWithRelationshipResponse"];
+  user: MyUser | OtherUser | undefined;
+  profileFor: "self" | "other";
 }
-const ProfileTabs = ({ user }: ProfileTabsProps) => {
-  const [activeTab, setActiveTab] = useState("posts");
+const ProfileTabs = ({ user, profileFor }: ProfileTabsProps) => {
+  const [activeTab, setActiveTab] = useState(
+    profileFor === "self" || (user as OtherUser)?.relationship?.is_following
+      ? "posts"
+      : "myQwirl"
+  );
 
   return (
     <>

@@ -24,6 +24,12 @@ export const getBaseUrl = () => {
   return "http://localhost:3000";
 };
 
+/**
+ * Safely converts a string to a number, returning a fallback value if the conversion fails.
+ * @param value - The string value to convert.
+ * @param fallback - The fallback number to return if conversion fails or if the string is empty.
+ * @returns The converted number or the fallback value.
+ */
 export function safeToNumber(
   value: string,
   fallback: number | null = null
@@ -52,3 +58,7 @@ export function queryToString(params: Record<string, string> | null): string {
 
 export const generateInitialPollOptionId = () =>
   Date.now().toString() + Math.random().toString(36).substring(2, 7);
+
+export const getUnimplementedMessage = (feature: string) => {
+  return `The ${feature} feature is not yet implemented. Coming very soon!`;
+};

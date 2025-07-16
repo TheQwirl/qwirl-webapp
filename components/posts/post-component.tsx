@@ -14,17 +14,14 @@ import { GoHeart, GoHeartFill } from "react-icons/go";
 
 dayjs.extend(relativeTime);
 
-type ReturnedPost = components["schemas"]["PostFetchByID"];
-type Post = {
-  results?: Record<string, never>[] | null;
-} & ReturnedPost;
+type Post = components["schemas"]["PostFetchByID"];
 interface PostComponentProps {
   post: Post;
   user?: {
     name?: string | null;
     avatar?: string | null;
   };
-  onOptionSelect?: (optionIndex: number) => void;
+  onOptionSelect?: (postId: string, optionId: number) => void;
   onLike?: (postId: string, isLiked: boolean) => void;
   onShare?: () => void;
   onComment?: () => void;
@@ -50,13 +47,13 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
         0
       ) || 0;
 
-    const getResultsForOption = (optionText: string) => {
+    const getResultsForOption = (option_id: number) => {
       if (!post.results) return null;
-      return post.results.find((result) => result.option_text === optionText);
+      return post.results.find((result) => result.option_id === option_id);
     };
 
-    const getPercentageForOption = (optionText: string) => {
-      const result = getResultsForOption(optionText);
+    const getPercentageForOption = (option_id: number) => {
+      const result = getResultsForOption(option_id);
       if (!result || totalVotes === 0) return 0;
       return Math.round(((result.vote_count ?? 0) / totalVotes) * 100);
     };
@@ -64,7 +61,9 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
     const handleOptionClick = (optionIndex: number) => {
       if (shouldShowResults) return;
       setSelectedOption(optionIndex);
-      onOptionSelect?.(optionIndex);
+      if (post?.options?.[optionIndex]?.option_id) {
+        onOptionSelect?.(post.id, post?.options?.[optionIndex]?.option_id);
+      }
     };
 
     return (
@@ -101,9 +100,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
               )}
             </div>
 
-            {/* Content */}
             <div className="space-y-4">
-              {/* Text Content */}
               {post.text_content && (
                 <div>
                   <p className="text-gray-900 leading-relaxed">
@@ -131,8 +128,12 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                       const isAuthorChoice =
                         !post.is_mine &&
                         post.author_selected_option_index === index;
-                      const optionResult = getResultsForOption(option);
-                      const percentage = getPercentageForOption(option);
+                      const optionResult = getResultsForOption(
+                        option?.option_id
+                      );
+                      const percentage = getPercentageForOption(
+                        option?.option_id
+                      );
                       const canClick = !shouldShowResults;
 
                       return (
@@ -160,16 +161,27 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                             {shouldShowResults &&
                               optionResult &&
                               totalVotes > 0 && (
-                                <div
-                                  className="absolute inset-0 bg-gradient-to-r from-gray-100/50 to-gray-200/50 rounded-xl transition-all duration-500"
-                                  style={{ width: `${percentage}%` }}
+                                // <div
+                                //   className="absolute inset-0 bg-gradient-to-r from-gray-100/50 to-gray-200/50 rounded-xl transition-all duration-500"
+                                //   style={{ width: `${percentage}%` }}
+                                // />
+                                <motion.div
+                                  className="h-full absolute inset-0 bg-gradient-to-r from-gray-100/50 to-gray-200/50 rounded-xl transition-all duration-500"
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${percentage}%` }}
+                                  transition={{
+                                    delay: 0.5 + index * 0.1,
+                                    duration: 0.5,
+                                    ease: "easeInOut",
+                                    bounce: 0.5,
+                                  }}
                                 />
                               )}
 
                             <div className="relative flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <span className="text-gray-900 font-medium">
-                                  {option}
+                                  {option?.option_text}
                                 </span>
 
                                 {/* Show badges based on conditions */}
