@@ -54,7 +54,11 @@ const PostCreator = () => {
 
   const { control, handleSubmit, setValue, reset } = methods;
 
-  const { fields, append, remove } = useFieldArray({
+  const {
+    fields: pollOptions,
+    append,
+    remove,
+  } = useFieldArray({
     control,
     name: "pollOptions",
     keyName: "keyId",
@@ -164,7 +168,7 @@ const PostCreator = () => {
                 <FormProvider {...methods}>
                   <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                     <PostCreatorHeader
-                      hasPollOptions={fields.length > 0}
+                      hasPollOptions={pollOptions.length > 0}
                       onCollapse={handleCollapse}
                       onTogglePreview={() => setShowPreview(!showPreview)}
                       showPreview={showPreview}
@@ -228,7 +232,7 @@ const PostCreator = () => {
                           </div>
 
                           {/* Back to Templates Button */}
-                          {fields.length > 0 && (
+                          {pollOptions.length > 0 && (
                             <Button
                               type="button"
                               variant="ghost"
@@ -247,7 +251,7 @@ const PostCreator = () => {
                         </div>
 
                         {/* Poll Templates */}
-                        {fields.length === 0 && (
+                        {pollOptions.length === 0 && (
                           <PollTemplates
                             append={append}
                             onShowQuestionBank={() => setShowQuestionBank(true)}
@@ -255,12 +259,12 @@ const PostCreator = () => {
                         )}
 
                         {/* Question Input */}
-                        {fields.length > 0 && <QuestionInput />}
+                        {pollOptions.length > 0 && <QuestionInput />}
 
                         {/* Poll Options */}
-                        {fields.length > 0 && (
+                        {pollOptions.length > 0 && (
                           <PollOptions
-                            options={fields}
+                            options={pollOptions}
                             append={append}
                             remove={remove}
                           />
@@ -268,7 +272,7 @@ const PostCreator = () => {
                       </div>
 
                       {/* Poll Settings */}
-                      {fields.length > 0 && <PollSettings />}
+                      {pollOptions.length > 0 && <PollSettings />}
 
                       {/* Actions */}
                       <PostActions
@@ -277,7 +281,7 @@ const PostCreator = () => {
                         onImageUploadClick={() => fileInputRef.current?.click()}
                         onSubmit={handleSubmit(onSubmit)}
                         isSubmitLoading={createPostMutation.isPending}
-                        isSubmitDisabled={fields.length < 2}
+                        isSubmitDisabled={pollOptions.length < 2}
                       />
                     </form>
 
@@ -291,7 +295,7 @@ const PostCreator = () => {
                   </div>
 
                   {/* Preview */}
-                  {showPreview && fields.length > 0 && <PostPreview />}
+                  {showPreview && pollOptions.length > 0 && <PostPreview />}
                 </FormProvider>
               </motion.div>
             )}

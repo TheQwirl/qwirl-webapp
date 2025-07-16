@@ -10,6 +10,10 @@ import {
   SelectValue,
 } from "./ui/select";
 
+/**
+ * @deprecated This component is deprecated and will be removed in future versions.
+ * Use the QuestionBankDialog component instead.
+ */
 const QuestionBankSidebar = () => {
   return (
     <div className="hidden lg:block lg:sticky max-h-screen  lg:top-0 lg:col-span-4 py-7">

@@ -15,6 +15,7 @@ import {
 import { motion } from "framer-motion";
 import { UserAvatar } from "./user-avatar";
 import { Skeleton } from "./ui/skeleton";
+import { redirect } from "next/navigation";
 
 interface User {
   id: number;
@@ -60,8 +61,7 @@ const UserCard = React.forwardRef<HTMLDivElement, UserCardProps>(
       if (onUserClick) {
         onUserClick(user);
       } else {
-        // Navigate to user profile
-        window.location.href = `/user/${user.id}`;
+        redirect(`/profile/${user.id}`);
       }
     };
 

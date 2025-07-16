@@ -5,6 +5,7 @@ import $api from "@/lib/api/client";
 import Empty from "../empty";
 import Image from "next/image";
 import { components } from "@/lib/api/v1";
+import { TabItemProp } from "./types";
 
 type User = {
   id: number;
@@ -15,15 +16,9 @@ type User = {
   is_following: boolean;
 };
 
-interface PeoplesTabProps {
-  user:
-    | components["schemas"]["UserResponse"]
-    | components["schemas"]["UserWithRelationshipResponse"];
-}
-
 type Users = components["schemas"]["UserFollowerResponse"][];
 
-export default function PeoplesTab({ user }: PeoplesTabProps) {
+export default function PeoplesTab({ user }: TabItemProp) {
   const [activeTab, setActiveTab] = useState("friends");
 
   return (
@@ -64,7 +59,8 @@ export const UserList = ({
   endpointKey: keyof typeof tabToEndpoints;
   user:
     | components["schemas"]["UserResponse"]
-    | components["schemas"]["UserWithRelationshipResponse"];
+    | components["schemas"]["UserWithRelationshipResponse"]
+    | undefined;
 }) => {
   const observer = useRef<IntersectionObserver | null>(null);
   const endpoint = tabToEndpoints[endpointKey];

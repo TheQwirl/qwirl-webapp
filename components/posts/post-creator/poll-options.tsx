@@ -27,11 +27,9 @@ export function PollOptions({ options, append, remove }: PollOptionsProps) {
       remove(index);
 
       if (selectedOptionIndex === index) {
-        // If removing the selected one, reselect another
         const newIndex = index < options.length - 1 ? index : index - 1;
         setValue("selected_option_index", newIndex);
       } else if (selectedOptionIndex > index) {
-        // Shift selected index down if after removed one
         setValue("selected_option_index", selectedOptionIndex - 1);
       }
     } else {

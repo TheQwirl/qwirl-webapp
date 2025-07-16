@@ -1,15 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { components } from "@/lib/api/v1";
+import { TabItemProp } from "./types";
 
-interface QwirlTabProps {
-  user:
-    | components["schemas"]["UserResponse"]
-    | components["schemas"]["UserWithRelationshipResponse"];
-}
-
-export default function QwirlTab({ user }: QwirlTabProps) {
-  console.log("QwirlTab user:", user);
+export default function QwirlTab({}: TabItemProp) {
   return (
     <div>
       <Card>

@@ -1,24 +1,16 @@
 import React, { useCallback, useRef } from "react";
 import Empty from "../empty";
-import { components } from "@/lib/api/v1";
 import $api from "@/lib/api/client";
 import Loader from "../loader";
 import PostComponent from "../posts/post-component";
 import { toast } from "sonner";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { TabItemProp } from "./types";
+import { components } from "@/lib/api/v1-client-side";
 
-interface PostTabProps {
-  user:
-    | components["schemas"]["UserResponse"]
-    | components["schemas"]["UserWithRelationshipResponse"];
-}
+type Post = components["schemas"]["PostFetchByID"];
 
-type ReturnedPost = components["schemas"]["PostFetchByID"];
-type Post = {
-  results?: Record<string, never>[] | null;
-} & ReturnedPost;
-
-const PostsTab = ({ user }: PostTabProps) => {
+const PostsTab = ({ user }: TabItemProp) => {
   const queryKey = [
     "get",
     "/post/user/{post_owner_id}",
@@ -83,29 +75,10 @@ const PostsTab = ({ user }: PostTabProps) => {
     [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]
   );
 
-  const posts = data?.pages.flatMap((page) => page?.flat()) ?? [];
+  const posts = data?.pages?.flatMap((page) => page?.flat()) ?? [];
   const queryClient = useQueryClient();
   const updatePostCache = (postId: string, isLiked: boolean) => {
     queryClient.setQueryData<InfiniteData<Post[]>>(queryKey, (oldData) => {
-      console.log(
-        "Updating post cache for postId:",
-        postId,
-        "isLiked:",
-        isLiked,
-        oldData?.pages.map((page) =>
-          page.map((post) =>
-            post.id === postId
-              ? {
-                  ...post,
-                  is_liked: isLiked,
-                  likes_count: post.is_liked
-                    ? post.likes_count - 1
-                    : post.likes_count + 1,
-                }
-              : post
-          )
-        )
-      );
       if (!oldData) return oldData;
       return {
         ...oldData,
@@ -115,9 +88,10 @@ const PostsTab = ({ user }: PostTabProps) => {
               ? {
                   ...post,
                   is_liked: isLiked,
-                  likes_count: post.is_liked
-                    ? post.likes_count - 1
-                    : post.likes_count + 1,
+                  likes_count:
+                    post.likes_count +
+                    (isLiked && !post.is_liked ? 1 : 0) -
+                    (!isLiked && post.is_liked ? 1 : 0),
                 }
               : post
           )
@@ -174,6 +148,65 @@ const PostsTab = ({ user }: PostTabProps) => {
     }
   );
 
+  const voteMutation = $api.useMutation("post", "/post/{post_id}/vote", {
+    onMutate: async (variables) => {
+      const postId = variables.params.path.post_id;
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData(queryKey);
+      queryClient.setQueryData<InfiniteData<Post[]>>(queryKey, (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            page.map((post) =>
+              post.id === postId
+                ? {
+                    ...post,
+                    my_selected_option_index: post?.options?.findIndex(
+                      (element) =>
+                        element.option_id === variables.body.poll_option_id
+                    ),
+                    results: post.results?.map((result) => ({
+                      ...result,
+                      vote_count:
+                        result.option_id === variables.body.poll_option_id
+                          ? (result?.vote_count ?? 0) + 1
+                          : result.vote_count ?? 0,
+                    })),
+                  }
+                : post
+            )
+          ),
+        };
+      });
+      return { previousData };
+    },
+    onError: (err, variables, context) => {
+      toast.error("An error occurred while voting the post");
+      if ((context as { previousData: unknown })?.previousData) {
+        queryClient.setQueryData(
+          queryKey,
+          (context as { previousData: unknown }).previousData
+        );
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const handleVote = (postId: string, optionId: number) => {
+    voteMutation.mutate({
+      params: {
+        path: {
+          post_id: postId,
+        },
+      },
+      body: {
+        poll_option_id: optionId,
+      },
+    });
+  };
   const handleLike = (postId: string, isCurrentlyLiked: boolean) => {
     if (isCurrentlyLiked) {
       deleteLikeMutation.mutate({
@@ -214,10 +247,11 @@ const PostsTab = ({ user }: PostTabProps) => {
       {posts.map((post, index) => (
         <PostComponent
           key={post.id}
-          ref={index === posts.length - 1 ? lastQuestionElementRef : null}
+          ref={index === posts.length - 1 ? lastQuestionElementRef : undefined}
           user={user}
           post={post}
           onLike={handleLike}
+          onOptionSelect={handleVote}
         />
       ))}
       {isFetchingNextPage && (

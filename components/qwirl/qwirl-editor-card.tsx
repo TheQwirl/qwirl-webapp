@@ -33,7 +33,7 @@ const QwirlEditorCard: React.FC<Props> = ({ question, className }) => {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <CiMenuKebab className=" hover:swing h-5 w-5 cursor-pointer" />
+              <CiMenuKebab className=" h-5 w-5 cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-40">
               <DropdownMenuItem className="group/btn cursor-pointer">
