@@ -3,19 +3,17 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { ArrowUpDown, LayoutGrid, PlusIcon } from "lucide-react";
 import { Label } from "../ui/label";
-import { Switch } from "../ui/switch";
-import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
 import AddPollDialog from "./add-poll-dialog";
 import $api from "@/lib/api/client";
 import { QwirlPollData } from "./schema";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-// import { components } from "@/lib/api/v1-client-side";
+import VerticalEditView from "./vertical-edit-view";
+import SingleCardEditView from "./single-card-edit-view";
+import clsx from "clsx";
 
 type EditViewType = "vertical" | "single-card";
-// type QwirlItem = components["schemas"]["QwirlBase"];
 
 const QwirlEditView = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -26,9 +24,6 @@ const QwirlEditView = () => {
 
   const handleAddPoll = async (pollData: QwirlPollData) => {
     const ownerAnswer = pollData?.options?.[pollData?.owner_answer_index] ?? "";
-    toast.loading("Adding poll...", {
-      id: "add-poll",
-    });
     await addPollToQwirlMutation.mutateAsync(
       {
         body: {
@@ -39,14 +34,13 @@ const QwirlEditView = () => {
       },
       {
         onSuccess: async () => {
-          toast.success("Post created successfully!", {
+          toast.success("Poll added successfully!", {
             id: "add-poll",
           });
+          setShowAddDialog(false);
           await queryClient.invalidateQueries({
             queryKey: ["get", "/qwirl/me"],
           });
-
-          setShowAddDialog(false);
         },
         onError: () => {
           toast.error("An error occurred while creating the post", {
@@ -60,68 +54,79 @@ const QwirlEditView = () => {
 
   return (
     <>
-      <div className="overflow-y-hidden col-span-full lg:col-span-full">
+      <div className="overflow-y-hidden col-span-full lg:col-span-full px-4 pb-4">
         <Card className="">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <LayoutGrid className="h-5 w-5" />
-                Edit Mode
-              </CardTitle>
+            <div className="flex items-center gap-3 flex-wrap justify-center lg:justify-between lg:flex-nowrap">
+              <div className="flex items-center space-x-3">
+                <CardTitle className="text-base lg:text-lg whitespace-nowrap font-semibold flex items-center gap-2 ">
+                  <LayoutGrid className="h-4 lg:h-5 w-4 lg:w-5" />
+                  Edit Mode
+                </CardTitle>
+                <Label htmlFor="edit-view-type" className="text-sm font-medium">
+                  Layout
+                </Label>
+                <div className="flex items-center space-x-2 bg-accent p-1 rounded-md text-muted-foreground">
+                  <button
+                    onClick={() => setEditViewType("vertical")}
+                    className={clsx(
+                      "p-1 rounded-md",
+                      editViewType === "vertical"
+                        ? "bg-background text-primary"
+                        : "text-muted-foreground hover:bg-accent"
+                    )}
+                    aria-label="Vertical Layout"
+                  >
+                    <ArrowUpDown className="h-4 w-4" />
+                  </button>
+
+                  <button
+                    onClick={() => setEditViewType("single-card")}
+                    className={clsx(
+                      "p-1 rounded-md",
+                      editViewType === "single-card"
+                        ? "bg-background text-primary"
+                        : "text-muted-foreground hover:bg-accent"
+                    )}
+                    aria-label="Single Card Layout"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              {/* <div className=" items-center gap-2 text-sm text-gray-600 hidden md:flex">
+                <Badge
+                  variant="default"
+                  className="rounded-full whitespace-nowrap"
+                >
+                  Total: {0}
+                </Badge>
+              </div> */}
 
               <div className="flex items-center gap-4">
-                {/* Edit View Type Toggle */}
-                <div className="flex items-center space-x-3">
-                  <Label
-                    htmlFor="edit-view-type"
-                    className="text-sm font-medium"
-                  >
-                    Layout
-                  </Label>
-                  <div className="flex items-center space-x-2">
-                    <ArrowUpDown className="h-4 w-4 text-gray-500" />
-                    <Switch
-                      id="edit-view-type"
-                      checked={editViewType === "single-card"}
-                      onCheckedChange={(checked) =>
-                        setEditViewType(checked ? "single-card" : "vertical")
-                      }
-                    />
-                    <LayoutGrid className="h-4 w-4 text-gray-500" />
-                  </div>
-                </div>
-
-                <Separator orientation="vertical" className="h-6" />
-
                 {/* Add Poll Button */}
                 <div className="flex items-center gap-4">
                   <Button
                     onClick={() => setShowAddDialog(true)}
                     //   disabled={questions.length >= 35}
-                    className="group rounded-full md:rounded"
+                    className="group rounded-full md:rounded shadow-none"
                     icon={PlusIcon}
                     iconPlacement="left"
                   >
-                    <span className="hidden md:block">Add Question</span>
+                    <span className="">Add Question</span>
                   </Button>
                 </div>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Badge
-                variant="outline"
-                className="border-purple-200 text-purple-700"
-              >
-                {editViewType === "vertical"
-                  ? "Vertical Cards"
-                  : "Single Card Navigation"}
-              </Badge>
-              <span>•</span>
-              <span>{0} polls total</span>
-            </div>
           </CardHeader>
         </Card>
+        <div className="mt-6 overflow-none">
+          {editViewType === "vertical" ? (
+            <VerticalEditView />
+          ) : (
+            <SingleCardEditView />
+          )}
+        </div>
       </div>
       <AddPollDialog
         isModalOpen={showAddDialog}

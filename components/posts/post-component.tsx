@@ -11,6 +11,9 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { UserAvatar } from "../user-avatar";
 import { components } from "@/lib/api/v1-client-side";
 import { GoHeart, GoHeartFill } from "react-icons/go";
+import clsx from "clsx";
+import { getFirstName } from "@/lib/utils";
+import PollTimer from "../poll-timer";
 
 dayjs.extend(relativeTime);
 
@@ -20,6 +23,7 @@ interface PostComponentProps {
   user?: {
     name?: string | null;
     avatar?: string | null;
+    username?: string | null;
   };
   onOptionSelect?: (postId: string, optionId: number) => void;
   onLike?: (postId: string, isLiked: boolean) => void;
@@ -69,11 +73,10 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
     return (
       <Card
         ref={ref}
-        className="border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
+        className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
       >
         <CardContent className="p-6">
           <div className="space-y-4">
-            {/* Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <UserAvatar
@@ -81,22 +84,25 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                   image={user?.avatar ?? undefined}
                   size="sm"
                 />
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900">
-                    {post.is_mine ? "You" : user?.name || "Anonymous"}
-                  </span>
-                  <span className="text-gray-400">•</span>
-                  <div className="flex items-center gap-1 text-sm text-gray-500">
-                    <Clock className="h-3 w-3" />
-                    <span>{timeAgo}</span>
+                <div className="flex flex-col">
+                  <div className="font-medium text-sm">
+                    {user?.name || "Anonymous"}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground tracking-none">
+                    {user?.username}
                   </div>
                 </div>
               </div>
 
               {post.duration && (
-                <Badge variant="outline" className="text-xs">
-                  {post.duration}h left
-                </Badge>
+                <PollTimer
+                  createdAt={post.created_at}
+                  duration={post.duration}
+                  showDays
+                  showHours
+                  variant="default"
+                  size="sm"
+                />
               )}
             </div>
 
@@ -109,19 +115,16 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                 </div>
               )}
 
-              {/* Poll Content */}
               {isPollPost && (
                 <div className="space-y-4">
-                  {/* Question */}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 leading-tight">
                       {post.question_text}
                     </h3>
                   </div>
 
-                  {/* Options */}
                   <div className="space-y-3">
-                    {post.options!.map((option, index) => {
+                    {post?.options?.map((option, index) => {
                       const isMyChoice =
                         selectedOption === index ||
                         post.my_selected_option_index === index;
@@ -141,36 +144,44 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                           key={index}
                           whileHover={canClick ? { scale: 1.01 } : {}}
                           whileTap={canClick ? { scale: 0.99 } : {}}
+                          className="flex items-center gap-4 relative z-10"
                         >
                           <button
                             onClick={() => handleOptionClick(index)}
                             disabled={!canClick}
-                            className={`relative w-full p-4 rounded-xl border text-left transition-all duration-200 ${
-                              isMyChoice && shouldShowResults
-                                ? "bg-gradient-to-r from-purple-50 to-purple-100 border-purple-300 shadow-lg shadow-purple-200/50"
-                                : isAuthorChoice &&
-                                  shouldShowResults &&
-                                  !post.is_mine
-                                ? "bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300 shadow-lg shadow-blue-200/50"
-                                : shouldShowResults
-                                ? "bg-gray-50 border-gray-200"
-                                : "bg-white border-gray-200 hover:border-purple-300 hover:shadow-md cursor-pointer"
-                            }`}
+                            className={clsx(
+                              "bg-background text-foreground relative w-full p-3 rounded-xl z-10 border text-left transition-all duration-200",
+                              {
+                                // "bg-gradient-to-r from-primary-50 to-purple-100 border-gray-300 shadow-lg shadow-primary-200/50":
+                                //   isMyChoice && shouldShowResults,
+                                // "bg-gradient-to-r from-secondary-50 to-secondary-100 border-gray-300 shadow-lg shadow-blue-200/50":
+                                //   isAuthorChoice &&
+                                //   shouldShowResults &&
+                                //   !post.is_mine,
+                                // "bg-gray-50 border-gray-200":
+                                //   shouldShowResults &&
+                                //   !isMyChoice &&
+                                //   !(isAuthorChoice && !post.is_mine),
+                                // "bg-white border-gray-200 hover:border-purple-300 hover:shadow-md cursor-pointer":
+                                //   !shouldShowResults,
+                                "shadow-lg":
+                                  isMyChoice ||
+                                  (isAuthorChoice && shouldShowResults),
+                                "hover:shadow-md cursor-pointer":
+                                  !shouldShowResults,
+                              }
+                            )}
                           >
                             {/* Background percentage bar */}
                             {shouldShowResults &&
                               optionResult &&
                               totalVotes > 0 && (
-                                // <div
-                                //   className="absolute inset-0 bg-gradient-to-r from-gray-100/50 to-gray-200/50 rounded-xl transition-all duration-500"
-                                //   style={{ width: `${percentage}%` }}
-                                // />
                                 <motion.div
-                                  className="h-full absolute inset-0 bg-gradient-to-r from-gray-100/50 to-gray-200/50 rounded-xl transition-all duration-500"
+                                  className="h-full absolute inset-0  bg-accent rounded-xl transition-all duration-500"
                                   initial={{ width: 0 }}
                                   animate={{ width: `${percentage}%` }}
                                   transition={{
-                                    delay: 0.5 + index * 0.1,
+                                    delay: 0.2 + index * 0.1,
                                     duration: 0.5,
                                     ease: "easeInOut",
                                     bounce: 0.5,
@@ -179,45 +190,42 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                               )}
 
                             <div className="relative flex items-center justify-between">
+                              <span className="text-gray-900 font-medium">
+                                {option?.option_text}
+                              </span>
                               <div className="flex items-center gap-3">
-                                <span className="text-gray-900 font-medium">
-                                  {option?.option_text}
-                                </span>
-
-                                {/* Show badges based on conditions */}
                                 {isMyChoice && shouldShowResults && (
                                   <Badge
-                                    variant="secondary"
-                                    className="bg-purple-200 text-purple-800 text-xs"
+                                    variant="outline"
+                                    className="text-xs bg-background text-foreground rounded-full flex items-center gap-1"
                                   >
-                                    {post.is_mine ? "My Choice" : "Your Choice"}
+                                    <div className="rounded-full h-3 w-3 bg-primary" />
+                                    {post.is_mine ? "Me" : "You"}
                                   </Badge>
                                 )}
 
-                                {/* Only show "Their Choice" if it's not my post */}
                                 {isAuthorChoice &&
                                   shouldShowResults &&
                                   !post.is_mine && (
                                     <Badge
-                                      variant="secondary"
-                                      className="bg-blue-200 text-blue-800 text-xs"
+                                      variant="outline"
+                                      className="text-xs bg-background text-foreground rounded-full flex items-center gap-1"
                                     >
-                                      Their Choice
+                                      <div className="rounded-full h-3 w-3 bg-secondary" />
+                                      {getFirstName(user?.name) ?? user?.name}
                                     </Badge>
                                   )}
-                              </div>
-
-                              {/* Show stats if results should be displayed */}
-                              {shouldShowResults && optionResult && (
-                                <div className="flex items-center gap-2 text-sm font-medium">
-                                  <span className="text-gray-600">
+                                {shouldShowResults && optionResult && (
+                                  <div className="flex items-center gap-2 text-sm font-medium">
+                                    {/* <span className="text-gray-600">
                                     {optionResult.vote_count}
-                                  </span>
-                                  <span className="text-purple-600">
-                                    {percentage}%
-                                  </span>
-                                </div>
-                              )}
+                                  </span> */}
+                                    <span className="text-purple-600">
+                                      {percentage}%
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </button>
                         </motion.div>
@@ -225,12 +233,20 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                     })}
                   </div>
 
-                  {/* Poll Stats */}
                   {shouldShowResults && totalVotes > 0 && (
-                    <div className="text-sm text-gray-500 pt-2 border-t border-gray-100">
-                      <span>
+                    <div className="flex items-center divide-gray-200 divide-x-2 text-sm text-gray-500 py-3 border-y border-gray-100">
+                      <div className="flex items-center gap-1 pr-2">
+                        <Clock className="h-3 w-3" />
+                        <span>{timeAgo}</span>
+                      </div>
+                      <div className="px-2">
                         {totalVotes} total vote{totalVotes !== 1 ? "s" : ""}
-                      </span>
+                      </div>
+                      <div className="pl-2">
+                        {post.created_at !== post.updated_at && (
+                          <span>Edited {dayjs(post.updated_at).fromNow()}</span>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -238,48 +254,39 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onLike?.(post?.id, post?.is_liked ?? false)}
-                  icon={post?.is_liked ? GoHeartFill : GoHeart}
-                  iconPlacement="left"
-                  className="text-gray-500 hover:text-red-500"
-                >
-                  Like
-                </Button>
+            <div className="flex items-center justify-between pt-2">
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => onLike?.(post?.id, post?.is_liked ?? false)}
+                icon={post?.is_liked ? GoHeartFill : GoHeart}
+                iconPlacement="left"
+                className="text-gray-500 hover:text-red-500"
+              >
+                {post?.likes_count ?? 0}
+              </Button>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onComment}
-                  icon={MessageCircle}
-                  iconPlacement="left"
-                  className="text-gray-500 hover:text-blue-500"
-                >
-                  Comment
-                </Button>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={onComment}
+                icon={MessageCircle}
+                iconPlacement="left"
+                className="text-gray-500 hover:text-blue-500"
+              >
+                {post?.comments_count ?? 0}
+              </Button>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onShare}
-                  icon={Share}
-                  iconPlacement="left"
-                  className="text-gray-500 hover:text-green-500"
-                >
-                  Share
-                </Button>
-              </div>
-
-              {/* Additional info */}
-              <div className="text-xs text-gray-400">
-                {post.created_at !== post.updated_at && (
-                  <span>Edited {dayjs(post.updated_at).fromNow()}</span>
-                )}
-              </div>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={onShare}
+                icon={Share}
+                iconPlacement="left"
+                className="text-gray-500 hover:text-green-500"
+              >
+                {post?.shares_count ?? 0}
+              </Button>
             </div>
           </div>
         </CardContent>

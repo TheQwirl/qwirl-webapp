@@ -116,9 +116,20 @@ const PostCreator = () => {
   };
 
   const parseDuration = (duration: "1h" | "6h" | "24h" | "7d"): number => {
-    if (duration.endsWith("h")) return parseInt(duration);
-    if (duration.endsWith("d")) return parseInt(duration) * 24;
-    return 24;
+    const value = parseInt(duration);
+    const unit = duration.slice(-1);
+
+    const SECONDS_PER_HOUR = 3600;
+    const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
+
+    switch (unit) {
+      case "h":
+        return value * SECONDS_PER_HOUR;
+      case "d":
+        return value * SECONDS_PER_DAY;
+      default:
+        return SECONDS_PER_DAY;
+    }
   };
 
   const onSubmit = async (data: PostCreatorData) => {

@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { UserAvatar } from "./user-avatar";
 import { Skeleton } from "./ui/skeleton";
 import { redirect } from "next/navigation";
+import { Badge } from "./ui/badge";
 
 interface User {
   id: number;
@@ -213,20 +214,20 @@ const UserCard = React.forwardRef<HTMLDivElement, UserCardProps>(
                   </Badge>
                 )} */}
 
-                  {/* {user?.wavelength && (
-                  <Badge
-                    variant="outline"
-                    className={`text-xs ${
-                      user.wavelength >= 70
-                        ? "border-green-500 text-green-700"
-                        : user.wavelength >= 40
-                        ? "border-yellow-500 text-yellow-700"
-                        : "border-gray-500 text-gray-700"
-                    }`}
-                  >
-                    {user.wavelength}% wavelength
-                  </Badge>
-                )} */}
+                  {user?.wavelength && (
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${
+                        user.wavelength >= 70
+                          ? "border-green-500 text-green-700"
+                          : user.wavelength >= 40
+                          ? "border-yellow-500 text-yellow-700"
+                          : "border-gray-500 text-gray-700"
+                      }`}
+                    >
+                      {user.wavelength}% wavelength
+                    </Badge>
+                  )}
                 </div>
 
                 {showActions && (

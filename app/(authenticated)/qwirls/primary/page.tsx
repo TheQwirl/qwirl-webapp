@@ -6,27 +6,28 @@ import React, { useState } from "react";
 import { RadialProgress } from "@/components/ui/radial-progress";
 import HorizontalBarGraph from "@/components/ui/horizontal-bar-graph";
 import PageHeader from "@/components/layout/page-header";
-import $api from "@/lib/api/client";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import QwirlEditView from "@/components/qwirl/qwirl-edit-view";
 import QwirlViewMode from "@/components/qwirl/qwirl-view-mode";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type ViewMode = "edit" | "view";
 
 const PrimaryQwirlEditor = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("edit");
-
-  const questions = $api.useQuery("get", "/qwirl/me");
-  console.log(questions);
-
   const isMobile = useIsMobile();
   return (
     <section className="grid grid-cols-12 pt-0 sm:pt-0 ">
       <div
         className={clsx(
           "col-span-full lg:col-span-9 flex flex-col h-full",
-          isMobile ? "col-span-full px-3" : "px-6"
+          isMobile ? "col-span-full px-0" : "px-6"
         )}
       >
         <PageHeader
@@ -38,7 +39,16 @@ const PrimaryQwirlEditor = () => {
                 View Mode
               </Label>
               <div className="flex items-center space-x-2">
-                <Eye className="h-4 w-4 text-gray-500" />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>View Mode</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <Switch
                   id="view-mode"
                   checked={viewMode === "edit"}
@@ -47,18 +57,25 @@ const PrimaryQwirlEditor = () => {
                     setViewMode(checked ? "edit" : "view")
                   }
                 />
-                <Edit3 className="h-4 w-4 text-gray-500" />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Edit3 className="h-4 w-4 text-gray-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Edit Mode</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
+              <Label htmlFor="view-mode" className="text-sm font-medium">
+                Edit Mode
+              </Label>
             </div>
           }
         />
 
         <div className="relative grid grid-cols-12 gap-5 py-8">
-          {/* <QwirlEditorColumn
-            setQuestions={setQuestions}
-            questions={questions}
-            handleDelete={handleDelete}
-          /> */}
           {viewMode === "edit" ? <QwirlEditView /> : <QwirlViewMode />}
         </div>
       </div>

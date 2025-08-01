@@ -122,14 +122,18 @@ export const UserList = ({
 
   return (
     <div className="space-y-4">
-      {users.map((user, index) => (
-        <UserCard
-          ref={index === users.length - 1 ? lastElementRef : null}
-          key={`${user.id}-${index}`}
-          user={user}
-          variant="detailed"
-        />
-      ))}
+      {users.map((u, index) => {
+        console.log(u, user, u?.name);
+        return (
+          <UserCard
+            ref={index === users.length - 1 ? lastElementRef : null}
+            key={`${u.id}-${index}`}
+            user={u}
+            variant="detailed"
+            showActions={u?.id !== user?.id}
+          />
+        );
+      })}
       {isFetchingNextPage && (
         <div className="flex justify-center py-4">
           <Image
