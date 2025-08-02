@@ -1,82 +1,76 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import TabView from "./tab-view";
 import QwirlTab from "./qwirl-tab";
 import PeoplesTab from "./peoples-tab";
-import PostsTab from "./posts-tab";
+import PostsTab, { PostsTabLoading } from "./posts-tab";
 import { MyUser, OtherUser } from "./types";
 import { ProfileProvider } from "@/contexts/ProfileForContext";
 import { useSearchParams } from "next/navigation";
+import { PostComponentLoading } from "../posts/post-component";
+import { ErrorBoundary } from "../error-boundary";
 
-interface ProfileTabsProps {
-  user: MyUser | OtherUser | undefined;
-  profileFor: "self" | "other";
-}
+type ProfileTabsProps =
+  | { profileFor: "self"; user: MyUser | undefined }
+  | { profileFor: "other"; user: OtherUser | undefined };
 
-const ProfileTabs = ({ user, profileFor }: ProfileTabsProps) => {
+const ProfileTabs = (props: ProfileTabsProps) => {
+  const { profileFor, user } = props;
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
 
+  const [activeTab, setActiveTab] = useState(() => {
+    if (profileFor === "self") return "posts";
+    return user?.relationship?.is_following ? "posts" : "myQwirl";
+  });
+
   React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (tab === "myQwirl" || tab === "posts" || tab === "myPeople") {
-        setActiveTab(tab);
-      }
+    if (tab === "myQwirl" || tab === "posts" || tab === "myPeople") {
+      setActiveTab(tab);
     }
   }, [tab]);
 
-  const [activeTab, setActiveTab] = useState(
-    profileFor === "self" || (user as OtherUser)?.relationship?.is_following
-      ? "posts"
-      : "myQwirl"
+  const tabComponents = (
+    <>
+      <TabView activeTab={activeTab} setActiveTab={setActiveTab} />
+      {activeTab === "myQwirl" && <QwirlTab />}
+      {activeTab === "posts" && (
+        <ErrorBoundary>
+          <Suspense fallback={<PostsTabLoading />}>
+            <PostsTab />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {activeTab === "myPeople" && <PeoplesTab />}
+    </>
   );
 
-  return (
-    <>
-      <ProfileProvider profileFor={profileFor}>
-        <TabView activeTab={activeTab} setActiveTab={setActiveTab} />
-        {activeTab === "myQwirl" && (
-          <QwirlTab
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            user={user}
-          />
-        )}
-        {activeTab === "posts" && (
-          <PostsTab
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            user={user}
-          />
-        )}
-        {activeTab === "myPeople" && (
-          <PeoplesTab
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            user={user}
-          />
-        )}
+  if (profileFor === "self") {
+    return (
+      <ProfileProvider profileFor="self" user={user}>
+        {tabComponents}
       </ProfileProvider>
-    </>
+    );
+  }
+
+  return (
+    <ProfileProvider profileFor="other" user={user}>
+      {tabComponents}
+    </ProfileProvider>
   );
 };
 
 export const ProfileTabsLoading = () => {
   return (
-    <div className="grid grid-cols-12 gap-6">
-      <div className="col-span-full lg:col-span-8">
-        <div className="mt-6 pl-5 pb-10">
-          <TabView activeTab="loading" setActiveTab={() => {}} />
-          <div className="p-4 bg-gray-100 rounded-lg mt-4">
-            <p className="text-gray-500">Loading profile tabs...</p>
-          </div>
-        </div>
+    <>
+      <TabView activeTab="posts" setActiveTab={() => {}} />
+      <div className="space-y-4 mt-4">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <PostComponentLoading key={index} />
+        ))}
       </div>
-      <div className="col-span-full lg:col-span-4">
-        {/* Placeholder for sidebar */}
-      </div>
-    </div>
+    </>
   );
 };
 

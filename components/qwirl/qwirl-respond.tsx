@@ -12,7 +12,7 @@ import {
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { User } from "../profile/types";
+import { OtherUser } from "../profile/types";
 import ProgressBar from "../progress-bar";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -20,6 +20,7 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { SkipCounter } from "./skip-counter";
 import { getFirstName } from "@/lib/utils";
+import WavelengthProgress from "../wavelength-progress-animated";
 
 type QwirlResponseItem = {
   user_response: {
@@ -36,7 +37,7 @@ type Qwirl = {
 const MAX_SKIPS = 5;
 const MIN_QWIRL_POLLS = 5;
 
-const QwirlRespond = ({ user }: { user: User | undefined }) => {
+const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
   const queryClient = useQueryClient();
   const queryKey = useMemo(
     () => [
@@ -226,7 +227,27 @@ const QwirlRespond = ({ user }: { user: User | undefined }) => {
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          const newValue = data?.wavelength_score ?? 0;
+          const currentValue = user?.relationship?.wavelength ?? 0;
+          toast.custom(
+            (t) => (
+              <WavelengthProgress
+                currentValue={currentValue}
+                newValue={newValue}
+                maxValue={100}
+                title="Wavelength Boost!"
+                subtitle="Your energy is rising"
+                onAnimationComplete={() => {
+                  setTimeout(() => toast.dismiss(t), 1000);
+                }}
+              />
+            ),
+            {
+              duration: 4000,
+              position: "top-center",
+            }
+          );
           userQwirlQuery.refetch();
         },
       }
@@ -399,9 +420,19 @@ const QwirlRespond = ({ user }: { user: User | undefined }) => {
                             )}
                           >
                             <motion.div
-                              className="h-full absolute inset-0  bg-accent rounded-xl transition-all duration-500"
+                              className="h-full absolute inset-0  bg-accent/40 rounded-l-xl transition-all duration-500"
                               initial={{ width: 0 }}
                               animate={{ width: `${optionStats.percentage}%` }}
+                              style={{
+                                borderTopRightRadius:
+                                  optionStats.percentage === 100
+                                    ? "0.75rem"
+                                    : "0.5rem",
+                                borderBottomRightRadius:
+                                  optionStats.percentage === 100
+                                    ? "0.75rem"
+                                    : "0.5rem",
+                              }}
                               transition={{
                                 delay: 0.2 + index * 0.1,
                                 duration: 0.5,

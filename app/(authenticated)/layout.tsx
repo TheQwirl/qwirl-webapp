@@ -3,7 +3,7 @@ import {
   // SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { useIsMobile } from "../../hooks/use-mobile";
 import QueryProvider from "@/components/query-provider";
@@ -12,19 +12,21 @@ import { MobileNavBar } from "@/components/layout/mobile-navbar";
 import PageLoader from "@/components/page-loader";
 // import { toast } from "sonner";
 import { authStore } from "@/stores/useAuthStore";
-import { usePathname } from "next/navigation";
 import { InfoAlertProvider } from "@/components/info-alert-provider";
 
 const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
   const { checkSession, isLoading } = authStore();
-  const pathname = usePathname();
+
+  const isInitialLoad = useRef(true);
 
   useEffect(() => {
-    checkSession();
-    console.log("AuthProvider: Checking session...");
-  }, [checkSession, pathname]);
-
+    if (isInitialLoad.current) {
+      console.log("AuthProvider: Checking session on initial load...");
+      checkSession();
+      isInitialLoad.current = false;
+    }
+  }, [checkSession]);
   return (
     <QueryProvider>
       {" "}

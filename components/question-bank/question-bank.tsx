@@ -1,3 +1,4 @@
+"use client";
 import { useState, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -106,7 +107,7 @@ export function QuestionBank({ onQuestionSelect }: QuestionBankProps) {
 
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full sm:w-40">
+            <SelectTrigger className="w-full sm:w-72">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>

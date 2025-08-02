@@ -5,7 +5,8 @@ import $api from "@/lib/api/client";
 import Empty from "../empty";
 import Image from "next/image";
 import { components } from "@/lib/api/v1";
-import { MyUser, TabItemProp, OtherUser } from "./types";
+import { MyUser, OtherUser } from "./types";
+import { useProfile } from "@/contexts/ProfileForContext";
 
 type User = {
   id: number;
@@ -18,9 +19,10 @@ type User = {
 
 type Users = components["schemas"]["UserFollowerResponse"][];
 
-export default function PeoplesTab({ user }: TabItemProp) {
+export default function PeoplesTab() {
   const [activeTab, setActiveTab] = useState("friends");
 
+  const { user } = useProfile();
   return (
     <div className="">
       <div className="mb-4">

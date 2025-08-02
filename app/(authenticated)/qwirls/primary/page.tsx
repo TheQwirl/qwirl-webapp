@@ -1,5 +1,4 @@
 "use client";
-import { useIsMobile } from "@/hooks/use-mobile";
 import clsx from "clsx";
 import { Edit3, Eye } from "lucide-react";
 import React, { useState } from "react";
@@ -7,27 +6,19 @@ import { RadialProgress } from "@/components/ui/radial-progress";
 import HorizontalBarGraph from "@/components/ui/horizontal-bar-graph";
 import PageHeader from "@/components/layout/page-header";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import QwirlEditView from "@/components/qwirl/qwirl-edit-view";
 import QwirlViewMode from "@/components/qwirl/qwirl-view-mode";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { ViewToggle } from "@/components/icon-toggle";
 
 type ViewMode = "edit" | "view";
 
 const PrimaryQwirlEditor = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("edit");
-  const isMobile = useIsMobile();
   return (
     <section className="grid grid-cols-12 pt-0 sm:pt-0 ">
       <div
         className={clsx(
-          "col-span-full lg:col-span-9 flex flex-col h-full",
-          isMobile ? "col-span-full px-0" : "px-6"
+          "col-span-full lg:col-span-9 px-0 lg:px-6 flex flex-col h-full"
         )}
       >
         <PageHeader
@@ -35,42 +26,25 @@ const PrimaryQwirlEditor = () => {
           pageSubTitle="View and Edit profile qwirl."
           extraContent={
             <div className="flex items-center space-x-3">
-              <Label htmlFor="view-mode" className="text-sm font-medium">
-                View Mode
+              <Label className="text-sm font-medium">
+                {viewMode === "edit" ? "Edit Mode" : "View Mode"}
               </Label>
-              <div className="flex items-center space-x-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Eye className="h-4 w-4 text-gray-500" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>View Mode</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <Switch
-                  id="view-mode"
-                  checked={viewMode === "edit"}
-                  className="shadow-none outline outline-[1px] outline-gray-400"
-                  onCheckedChange={(checked) =>
-                    setViewMode(checked ? "edit" : "view")
-                  }
-                />
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Edit3 className="h-4 w-4 text-gray-500" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Edit Mode</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <Label htmlFor="view-mode" className="text-sm font-medium">
-                Edit Mode
-              </Label>
+              <ViewToggle
+                options={[
+                  {
+                    value: "edit",
+                    label: "Edit Mode",
+                    icon: <Edit3 className="h-4 w-4" />,
+                  },
+                  {
+                    value: "view",
+                    label: "View Mode",
+                    icon: <Eye className="h-4 w-4" />,
+                  },
+                ]}
+                value={viewMode}
+                onChange={(value) => setViewMode(value as ViewMode)}
+              />
             </div>
           }
         />

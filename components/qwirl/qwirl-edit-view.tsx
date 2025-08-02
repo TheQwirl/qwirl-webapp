@@ -1,8 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle } from "../ui/card";
-import { ArrowUpDown, LayoutGrid, PlusIcon } from "lucide-react";
-import { Label } from "../ui/label";
+import { LayoutGrid, PlusIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import AddPollDialog from "./add-poll-dialog";
 import $api from "@/lib/api/client";
@@ -10,14 +9,10 @@ import { QwirlPollData } from "./schema";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import VerticalEditView from "./vertical-edit-view";
-import SingleCardEditView from "./single-card-edit-view";
-import clsx from "clsx";
-
-type EditViewType = "vertical" | "single-card";
+import { Badge } from "../ui/badge";
 
 const QwirlEditView = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editViewType, setEditViewType] = useState<EditViewType>("vertical");
 
   const addPollToQwirlMutation = $api.useMutation("post", "/qwirl/me/items");
   const queryClient = useQueryClient();
@@ -63,45 +58,15 @@ const QwirlEditView = () => {
                   <LayoutGrid className="h-4 lg:h-5 w-4 lg:w-5" />
                   Edit Mode
                 </CardTitle>
-                <Label htmlFor="edit-view-type" className="text-sm font-medium">
-                  Layout
-                </Label>
-                <div className="flex items-center space-x-2 bg-accent p-1 rounded-md text-muted-foreground">
-                  <button
-                    onClick={() => setEditViewType("vertical")}
-                    className={clsx(
-                      "p-1 rounded-md",
-                      editViewType === "vertical"
-                        ? "bg-background text-primary"
-                        : "text-muted-foreground hover:bg-accent"
-                    )}
-                    aria-label="Vertical Layout"
+                <div className=" items-center gap-2 text-sm text-gray-600 hidden md:flex">
+                  <Badge
+                    variant="default"
+                    className="rounded-full whitespace-nowrap"
                   >
-                    <ArrowUpDown className="h-4 w-4" />
-                  </button>
-
-                  <button
-                    onClick={() => setEditViewType("single-card")}
-                    className={clsx(
-                      "p-1 rounded-md",
-                      editViewType === "single-card"
-                        ? "bg-background text-primary"
-                        : "text-muted-foreground hover:bg-accent"
-                    )}
-                    aria-label="Single Card Layout"
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </button>
+                    Total: {0}
+                  </Badge>
                 </div>
               </div>
-              {/* <div className=" items-center gap-2 text-sm text-gray-600 hidden md:flex">
-                <Badge
-                  variant="default"
-                  className="rounded-full whitespace-nowrap"
-                >
-                  Total: {0}
-                </Badge>
-              </div> */}
 
               <div className="flex items-center gap-4">
                 {/* Add Poll Button */}
@@ -113,7 +78,7 @@ const QwirlEditView = () => {
                     icon={PlusIcon}
                     iconPlacement="left"
                   >
-                    <span className="">Add Question</span>
+                    Add Question
                   </Button>
                 </div>
               </div>
@@ -121,11 +86,7 @@ const QwirlEditView = () => {
           </CardHeader>
         </Card>
         <div className="mt-6 overflow-none">
-          {editViewType === "vertical" ? (
-            <VerticalEditView />
-          ) : (
-            <SingleCardEditView />
-          )}
+          <VerticalEditView />
         </div>
       </div>
       <AddPollDialog

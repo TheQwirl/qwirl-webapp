@@ -13,7 +13,7 @@ import { EditableUserAvatar } from "../editable-user-avatar";
 import { UserAvatar } from "../user-avatar";
 import WavelengthIndicator, {
   WavelengthIndicatorLoading,
-} from "../wavelength-indicator";
+} from "../wavelength-indicator"; // WavelengthIndicatorLoading,
 import { getUnimplementedMessage } from "@/lib/utils";
 import $api, { fetchClient } from "@/lib/api/client";
 
@@ -164,7 +164,7 @@ const ProfileHeader = ({
     return (
       <div className="flex justify-center flex-wrap gap-3 mt-4">
         {visible?.map((category) => (
-          <Badge key={category} variant="secondary" className="text-xs">
+          <Badge key={category} variant="outline" className="text-xs">
             {category}
           </Badge>
         ))}
@@ -180,29 +180,6 @@ const ProfileHeader = ({
   return (
     <>
       <Card className="overflow-hidden p-4">
-        {/* <div
-            className="h-36 bg-accent"
-            style={{
-              backgroundImage: user?.header_img
-                ? `url(${user.header_img})`
-                : undefined,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
-            {isOwnProfile && (
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute z-10 top-4 right-4 bg-black/20 hover:bg-black/40 text-white border-0"
-                onClick={() =>
-                  toast.info(getUnimplementedMessage("Header Image Editing"))
-                }
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
-          </div> */}
         <div className="p-4">
           <div className="">
             <div className="flex items-center gap-4 flex-col md:flex-row">
@@ -324,20 +301,24 @@ const ProfileHeader = ({
   );
 };
 
-export const ProfileHeaderLoading = () => {
+export const ProfileHeaderLoading = ({
+  showWavelength,
+}: {
+  showWavelength?: boolean;
+}) => {
   return (
     <Card className="overflow-hidden p-4">
       <div className="p-4">
         <div className="">
           <div className="flex items-center gap-4 flex-col md:flex-row">
             <div className="flex-shrink-0">
-              <UserAvatar loading />
+              <UserAvatar loading size="xl" />
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between flex-col md:flex-row gap-y-4">
                 <div>
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-8 w-32 mb-2" />
+                  <Skeleton className="h-4 w-28" />
                 </div>
                 <div className="flex flex-wrap justify-end gap-2">
                   <Skeleton className="h-10 w-32 rounded-full" />
@@ -349,13 +330,9 @@ export const ProfileHeaderLoading = () => {
         </div>
 
         <div className="">
-          {/* {renderCategories()} */}
           <div className="flex justify-center flex-wrap gap-3 mt-4">
             {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton
-                key={index}
-                className="h-8 w-12 rounded-full bg-accent"
-              />
+              <Skeleton key={index} className="h-5 w-24 rounded " />
               // <Badge key={index} variant="secondary" className="text-xs">
               // </Badge>
             ))}
@@ -366,19 +343,23 @@ export const ProfileHeaderLoading = () => {
               " mt-5 grid grid-cols-3 gap-1 col-span-full md:col-span-1 border p-2 rounded-2xl divide-x"
             )}
           >
-            {Array.from({ length: 3 }).map((_, index) => (
+            {["Followers", "Following", "Friends"].map((name, index) => (
               <div
                 key={index}
                 className="flex flex-col items-center justify-between"
               >
-                <Skeleton className="h-4 w-16 mb-1" />
+                <span className="text-[10px] tracking-widest uppercase text-gray-400">
+                  {name}
+                </span>
                 <Skeleton className="h-6 w-12" />
               </div>
             ))}
           </div>
-          <div className="w-full flex justify-center mt-5">
-            <WavelengthIndicatorLoading />
-          </div>
+          {showWavelength && (
+            <div className="w-full flex justify-center mt-5">
+              <WavelengthIndicatorLoading />
+            </div>
+          )}
         </div>
       </div>
     </Card>

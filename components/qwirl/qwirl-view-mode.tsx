@@ -1,7 +1,8 @@
 import React from "react";
+import SingleCardEditView from "./single-card-view";
 
 const QwirlViewMode = () => {
-  return <div>QwirlViewMode</div>;
+  return <SingleCardEditView />;
 };
 
 export default QwirlViewMode;

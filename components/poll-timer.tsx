@@ -202,8 +202,7 @@ const PollTimer: React.FC<PollTimerProps> = ({
         </AnimatePresence>
         <span
           className={clsx(
-            "text-muted-foreground uppercase text-[7px] font-semibold leading-none",
-            timerUnit({ size })
+            "text-muted-foreground uppercase text-[7px] font-semibold leading-none"
           )}
         >
           {unit}

@@ -2,12 +2,22 @@ import React from "react";
 import { Card, CardContent } from "../ui/card";
 import { GripVertical } from "lucide-react";
 import { SortableList } from "../sortable-list/sortable-list";
-import QwirlEditorCard from "./qwirl-editor-card";
+import QwirlEditorCard, { QwirlEdiorCardLoading } from "./qwirl-editor-card";
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
 
 const VerticalEditView = () => {
   const { polls, qwirlQuery, handleReorder, handleDelete, isDeleting } =
     useQwirlEditor();
+
+  if (qwirlQuery.isLoading) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <QwirlEdiorCardLoading key={index} />
+        ))}
+      </div>
+    );
+  }
 
   if (qwirlQuery?.data?.items?.length === 0) {
     return (

@@ -47,7 +47,7 @@ const PostCreator = () => {
     defaultValues: {
       text_content: "",
       question_text: "",
-      duration: "24h",
+      duration: null,
       pollOptions: [],
     },
   });
@@ -141,7 +141,7 @@ const PostCreator = () => {
             text_content: data.text_content,
             image_url: postImage,
             question_text: data.question_text,
-            duration: parseDuration(data.duration),
+            duration: data.duration ? parseDuration(data.duration) : null,
             question_bank_id: importedFromBank,
           },
           selected_option_index: data.selected_option_index,

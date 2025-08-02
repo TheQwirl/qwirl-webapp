@@ -25,7 +25,7 @@ import Image from "next/image";
 import clsx from "clsx";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 
-const SingleCardEditView = () => {
+const SingleCardView = () => {
   const { qwirlQuery, handleReorder, handleDelete } = useQwirlEditor();
   const [currentIndex, setCurrentIndex] = useState(0);
   const polls = React.useMemo(
@@ -338,4 +338,4 @@ const SingleCardEditView = () => {
   );
 };
 
-export default SingleCardEditView;
+export default SingleCardView;

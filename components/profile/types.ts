@@ -5,9 +5,3 @@ export type OtherUser = components["schemas"]["UserWithRelationshipResponse"];
 
 export type User = MyUser | OtherUser;
 export type Tab = "myQwirl" | "posts" | "myPeople";
-
-export type TabItemProp = {
-  user: MyUser | OtherUser | undefined;
-  activeTab: Tab;
-  setActiveTab: (tab: Tab) => void;
-};
