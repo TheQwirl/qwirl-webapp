@@ -1,6 +1,7 @@
 import { UserAvatar } from "../user-avatar";
 import QwirlRespond from "../qwirl/qwirl-respond";
 import { useProfile } from "@/contexts/ProfileForContext";
+import { Button } from "../ui/button";
 
 export default function QwirlTab() {
   const { user, profileFor } = useProfile();
@@ -20,7 +21,14 @@ export default function QwirlTab() {
           <p className="text-xs text-gray-600">{user?.username}</p>
         </div>
       </div>
-      {profileFor === "other" ? <QwirlRespond user={user} /> : ""}
+      {profileFor === "other" ? (
+        <QwirlRespond user={user} />
+      ) : (
+        <div className="flex items-center justify-end space-x-2">
+          <Button>Edit Qwirl</Button>
+          <Button variant={"ghost"}>View Qwirl</Button>
+        </div>
+      )}
     </div>
   );
 }

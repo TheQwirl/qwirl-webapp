@@ -42,16 +42,17 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
   const queryKey = useMemo(
     () => [
       "get",
-      "/users/{user_id}",
+      "/qwirl/users/{username}/qwirl",
       {
         params: {
           path: {
-            user_id: user?.id ?? 0,
+            username: user?.username,
           },
         },
+        enabled: true,
       },
     ],
-    [user?.id]
+    [user?.username]
   );
   const [currentPosition, setCurrentPosition] = useState(1);
   const [isPositionSet, setIsPositionSet] = useState(false);
@@ -108,7 +109,50 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
   );
   const submitAnswerMutation = $api.useMutation(
     "post",
-    "/qwirl-responses/sessions/{session_id}/responses"
+    "/qwirl-responses/sessions/{session_id}/responses",
+    {
+      onMutate: async (variables) => {
+        const qwirl_item_id = variables.body.qwirl_item_id;
+        await queryClient.cancelQueries({ queryKey });
+        const previousData = queryClient.getQueryData(queryKey);
+        if (!previousData) return { previousData };
+        queryClient.setQueryData<Qwirl>(queryKey, (oldData) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            items: oldData.items.map((item) => {
+              if (item.id === qwirl_item_id) {
+                const currentStats = item.option_statistics ?? {};
+                const currentOptionCount = variables.body.selected_answer
+                  ? currentStats[variables.body.selected_answer]
+                  : 0;
+                const newOptionStats = {
+                  ...currentStats,
+                  [String(variables.body.selected_answer)]:
+                    (currentOptionCount ?? 0) + 1,
+                };
+
+                const newResponseCount = (item.response_count ?? 0) + 1;
+                return {
+                  ...item,
+                  owner_answer: variables.body.selected_answer,
+                  response_count: newResponseCount,
+                  option_statistics: newOptionStats,
+                  user_response: {
+                    ...item.user_response,
+                    selected_answer: variables.body.selected_answer,
+                    comment: variables.body.comment,
+                  },
+                } as QwirlResponseItem;
+              }
+              return item;
+            }),
+          };
+        });
+
+        return { previousData };
+      },
+    }
   );
 
   const handleSessionStart = () => {
@@ -185,14 +229,15 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
 
             return { ...oldData, items: newItems };
           });
-
-          userQwirlQuery.refetch();
         },
         onError: () => {
           toast.error("An error occurred while submitting your answer.", {
             id: "submit-answer",
           });
           setUserAnswer(null);
+        },
+        onSettled: () => {
+          queryClient.invalidateQueries({ queryKey });
         },
       }
     );
@@ -218,6 +263,9 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
   };
 
   const handleEndSession = async () => {
+    toast.loading("Getting Wavelength...", {
+      id: "wavelength-update",
+    });
     await finishQwirlSessionMutation.mutateAsync(
       {
         params: {
@@ -236,8 +284,8 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
                 currentValue={currentValue}
                 newValue={newValue}
                 maxValue={100}
-                title="Wavelength Boost!"
-                subtitle="Your energy is rising"
+                title="Wavelength updated!"
+                subtitle=""
                 onAnimationComplete={() => {
                   setTimeout(() => toast.dismiss(t), 1000);
                 }}
@@ -245,7 +293,7 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
             ),
             {
               duration: 4000,
-              position: "top-center",
+              id: "wavelength-update",
             }
           );
           userQwirlQuery.refetch();
@@ -319,7 +367,14 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
           <div className="absolute top-0 left-0 inset-x-0 flex  justify-between">
             {userAnswer && (
               <div className="flex items-center justify-center py-1 px-2 rounded-tl-xl rounded-br-2xl bg-primary text-primary-foreground text-xs ">
-                {"Answered"}
+                {submitAnswerMutation?.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="ml-2">Loading...</span>
+                  </div>
+                ) : (
+                  "Answered"
+                )}
               </div>
             )}
             <div className="flex items-center gap-3 flex-grow flex-1 flex-shrink-0 px-4 pt-1">
@@ -382,12 +437,21 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
                       const isOwnerChoice =
                         option === currentPoll?.owner_answer;
                       const optionStats = {
-                        count: currentPoll?.option_statistics?.[option],
-                        percentage:
-                          ((currentPoll?.option_statistics?.[option] ?? 0) /
-                            currentPoll?.response_count) *
-                          100,
+                        count: currentPoll?.option_statistics?.[option] ?? 0,
+                        percentage: currentPoll?.option_statistics?.[option]
+                          ? currentPoll?.response_count
+                            ? ((currentPoll?.option_statistics?.[option] ?? 0) /
+                                currentPoll?.response_count) *
+                              100
+                            : 0
+                          : 0,
                       };
+                      console.log(
+                        optionStats,
+                        "Option Stats",
+                        currentPoll?.option_statistics,
+                        currentPoll?.response_count
+                      );
                       return (
                         <motion.div
                           key={index}

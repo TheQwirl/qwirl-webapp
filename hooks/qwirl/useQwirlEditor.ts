@@ -2,18 +2,50 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import $api from "@/lib/api/client";
 import { Qwirl, QwirlItem } from "@/components/qwirl/types";
-import { useMemo } from "react";
+import { useState } from "react";
+import { QwirlPollData } from "@/components/qwirl/schema";
 
 export function useQwirlEditor() {
   const queryClient = useQueryClient();
   const queryKey = ["get", "/qwirl/me"];
+  const [showAddDialog, setShowAddDialog] = useState(false);
+
+  const addPollToQwirlMutation = $api.useMutation("post", "/qwirl/me/items");
+
+  const handleAddPoll = async (pollData: QwirlPollData) => {
+    const ownerAnswer = pollData?.options?.[pollData?.owner_answer_index] ?? "";
+    await addPollToQwirlMutation.mutateAsync(
+      {
+        body: {
+          options: pollData.options,
+          question_text: pollData.question_text,
+          owner_answer: ownerAnswer,
+        },
+      },
+      {
+        onSuccess: async () => {
+          toast.success("Poll added successfully!", {
+            id: "add-poll",
+          });
+          setShowAddDialog(false);
+          await queryClient.invalidateQueries({
+            queryKey: ["get", "/qwirl/me"],
+          });
+        },
+        onError: () => {
+          toast.error("An error occurred while creating the post", {
+            id: "add-poll",
+          });
+          console.error("Error creating post:", addPollToQwirlMutation.error);
+        },
+      }
+    );
+  };
 
   const qwirlQuery = $api.useQuery("get", "/qwirl/me");
-  const polls = useMemo(() => {
-    return (
-      qwirlQuery?.data?.items?.sort((a, b) => a.position - b.position) ?? []
-    );
-  }, [qwirlQuery?.data?.items]);
+  const polls = qwirlQuery?.data?.items
+    ? [...qwirlQuery.data.items].sort((a, b) => a.position - b.position)
+    : [];
 
   const deleteMutation = $api.useMutation(
     "delete",
@@ -109,10 +141,19 @@ export function useQwirlEditor() {
   };
 
   return {
+    // Get
     polls,
     qwirlQuery,
+    // Patch
     handleReorder,
+    // Delete
     handleDelete,
     isDeleting: deleteMutation.isPending,
+    deleteMutation,
+    // Add
+    addPollToQwirlMutation,
+    showAddDialog,
+    setShowAddDialog,
+    handleAddPoll,
   };
 }
