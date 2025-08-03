@@ -13,6 +13,7 @@ import PageLoader from "@/components/page-loader";
 // import { toast } from "sonner";
 import { authStore } from "@/stores/useAuthStore";
 import { InfoAlertProvider } from "@/components/info-alert-provider";
+import { ConfirmationModal } from "@/components/confirmation-modal";
 
 const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
@@ -64,6 +65,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
             </>
           )}
         </div>
+        <ConfirmationModal />
       </InfoAlertProvider>
     </QueryProvider>
   );

@@ -30,6 +30,8 @@ import Image from "next/image";
 import { components } from "@/lib/api/v1-client-side";
 import $api from "@/lib/api/client";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { authStore } from "@/stores/useAuthStore";
 
 type Question = components["schemas"]["QuestionSearchResponse"];
 
@@ -41,6 +43,11 @@ const PostCreator = () => {
   const [postImage, setPostImage] = useState<string | null>(null);
   const [importedFromBank, setImportedFromBank] = useState<null | number>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { user } = authStore();
+  console.log("User in PostCreator:", user);
+
+  const queryClient = useQueryClient();
 
   const methods = useForm<PostCreatorData>({
     resolver: zodResolver(PostCreatorSchema),
@@ -133,7 +140,9 @@ const PostCreator = () => {
   };
 
   const onSubmit = async (data: PostCreatorData) => {
-    toast.loading("Creating post...");
+    toast.loading("Creating post...", {
+      id: "create-post",
+    });
     await createPostMutation.mutateAsync(
       {
         body: {
@@ -149,12 +158,19 @@ const PostCreator = () => {
         },
       },
       {
-        onSuccess: () => {
-          toast.success("Post created successfully!");
+        onSuccess: async () => {
+          toast.success("Post created successfully!", {
+            id: "create-post",
+          });
           handleCollapse();
+          await queryClient.invalidateQueries({
+            queryKey: ["posts", user?.id],
+          });
         },
         onError: () => {
-          toast.error("An error occurred while creating the post");
+          toast.error("An error occurred while creating the post", {
+            id: "create-post",
+          });
           console.error("Error creating post:", createPostMutation.error);
         },
       }
@@ -235,7 +251,10 @@ const PostCreator = () => {
                               Create Your Poll
                             </h3>
                             {importedFromBank && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge
+                                variant="secondary"
+                                className="text-xs whitespace-nowrap"
+                              >
                                 <BookOpen className="h-3 w-3 mr-1" />
                                 From Bank
                               </Badge>

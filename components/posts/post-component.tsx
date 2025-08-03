@@ -9,16 +9,16 @@ import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { UserAvatar } from "../user-avatar";
-import { components } from "@/lib/api/v1-client-side";
 import { GoHeart, GoHeartFill } from "react-icons/go";
 import clsx from "clsx";
 import { getFirstName } from "@/lib/utils";
 import PollTimer from "../poll-timer";
 import { Skeleton } from "../ui/skeleton";
+import { Post } from "@/types/posts";
+import { PostOptionsDropdown } from "./post-options-dropdown";
 
 dayjs.extend(relativeTime);
 
-type Post = components["schemas"]["PostFetchByID"];
 interface PostComponentProps {
   post: Post;
   user?: {
@@ -74,8 +74,9 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
     return (
       <Card
         ref={ref}
-        className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
+        className="bg-white relative border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
       >
+        <PostOptionsDropdown post={post} className="absolute top-2 right-1" />
         <CardContent className="p-6 space-y-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">

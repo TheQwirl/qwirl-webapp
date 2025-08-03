@@ -1,7 +1,7 @@
 import { UserAvatar } from "../user-avatar";
 import QwirlRespond from "../qwirl/qwirl-respond";
 import { useProfile } from "@/contexts/ProfileForContext";
-import { Button } from "../ui/button";
+import { OwnQwirlPreview } from "../qwirl/own-qwirl-preview";
 
 export default function QwirlTab() {
   const { user, profileFor } = useProfile();
@@ -24,10 +24,23 @@ export default function QwirlTab() {
       {profileFor === "other" ? (
         <QwirlRespond user={user} />
       ) : (
-        <div className="flex items-center justify-end space-x-2">
-          <Button>Edit Qwirl</Button>
-          <Button variant={"ghost"}>View Qwirl</Button>
-        </div>
+        <OwnQwirlPreview
+          // dummy data
+          qwirl={{
+            id: "1",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            pollCount: 0,
+          }}
+          onShare={() => {}}
+          onViewResponses={() => {}}
+          stats={{
+            totalResponses: 0,
+            completionRate: 0,
+            totalComments: 0,
+            recentResponses: [],
+          }}
+        />
       )}
     </div>
   );

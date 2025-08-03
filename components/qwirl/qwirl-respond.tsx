@@ -21,6 +21,7 @@ import { Textarea } from "../ui/textarea";
 import { SkipCounter } from "./skip-counter";
 import { getFirstName } from "@/lib/utils";
 import WavelengthProgress from "../wavelength-progress-animated";
+import InCompleteQwirl from "./incomplete-qwirl";
 
 type QwirlResponseItem = {
   user_response: {
@@ -35,7 +36,7 @@ type Qwirl = {
 } & components["schemas"]["QwirlBase"];
 
 const MAX_SKIPS = 5;
-const MIN_QWIRL_POLLS = 5;
+const MIN_QWIRL_POLLS = 10;
 
 const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
   const queryClient = useQueryClient();
@@ -118,7 +119,7 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
         if (!previousData) return { previousData };
         queryClient.setQueryData<Qwirl>(queryKey, (oldData) => {
           if (!oldData) return oldData;
-          return {
+          const newData = {
             ...oldData,
             items: oldData.items.map((item) => {
               if (item.id === qwirl_item_id) {
@@ -141,13 +142,15 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
                   user_response: {
                     ...item.user_response,
                     selected_answer: variables.body.selected_answer,
-                    comment: variables.body.comment,
+                    comment: null,
                   },
                 } as QwirlResponseItem;
               }
               return item;
             }),
           };
+          console.log(oldData, "Old Data", newData, "New Data");
+          return newData;
         });
 
         return { previousData };
@@ -352,16 +355,18 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
         </div>
       )}
       {!userQwirlQuery.isLoading && polls?.length < MIN_QWIRL_POLLS ? (
-        <div className="flex flex-col items-center justify-center h-full">
-          <MessageSquare className="text-8xl text-gray-500 animate-in" />
-          <h1 className="text-2xl font-bold text-gray-800 mt-6">
-            Incomplete Qwirl
-          </h1>
-          <p className="text-gray-600">
-            The user is still figuring out their Qwirl. Maybe check out their{" "}
-            <span className="">posts</span> until then.
-          </p>
-        </div>
+        <InCompleteQwirl
+          ownerName={user?.name ?? ""}
+          ownerUsername={user?.username ?? ""}
+          ownerAvatar={user?.avatar ?? ""}
+          pollCount={polls?.length ?? 0}
+          onNotifyWhenReady={() => {
+            toast("You will be notified when the Qwirl is ready!", {
+              duration: 3000,
+              id: "notify-ready",
+            });
+          }}
+        />
       ) : (
         <>
           <div className="absolute top-0 left-0 inset-x-0 flex  justify-between">

@@ -259,11 +259,11 @@ const PostsTab = () => {
 
 export const PostsTabLoading = () => {
   return (
-    <>
+    <div className="space-y-4">
       {Array.from({ length: 3 }).map((_, index) => (
         <PostComponentLoading key={index} />
       ))}
-    </>
+    </div>
   );
 };
 
