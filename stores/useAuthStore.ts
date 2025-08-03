@@ -63,11 +63,11 @@ export const authStore = create<AuthState>((set, get) => ({
       console.error("Error during logout:", error);
     } finally {
       // Ensure redirection even if API call fails
-      redirect("/auth?logged_out=true");
+      // redirect("/auth?logged_out=true");
       if (typeof window !== "undefined") {
         if (wasAuthenticated) {
           // Only redirect if they were actually logged in
-          window.location.href = "/auth?logged_out=true";
+          redirect("/auth?logged_out=true");
         }
       }
     }

@@ -1,12 +1,12 @@
 import React from "react";
 import { Question } from "../../types/qwirl";
-import QwirlEditorCard from "./qwirl-editor-card";
+// import QwirlEditorCard from "./qwirl-editor-card";
 import clsx from "clsx";
 import { SortableList } from "../sortable-list/sortable-list";
 
 const QwirlEditorColumn = ({
   questions,
-  handleDelete,
+  // handleDelete,
   setQuestions,
 }: {
   questions: Question[];
@@ -26,11 +26,11 @@ const QwirlEditorColumn = ({
         className="space-y-4 pb-6"
         renderItem={(question) => (
           <SortableList.Item className="w-full" id={question?.id}>
-            <QwirlEditorCard
+            {/* <QwirlEditorCard
               key={question.id}
               handleDelete={() => handleDelete(question.id)}
               question={question}
-            />
+            /> */}
           </SortableList.Item>
         )}
       />

@@ -1,58 +1,51 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import Empty from "../empty";
-import $api from "@/lib/api/client";
-import Loader from "../loader";
-import PostComponent from "../posts/post-component";
+import $api, { fetchClient } from "@/lib/api/client";
+import PostComponent, { PostComponentLoading } from "../posts/post-component";
 import { toast } from "sonner";
-import { InfiniteData, useQueryClient } from "@tanstack/react-query";
-import { TabItemProp } from "./types";
+import {
+  InfiniteData,
+  useQueryClient,
+  useSuspenseInfiniteQuery,
+} from "@tanstack/react-query";
 import { components } from "@/lib/api/v1-client-side";
+import { useProfile } from "@/contexts/ProfileForContext";
 
 type Post = components["schemas"]["PostFetchByID"];
 
-const PostsTab = ({ user }: TabItemProp) => {
-  const queryKey = [
-    "get",
-    "/post/user/{post_owner_id}",
-    {
-      params: {
-        path: {
-          post_owner_id: user?.id ?? 1,
-        },
-        query: {
-          limit: 10,
-          skip: 0,
-        },
-      },
-    },
-  ];
+const PostsTab = () => {
+  const { user } = useProfile();
+  const queryKey = useMemo(() => ["posts", user?.id], [user?.id]);
 
-  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
-    $api.useInfiniteQuery(
-      "get",
-      "/post/user/{post_owner_id}",
-      {
+  const getUserPosts = useCallback(
+    (skip?: number) => {
+      return fetchClient.GET("/post/user/{post_owner_id}", {
         params: {
           path: {
             post_owner_id: user?.id ?? 1,
           },
           query: {
             limit: 10,
-            skip: 0,
+            skip,
           },
         },
+      });
+    },
+    [user?.id]
+  );
+
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useSuspenseInfiniteQuery({
+      initialPageParam: 0,
+      queryKey: ["posts", user?.id],
+      queryFn: ({ pageParam }) => getUserPosts(pageParam),
+      getNextPageParam: (lastPage, allPages) => {
+        if (lastPage?.data?.length && lastPage?.data?.length < 10) {
+          return undefined;
+        }
+        return allPages?.flat()?.map((page) => page.data)?.length ?? 0;
       },
-      {
-        initialPageParam: 0,
-        pageParamName: "skip",
-        getNextPageParam: (lastPage: Post[], allPages: { data: Post[] }[]) => {
-          if (lastPage?.length < 10) {
-            return undefined;
-          }
-          return allPages.flat().length;
-        },
-      }
-    );
+    });
 
   const observer = useRef<IntersectionObserver>(null);
   const lastQuestionElementRef = useCallback(
@@ -75,29 +68,33 @@ const PostsTab = ({ user }: TabItemProp) => {
     [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]
   );
 
-  const posts = data?.pages?.flatMap((page) => page?.flat()) ?? [];
+  const posts = data?.pages?.flatMap((page) => page?.data || []);
   const queryClient = useQueryClient();
   const updatePostCache = (postId: string, isLiked: boolean) => {
-    queryClient.setQueryData<InfiniteData<Post[]>>(queryKey, (oldData) => {
-      if (!oldData) return oldData;
-      return {
-        ...oldData,
-        pages: oldData.pages.map((page) =>
-          page.map((post) =>
-            post.id === postId
-              ? {
-                  ...post,
-                  is_liked: isLiked,
-                  likes_count:
-                    post.likes_count +
-                    (isLiked && !post.is_liked ? 1 : 0) -
-                    (!isLiked && post.is_liked ? 1 : 0),
-                }
-              : post
-          )
-        ),
-      };
-    });
+    queryClient.setQueryData<InfiniteData<{ data: Post[] }>>(
+      queryKey,
+      (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            data: page.data.map((post) =>
+              post.id === postId
+                ? {
+                    ...post,
+                    is_liked: isLiked,
+                    likes_count:
+                      post.likes_count +
+                      (isLiked && !post.is_liked ? 1 : 0) -
+                      (!isLiked && post.is_liked ? 1 : 0),
+                  }
+                : post
+            ),
+          })),
+        };
+      }
+    );
   };
 
   const likeMutation = $api.useMutation("post", "/post/{post_id}/like", {
@@ -153,36 +150,39 @@ const PostsTab = ({ user }: TabItemProp) => {
       const postId = variables.params.path.post_id;
       await queryClient.cancelQueries({ queryKey });
       const previousData = queryClient.getQueryData(queryKey);
-      queryClient.setQueryData<InfiniteData<Post[]>>(queryKey, (oldData) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) =>
-            page.map((post) =>
-              post.id === postId
-                ? {
-                    ...post,
-                    my_selected_option_index: post?.options?.findIndex(
-                      (element) =>
-                        element.option_id === variables.body.poll_option_id
-                    ),
-                    results: post.results?.map((result) => ({
-                      ...result,
-                      vote_count:
-                        result.option_id === variables.body.poll_option_id
-                          ? (result?.vote_count ?? 0) + 1
-                          : result.vote_count ?? 0,
-                    })),
-                  }
-                : post
-            )
-          ),
-        };
-      });
+      queryClient.setQueryData<InfiniteData<{ data: Post[] }>>(
+        queryKey,
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              data: page.data.map((post) => {
+                if (post.id !== postId) return post;
+
+                return {
+                  ...post,
+                  my_selected_option_index: variables.body.poll_option_id,
+                  results: post.results?.map((result) => ({
+                    ...result,
+                    vote_count:
+                      result.option_id === variables.body.poll_option_id
+                        ? (result?.vote_count ?? 0) + 1
+                        : result.vote_count ?? 0,
+                  })),
+                };
+              }),
+            })),
+          };
+        }
+      );
       return { previousData };
     },
     onError: (err, variables, context) => {
       toast.error("An error occurred while voting the post");
+      console.error("Vote error:", err);
       if ((context as { previousData: unknown })?.previousData) {
         queryClient.setQueryData(
           queryKey,
@@ -227,13 +227,6 @@ const PostsTab = ({ user }: TabItemProp) => {
     }
   };
 
-  if (isLoading)
-    return (
-      <div className="min-h-[200px] flex flex-col justify-center">
-        <Loader description="Loading your posts..." />
-      </div>
-    );
-
   if (!posts?.length)
     return (
       <Empty
@@ -260,6 +253,16 @@ const PostsTab = ({ user }: TabItemProp) => {
           <p className="text-xs text-muted-foreground mt-2">Loading more...</p>
         </div>
       )}
+    </div>
+  );
+};
+
+export const PostsTabLoading = () => {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <PostComponentLoading key={index} />
+      ))}
     </div>
   );
 };

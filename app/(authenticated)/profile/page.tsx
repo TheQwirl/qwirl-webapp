@@ -31,13 +31,13 @@ const Profile = async () => {
 
   return (
     <div className="grid grid-cols-12 gap-6">
-      <div className="col-span-8">
+      <div className="col-span-full md:col-span-8">
         <ProfileHeader profileOf="self" initialUser={user} isLoading={false} />
         <div className="mt-6 pl-5 pb-10">
           <ProfileTabs profileFor="self" user={user!} />
         </div>
       </div>
-      <div className="col-span-4">
+      <div className="col-span-full md:col-span-4">
         <ProfileSidebar />
       </div>
     </div>

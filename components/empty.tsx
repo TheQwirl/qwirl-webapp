@@ -16,7 +16,7 @@ interface EmptyProps {
 const Empty: React.FC<EmptyProps> = ({
   title = "Nothing here yet",
   description = "There's no data to display right now.",
-  imageSrc = "/assets//empty-data.svg",
+  imageSrc = "/assets/empty-data.svg",
   containerClassName,
   imageClassName,
   children,

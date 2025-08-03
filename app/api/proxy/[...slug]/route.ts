@@ -205,6 +205,28 @@ async function handleRequest(req: NextRequest, context: { params: tParams }) {
     }
 
     return NextResponse.json(errorPayload, { status });
+  } else if (apiCallResult.response) {
+    // Handle successful responses with no data (like 204 No Content)
+    const status = apiCallResult.response.status;
+
+    if (status >= 200 && status < 300) {
+      // Success response with no data (common for DELETE operations)
+      const headers = new Headers(apiCallResult.response.headers);
+      headers.delete("content-encoding");
+      headers.delete("content-length");
+
+      return new NextResponse(null, {
+        status: status,
+        statusText: apiCallResult.response.statusText,
+        headers: headers,
+      });
+    } else {
+      // Error response with no data
+      return NextResponse.json(
+        { error: `Request failed with status ${status}` },
+        { status }
+      );
+    }
   } else {
     console.error(
       "Proxy: Unknown state from serverFetchClient call. Neither data nor error was present."

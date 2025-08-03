@@ -1,23 +1,25 @@
 import React from "react";
-import { QwirlItem } from "./types";
 import { Card, CardContent } from "../ui/card";
 import { GripVertical } from "lucide-react";
 import { SortableList } from "../sortable-list/sortable-list";
+import QwirlEditorCard, { QwirlEdiorCardLoading } from "./qwirl-editor-card";
+import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
 
-interface VerticalEditViewProps {
-  qwirlPolls: QwirlItem[];
-  isLoading: boolean;
-}
+const VerticalEditView = () => {
+  const { polls, qwirlQuery, handleReorder, handleDelete, isDeleting } =
+    useQwirlEditor();
 
-const VerticalEditView = ({ qwirlPolls, isLoading }: VerticalEditViewProps) => {
-  if (isLoading) {
+  if (qwirlQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">Loading...</p>
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <QwirlEdiorCardLoading key={index} />
+        ))}
       </div>
     );
   }
-  if (qwirlPolls?.length === 0) {
+
+  if (qwirlQuery?.data?.items?.length === 0) {
     return (
       <Card className="border-0 shadow-lg">
         <CardContent className="p-12 text-center">
@@ -32,16 +34,17 @@ const VerticalEditView = ({ qwirlPolls, isLoading }: VerticalEditViewProps) => {
   }
   return (
     <SortableList
-      items={qwirlPolls}
-      onChange={() => {}}
+      items={polls || []}
+      onChange={(reorderedItems) => handleReorder(reorderedItems)}
       className="space-y-4 pb-6"
       renderItem={(qwirlPoll) => (
         <SortableList.Item className="w-full" id={qwirlPoll?.id}>
-          {/* <QwirlEditorCard
-            key={question.id}
-            handleDelete={() => handleDelete(question.id)}
-            question={question}
-          /> */}
+          <QwirlEditorCard
+            key={qwirlPoll.id}
+            handleDelete={() => handleDelete(qwirlPoll.id)}
+            poll={qwirlPoll}
+            isDeleting={isDeleting}
+          />
         </SortableList.Item>
       )}
     />

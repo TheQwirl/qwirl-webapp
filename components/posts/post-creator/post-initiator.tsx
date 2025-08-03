@@ -27,7 +27,7 @@ const PostInitiator = ({ handleExpand }: PostInitiatorProps) => {
           name={user?.name ?? undefined}
         />
         <div
-          className="flex-1 bg-accent rounded-xl px-3 sm:px-4 py-2 sm:py-3 cursor-text hover:shadow-md transition-all text-sm sm:text-base"
+          className="flex-1 bg-accent/60 rounded-xl px-3 sm:px-4 py-2 sm:py-3 cursor-text hover:shadow-md transition-all text-sm sm:text-base"
           onClick={handleExpand}
         >
           What&apos;s on your mind? Create a poll...

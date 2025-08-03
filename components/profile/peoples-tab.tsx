@@ -5,7 +5,8 @@ import $api from "@/lib/api/client";
 import Empty from "../empty";
 import Image from "next/image";
 import { components } from "@/lib/api/v1";
-import { MyUser, TabItemProp, OtherUser } from "./types";
+import { MyUser, OtherUser } from "./types";
+import { useProfile } from "@/contexts/ProfileForContext";
 
 type User = {
   id: number;
@@ -18,9 +19,10 @@ type User = {
 
 type Users = components["schemas"]["UserFollowerResponse"][];
 
-export default function PeoplesTab({ user }: TabItemProp) {
+export default function PeoplesTab() {
   const [activeTab, setActiveTab] = useState("friends");
 
+  const { user } = useProfile();
   return (
     <div className="">
       <div className="mb-4">
@@ -122,14 +124,18 @@ export const UserList = ({
 
   return (
     <div className="space-y-4">
-      {users.map((user, index) => (
-        <UserCard
-          ref={index === users.length - 1 ? lastElementRef : null}
-          key={`${user.id}-${index}`}
-          user={user}
-          variant="detailed"
-        />
-      ))}
+      {users.map((u, index) => {
+        console.log(u, user, u?.name);
+        return (
+          <UserCard
+            ref={index === users.length - 1 ? lastElementRef : null}
+            key={`${u.id}-${index}`}
+            user={u}
+            variant="detailed"
+            showActions={u?.id !== user?.id}
+          />
+        );
+      })}
       {isFetchingNextPage && (
         <div className="flex justify-center py-4">
           <Image

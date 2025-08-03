@@ -25,7 +25,9 @@ const ExternalLoginButtons = ({ apiUrl }: ExternalLoginButtonsProps) => {
     }
     const loggedOut = searchParams.get("logged_out");
     if (loggedOut) {
-      toast.success("You have been logged out successfully.");
+      toast.success("You have been logged out successfully.", {
+        id: "logout",
+      });
       router.replace("/auth");
     }
   }, [searchParams, router]);
