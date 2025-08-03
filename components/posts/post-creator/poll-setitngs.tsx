@@ -10,6 +10,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import { PostCreatorData } from "./schema";
 
 const durationOptions = [
+  { value: "null", label: "Forever" }, // New option
   { value: "1h", label: "1 hour" },
   { value: "6h", label: "6 hours" },
   { value: "24h", label: "24 hours" },
@@ -27,10 +28,12 @@ export function PollSettings() {
           control={control}
           render={({ field }) => (
             <div className="flex flex-col space-y-1">
-              {/* <Label htmlFor="poll-duration" className="text-xs text-gray-500">
-                Poll Duration
-              </Label> */}
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={(val) =>
+                  field.onChange(val === "null" ? null : val)
+                }
+                value={field.value === null ? "null" : field.value}
+              >
                 <SelectTrigger
                   id="poll-duration"
                   className="w-[120px] sm:w-[150px] text-xs sm:text-sm h-8 sm:h-9"

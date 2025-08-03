@@ -73,7 +73,7 @@ export function UserAvatar({
   const skeletonClass = skeletonVariants({ size, rounded });
 
   return (
-    <div className={cn(avatarClass, className)}>
+    <div className={cn(className)}>
       {loading ? (
         <Skeleton className={cn(skeletonClass)} />
       ) : (

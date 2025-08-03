@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -49,7 +49,27 @@ const AddPollDialog: React.FC<Props> = ({
   });
   const options = methods.watch("options");
   const ownerAnswerIndex = methods.watch("owner_answer_index");
-  console.log(methods.formState.errors);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      methods.reset({
+        question_text: "",
+        options: [],
+      });
+      setStep(1);
+    }
+  }, [isModalOpen, methods]);
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      methods.reset({
+        question_text: "",
+        options: [],
+      });
+      setStep(1);
+    }
+    setIsModalOpen(open);
+  };
 
   const onCustomQuestion = () => {
     const defaultOptions = ["Option 1", "Option 2"];
@@ -97,7 +117,7 @@ const AddPollDialog: React.FC<Props> = ({
   };
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+    <Dialog open={isModalOpen} onOpenChange={handleOpenChange} modal>
       <DialogContent className="overflow-y-auto sm:max-h-[80vh] max-h-screen sm:max-w-xl no-scrollbar">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -336,8 +356,6 @@ const AddPollDialog: React.FC<Props> = ({
                 variant="outline"
                 onClick={() => {
                   setIsModalOpen(false);
-                  methods.reset();
-                  setStep(1);
                 }}
               >
                 Cancel

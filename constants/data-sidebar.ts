@@ -8,9 +8,10 @@ import { GoHomeFill } from "react-icons/go";
 export interface MenuItem {
   title: string;
   icon: React.ElementType;
-  url?: string;
+  url: string;
   type: "single" | "group";
   children?: MenuItem[];
+  disabled?: boolean;
 }
 
 export // Menu items array
@@ -38,12 +39,14 @@ const MENU_ITEMS = [
     icon: RiUserCommunityFill,
     url: "/community",
     type: "single",
+    disabled: true,
   },
   {
     title: "Question Bank",
     icon: TbMessageQuestion,
     url: "/question-bank",
     type: "single",
+    disabled: true,
   },
 
   {
@@ -51,5 +54,6 @@ const MENU_ITEMS = [
     icon: IoSettingsOutline,
     url: "/settings",
     type: "single",
+    disabled: true,
   },
 ] as MenuItem[];

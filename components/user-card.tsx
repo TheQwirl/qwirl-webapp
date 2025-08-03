@@ -5,7 +5,6 @@ import React from "react";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// import { Badge } from "@/components/ui/badge";
 import {
   UserPlus,
   UserCheck,
@@ -15,7 +14,8 @@ import {
 import { motion } from "framer-motion";
 import { UserAvatar } from "./user-avatar";
 import { Skeleton } from "./ui/skeleton";
-import { redirect } from "next/navigation";
+import { Badge } from "./ui/badge";
+import Link from "next/link";
 
 interface User {
   id: number;
@@ -33,11 +33,11 @@ interface UserCardProps {
   user: User;
   variant?: "default" | "suggestion" | "compact" | "detailed";
   showActions?: boolean;
-  onUserClick?: (user: User) => void;
+  onClick?: (e: React.MouseEvent, user: User) => void;
 }
 
 const UserCard = React.forwardRef<HTMLDivElement, UserCardProps>(
-  ({ user, variant = "default", showActions = true, onUserClick }, ref) => {
+  ({ user, variant = "default", showActions = true, onClick }, ref) => {
     const [isFollowing, setIsFollowing] = useState(user?.is_following || false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -57,215 +57,213 @@ const UserCard = React.forwardRef<HTMLDivElement, UserCardProps>(
       console.log("Message user:", user.username);
     };
 
-    const handleCardClick = () => {
-      if (onUserClick) {
-        onUserClick(user);
-      } else {
-        redirect(`/profile/${user.id}`);
-      }
-    };
-
     if (variant === "compact") {
       return (
-        <motion.div
-          ref={ref}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-          onClick={handleCardClick}
-        >
-          <UserAvatar
-            className=""
-            image={user.avatar ?? undefined}
-            loading={!user}
-            name={user.name ?? undefined}
-            ringed
-            size={"md"}
-          />
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm truncate">{user.name}</p>
-            <p className="text-xs text-gray-600 truncate">@{user.username}</p>
-          </div>
-          {showActions && (
-            <Button
-              size="sm"
-              variant={isFollowing ? "outline" : "default"}
-              onClick={handleFollow}
-              disabled={isLoading}
-              className="flex-shrink-0"
-            >
-              {isLoading ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              ) : isFollowing ? (
-                <UserCheck className="h-4 w-4" />
-              ) : (
-                <UserPlus className="h-4 w-4" />
-              )}
-            </Button>
-          )}
-        </motion.div>
-      );
-    }
-
-    if (variant === "suggestion") {
-      return (
-        <motion.div
-          ref={ref}
-          whileHover={{ scale: 1.02 }}
-          className="p-3 rounded-lg border hover:shadow-md cursor-pointer transition-all"
-          onClick={handleCardClick}
-        >
-          <div className="flex items-start gap-2">
+        <Link href={`/profile/${user.id}`} scroll={false}>
+          <motion.div
+            ref={ref}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={(e) => onClick?.(e, user)}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+          >
             <UserAvatar
               className=""
               image={user.avatar ?? undefined}
               loading={!user}
               name={user.name ?? undefined}
               ringed
-              size={"sm"}
+              size={"md"}
             />
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm truncate">{user.name}</p>
               <p className="text-xs text-gray-600 truncate">@{user.username}</p>
-              {/* {user.mutualFriends && user.mutualFriends > 0 && (
-              <p className="text-xs text-gray-500 mt-1 whitespace-nowrap truncate">
-                {user.mutualFriends} mutual friends
-              </p>
-            )} */}
             </div>
-            <div className="flex gap-1 mt-2 justify-end">
+            {showActions && (
               <Button
                 size="sm"
                 variant={isFollowing ? "outline" : "default"}
                 onClick={handleFollow}
                 disabled={isLoading}
-                className="text-xs h-7"
+                className="flex-shrink-0"
               >
-                {isLoading ? "..." : isFollowing ? "Following" : "Follow"}
+                {isLoading ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : isFollowing ? (
+                  <UserCheck className="h-4 w-4" />
+                ) : (
+                  <UserPlus className="h-4 w-4" />
+                )}
               </Button>
-            </div>
-          </div>
-        </motion.div>
+            )}
+          </motion.div>
+        </Link>
       );
     }
 
-    // Default and detailed variants
-    return (
-      <motion.div
-        ref={ref}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-all duration-200"
-          onClick={handleCardClick}
-        >
-          <CardContent className="p-4">
-            <div className="flex items-start gap-4">
+    if (variant === "suggestion") {
+      return (
+        <Link href={`/profile/${user.id}`}>
+          <motion.div
+            ref={ref}
+            whileHover={{ scale: 1.02 }}
+            onClick={(e) => onClick?.(e, user)}
+            className="p-3 rounded-lg border hover:shadow-md cursor-pointer transition-all"
+          >
+            <div className="flex items-start gap-2">
               <UserAvatar
                 className=""
                 image={user.avatar ?? undefined}
                 loading={!user}
                 name={user.name ?? undefined}
                 ringed
-                size={"md"}
+                size={"sm"}
               />
-
               <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-base truncate">
-                      {user.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm truncate">
-                      @{user.username}
-                    </p>
+                <p className="font-medium text-sm truncate">{user.name}</p>
+                <p className="text-xs text-gray-600 truncate">
+                  @{user.username}
+                </p>
+                {/* {user.mutualFriends && user.mutualFriends > 0 && (
+              <p className="text-xs text-gray-500 mt-1 whitespace-nowrap truncate">
+                {user.mutualFriends} mutual friends
+              </p>
+            )} */}
+              </div>
+              <div className="flex gap-1 mt-2 justify-end">
+                <Button
+                  size="sm"
+                  variant={isFollowing ? "outline" : "default"}
+                  onClick={handleFollow}
+                  disabled={isLoading}
+                  className="text-xs h-7"
+                >
+                  {isLoading ? "..." : isFollowing ? "Following" : "Follow"}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </Link>
+      );
+    }
 
-                    {/* {user.bio && variant === "detailed" && (
+    // Default and detailed variants
+    return (
+      <Link href={`/profile/${user.id}`}>
+        <motion.div
+          ref={ref}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={(e) => onClick?.(e, user)}
+        >
+          <Card className="cursor-pointer hover:shadow-lg transition-all duration-200">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-4">
+                <UserAvatar
+                  className=""
+                  image={user.avatar ?? undefined}
+                  loading={!user}
+                  name={user.name ?? undefined}
+                  ringed
+                  size={"md"}
+                />
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-base truncate">
+                        {user.name}
+                      </h3>
+                      <p className="text-gray-600 text-sm truncate">
+                        @{user.username}
+                      </p>
+
+                      {/* {user.bio && variant === "detailed" && (
                     <p className="text-sm text-gray-700 mt-2 line-clamp-2">
                       {user.bio}
                     </p>
                   )} */}
-                    {/* 
+                      {/* 
                   {user.location && variant === "detailed" && (
                     <p className="text-xs text-gray-500 mt-1">
                       {user.location}
                     </p>
                   )} */}
+                    </div>
+
+                    {showActions && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="flex-shrink-0"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
 
-                  {showActions && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="flex-shrink-0"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 mt-3">
-                  {/* {user.mutualFriends && user.mutualFriends > 0 && (
+                  <div className="flex items-center gap-2 mt-3">
+                    {/* {user.mutualFriends && user.mutualFriends > 0 && (
                   <Badge variant="secondary" className="text-xs">
                     <Users className="h-3 w-3 mr-1" />
                     {user.mutualFriends} mutual
                   </Badge>
                 )} */}
 
-                  {/* {user?.wavelength && (
-                  <Badge
-                    variant="outline"
-                    className={`text-xs ${
-                      user.wavelength >= 70
-                        ? "border-green-500 text-green-700"
-                        : user.wavelength >= 40
-                        ? "border-yellow-500 text-yellow-700"
-                        : "border-gray-500 text-gray-700"
-                    }`}
-                  >
-                    {user.wavelength}% wavelength
-                  </Badge>
-                )} */}
-                </div>
-
-                {showActions && (
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      size="sm"
-                      icon={isFollowing ? UserCheck : UserPlus}
-                      iconPlacement="left"
-                      variant={isFollowing ? "outline" : "default"}
-                      onClick={handleFollow}
-                      disabled={isLoading}
-                      className="flex-1"
-                    >
-                      {isLoading ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                      ) : isFollowing ? (
-                        <>Following</>
-                      ) : (
-                        <>Follow</>
-                      )}
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      icon={MessageCircle}
-                      iconPlacement="left"
-                      onClick={handleMessage}
-                      className="flex-1"
-                    >
-                      Message
-                    </Button>
+                    {user?.wavelength && (
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${
+                          user.wavelength >= 70
+                            ? "border-green-500 text-green-700"
+                            : user.wavelength >= 40
+                            ? "border-yellow-500 text-yellow-700"
+                            : "border-gray-500 text-gray-700"
+                        }`}
+                      >
+                        {user.wavelength}% wavelength
+                      </Badge>
+                    )}
                   </div>
-                )}
+
+                  {showActions && (
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        icon={isFollowing ? UserCheck : UserPlus}
+                        iconPlacement="left"
+                        variant={isFollowing ? "outline" : "default"}
+                        onClick={handleFollow}
+                        disabled={isLoading}
+                        className="flex-1"
+                      >
+                        {isLoading ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        ) : isFollowing ? (
+                          <>Following</>
+                        ) : (
+                          <>Follow</>
+                        )}
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        icon={MessageCircle}
+                        iconPlacement="left"
+                        onClick={handleMessage}
+                        className="flex-1"
+                      >
+                        Message
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </Link>
     );
   }
 );

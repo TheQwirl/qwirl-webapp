@@ -1,27 +1,47 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TabItemProp } from "./types";
+import { UserAvatar } from "../user-avatar";
+import QwirlRespond from "../qwirl/qwirl-respond";
+import { useProfile } from "@/contexts/ProfileForContext";
+import { OwnQwirlPreview } from "../qwirl/own-qwirl-preview";
 
-export default function QwirlTab({}: TabItemProp) {
+export default function QwirlTab() {
+  const { user, profileFor } = useProfile();
   return (
-    <div>
-      <Card>
-        <CardHeader>
-          <CardTitle>My Qwirl</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 flex space-x-4">
-            <Button variant="outline">View Details</Button>
-            <Button>Edit Qwirl</Button>
-          </div>
-          <p className="mb-4">Total Responses: 42</p>
-          <div className="rounded-lg bg-gray-100 p-4">
-            <p className="text-gray-600">
-              Your Qwirl will be displayed here once created.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="bg-white p-4 rounded-2xl space-y-4">
+      <div className="flex items-center gap-3">
+        <UserAvatar
+          image={user?.avatar ?? ""}
+          loading={!user}
+          name={user?.name ?? undefined}
+          size={"md"}
+        />
+        <div>
+          <h2 className="text-base font-semibold text-gray-900">
+            {user?.name}
+          </h2>
+          <p className="text-xs text-gray-600">{user?.username}</p>
+        </div>
+      </div>
+      {profileFor === "other" ? (
+        <QwirlRespond user={user} />
+      ) : (
+        <OwnQwirlPreview
+          // dummy data
+          qwirl={{
+            id: "1",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            pollCount: 0,
+          }}
+          onShare={() => {}}
+          onViewResponses={() => {}}
+          stats={{
+            totalResponses: 0,
+            completionRate: 0,
+            totalComments: 0,
+            recentResponses: [],
+          }}
+        />
+      )}
     </div>
   );
 }

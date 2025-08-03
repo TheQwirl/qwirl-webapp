@@ -30,6 +30,8 @@ import Image from "next/image";
 import { components } from "@/lib/api/v1-client-side";
 import $api from "@/lib/api/client";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { authStore } from "@/stores/useAuthStore";
 
 type Question = components["schemas"]["QuestionSearchResponse"];
 
@@ -42,12 +44,17 @@ const PostCreator = () => {
   const [importedFromBank, setImportedFromBank] = useState<null | number>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { user } = authStore();
+  console.log("User in PostCreator:", user);
+
+  const queryClient = useQueryClient();
+
   const methods = useForm<PostCreatorData>({
     resolver: zodResolver(PostCreatorSchema),
     defaultValues: {
       text_content: "",
       question_text: "",
-      duration: "24h",
+      duration: null,
       pollOptions: [],
     },
   });
@@ -116,13 +123,26 @@ const PostCreator = () => {
   };
 
   const parseDuration = (duration: "1h" | "6h" | "24h" | "7d"): number => {
-    if (duration.endsWith("h")) return parseInt(duration);
-    if (duration.endsWith("d")) return parseInt(duration) * 24;
-    return 24;
+    const value = parseInt(duration);
+    const unit = duration.slice(-1);
+
+    const SECONDS_PER_HOUR = 3600;
+    const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
+
+    switch (unit) {
+      case "h":
+        return value * SECONDS_PER_HOUR;
+      case "d":
+        return value * SECONDS_PER_DAY;
+      default:
+        return SECONDS_PER_DAY;
+    }
   };
 
   const onSubmit = async (data: PostCreatorData) => {
-    toast.loading("Creating post...");
+    toast.loading("Creating post...", {
+      id: "create-post",
+    });
     await createPostMutation.mutateAsync(
       {
         body: {
@@ -130,7 +150,7 @@ const PostCreator = () => {
             text_content: data.text_content,
             image_url: postImage,
             question_text: data.question_text,
-            duration: parseDuration(data.duration),
+            duration: data.duration ? parseDuration(data.duration) : null,
             question_bank_id: importedFromBank,
           },
           selected_option_index: data.selected_option_index,
@@ -138,12 +158,19 @@ const PostCreator = () => {
         },
       },
       {
-        onSuccess: () => {
-          toast.success("Post created successfully!");
+        onSuccess: async () => {
+          toast.success("Post created successfully!", {
+            id: "create-post",
+          });
           handleCollapse();
+          await queryClient.invalidateQueries({
+            queryKey: ["posts", user?.id],
+          });
         },
         onError: () => {
-          toast.error("An error occurred while creating the post");
+          toast.error("An error occurred while creating the post", {
+            id: "create-post",
+          });
           console.error("Error creating post:", createPostMutation.error);
         },
       }
@@ -224,7 +251,10 @@ const PostCreator = () => {
                               Create Your Poll
                             </h3>
                             {importedFromBank && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge
+                                variant="secondary"
+                                className="text-xs whitespace-nowrap"
+                              >
                                 <BookOpen className="h-3 w-3 mr-1" />
                                 From Bank
                               </Badge>

@@ -1,22 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Users, MessageCircle, Settings } from "lucide-react";
+import { Users, MessageCircle, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { authStore } from "@/stores/useAuthStore";
 import { EditableUserAvatar } from "../editable-user-avatar";
 import { UserAvatar } from "../user-avatar";
-import WavelengthIndicator from "../wavelength-indicator";
+import WavelengthIndicator, {
+  WavelengthIndicatorLoading,
+} from "../wavelength-indicator"; // WavelengthIndicatorLoading,
 import { getUnimplementedMessage } from "@/lib/utils";
 import $api, { fetchClient } from "@/lib/api/client";
 
 import { DialogUpdateUser } from "./dialog-update-user";
 import { MyUser, OtherUser } from "./types";
+import clsx from "clsx";
+import { Skeleton } from "../ui/skeleton";
 
 interface ProfileHeaderBaseProps {
   isLoading: boolean;
@@ -45,29 +49,44 @@ const ProfileHeader = ({
   const queryClient = useQueryClient();
 
   const isOwnProfile = currentUser?.id === initialUser?.id;
-  const queryKey = [
-    "get",
-    "/users/{user_id}",
-    {
-      params: { path: { user_id: initialUser?.id ?? 0 } },
-      initialData: initialUser,
-    },
-  ];
-
-  const { data: user } = $api.useQuery(
-    "get",
-    "/users/{user_id}",
-    {
-      params: { path: { user_id: initialUser?.id ?? 0 } },
-      initialData: initialUser,
-    },
-    { enabled: !!initialUser?.id }
+  const queryKey = useMemo(
+    () => [
+      "get",
+      "/users/{user_id}",
+      {
+        params: { path: { user_id: initialUser?.id ?? 0 } },
+        // initialData: initialUser,
+      },
+    ],
+    [initialUser?.id]
   );
+
+  const { data: user, isLoading: isQueryLoading } = $api.useQuery(
+    "get",
+    "/users/{user_id}",
+    {
+      params: { path: { user_id: initialUser?.id ?? 0 } },
+    },
+    {
+      initialData: initialUser
+        ? {
+            ...initialUser,
+            relationship: (initialUser as OtherUser)?.relationship ?? {
+              is_following: false,
+              is_followed_by: false,
+              is_friend: false,
+              wavelength: 0,
+            },
+          }
+        : undefined,
+      enabled: !!initialUser?.id,
+    }
+  );
+  const isDataLoading = isLoading || (isQueryLoading && !user);
 
   const wavelength =
     profileOf === "other" ? user?.relationship?.wavelength : null;
-
-  console.log(wavelength);
+  const shouldShowWavelength = !!wavelength && wavelength > 0;
 
   const { mutate: toggleFollow } = useMutation({
     mutationFn: async (isFollowing: boolean) => {
@@ -129,7 +148,7 @@ const ProfileHeader = ({
       <UserAvatar
         name={user?.name ?? "Name Unavailable"}
         image={user?.avatar ?? ""}
-        size="lg"
+        size="2xl"
         ringed
         loading={isLoading}
         className="object-cover text-xl"
@@ -145,7 +164,7 @@ const ProfileHeader = ({
     return (
       <div className="flex justify-center flex-wrap gap-3 mt-4">
         {visible?.map((category) => (
-          <Badge key={category} variant="secondary" className="text-xs">
+          <Badge key={category} variant="outline" className="text-xs">
             {category}
           </Badge>
         ))}
@@ -160,126 +179,114 @@ const ProfileHeader = ({
 
   return (
     <>
-      <Card className="overflow-hidden">
-        <div className="relative">
-          <div
-            className="h-36 bg-accent"
-            style={{
-              backgroundImage: user?.header_img
-                ? `url(${user.header_img})`
-                : undefined,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
-            {isOwnProfile && (
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute z-10 top-4 right-4 bg-black/20 hover:bg-black/40 text-white border-0"
-                onClick={() =>
-                  toast.info(getUnimplementedMessage("Header Image Editing"))
-                }
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-          <div className="p-4">
-            <div className="">
-              <div className="flex items-center gap-4 ">
-                <div className="flex-shrink-0">{renderUserAvatar()}</div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h1 className="text-2xl font-bold text-gray-900">
-                        {user?.name}
-                      </h1>
-                      <div className="text-gray-600">@{user?.username}</div>
+      <Card className="overflow-hidden p-4">
+        <div className="p-4">
+          <div className="">
+            <div className="flex items-center gap-4 flex-col md:flex-row">
+              <div className="flex-shrink-0">{renderUserAvatar()}</div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between flex-col md:flex-row gap-y-4">
+                  <div>
+                    <h1 className="text-2xl font-semibold whitespace-nowrap">
+                      {user?.name}
+                    </h1>
+                    <div className="text-muted-foreground text-xs">
+                      @{user?.username}
                     </div>
-                    <div className="flex gap-2">
-                      {isOwnProfile ? (
+                  </div>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    {isOwnProfile ? (
+                      <Button
+                        icon={Settings}
+                        iconPlacement="left"
+                        onClick={() => setOpenUpdateDialog(true)}
+                        variant="secondary"
+                        size="sm"
+                        className="gap-2"
+                      >
+                        Edit Profile
+                      </Button>
+                    ) : (
+                      <>
                         <Button
-                          icon={Settings}
+                          onClick={handleFollow}
+                          icon={Users}
                           iconPlacement="left"
-                          onClick={() => setOpenUpdateDialog(true)}
-                          variant="secondary"
-                          size="sm"
-                          className="gap-2"
-                        >
-                          Edit Profile
-                        </Button>
-                      ) : (
-                        <>
-                          <Button
-                            onClick={handleFollow}
-                            icon={Users}
-                            iconPlacement="left"
-                            className="gap-2"
-                          >
-                            {user?.relationship?.is_friend ||
+                          className={clsx(
+                            "gap-2 rounded-full shadow-none bg-opacity-50"
+                          )}
+                          variant={
+                            user?.relationship?.is_friend ||
                             user?.relationship?.is_following
-                              ? "Unfollow"
-                              : "Follow"}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              toast.info(getUnimplementedMessage("Messaging"))
-                            }
-                            className="gap-2"
-                            icon={MessageCircle}
-                            iconPlacement="left"
-                          >
-                            Message
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                              ? "destructive"
+                              : "default"
+                          }
+                        >
+                          {user?.relationship?.is_friend ||
+                          user?.relationship?.is_following
+                            ? "Unfollow"
+                            : "Follow"}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            toast.info(getUnimplementedMessage("Messaging"))
+                          }
+                          className="shadow-none rounded-full"
+                          icon={MessageCircle}
+                          iconPlacement="left"
+                        >
+                          Message
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="">
-              {renderCategories()}
+          <div className="">
+            {renderCategories()}
 
-              <div className="grid grid-cols-3 gap-6 my-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {user?.followers_count}
-                  </div>
-                  <div className="text-sm text-gray-600 font-medium">
-                    Followers
-                  </div>
+            <div
+              className={clsx(
+                " mt-5 grid grid-cols-3 gap-1 col-span-full md:col-span-1 border p-2 rounded-2xl divide-x",
+                {
+                  "!col-span-full": !shouldShowWavelength,
+                }
+              )}
+            >
+              {[
+                { label: "Followers", count: user?.followers_count },
+                { label: "Following", count: user?.following_count },
+                { label: "Friends", count: user?.friends_count },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex flex-col items-center justify-between"
+                >
+                  <span className="text-[10px] tracking-widest uppercase text-gray-400">
+                    {item.label}
+                  </span>
+                  <span className="text-3xl font-black leading-tight tracking-tight">
+                    {item.count ?? "--"}
+                  </span>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {user?.following_count}
-                  </div>
-                  <div className="text-sm text-gray-600 font-medium">
-                    Following
-                  </div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {user?.friends_count}
-                  </div>
-                  <div className="text-sm text-gray-600 font-medium">
-                    Friends
-                  </div>
-                </div>
-              </div>
-
-              {!!wavelength && wavelength > 0 && (
-                <div className="my-4 px-6">
+              ))}
+            </div>
+            {shouldShowWavelength && (
+              <div className="w-full flex justify-center mt-5">
+                {isDataLoading ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : (
                   <WavelengthIndicator
                     wavelength={wavelength}
                     userName={user?.name ?? ""}
                   />
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </Card>
@@ -291,6 +298,71 @@ const ProfileHeader = ({
         />
       )}
     </>
+  );
+};
+
+export const ProfileHeaderLoading = ({
+  showWavelength,
+}: {
+  showWavelength?: boolean;
+}) => {
+  return (
+    <Card className="overflow-hidden p-4">
+      <div className="p-4">
+        <div className="">
+          <div className="flex items-center gap-4 flex-col md:flex-row">
+            <div className="flex-shrink-0">
+              <UserAvatar loading size="xl" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between flex-col md:flex-row gap-y-4">
+                <div>
+                  <Skeleton className="h-8 w-32 mb-2" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Skeleton className="h-10 w-32 rounded-full" />
+                  <Skeleton className="h-10 w-32 rounded-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="">
+          <div className="flex justify-center flex-wrap gap-3 mt-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton key={index} className="h-5 w-24 rounded " />
+              // <Badge key={index} variant="secondary" className="text-xs">
+              // </Badge>
+            ))}
+          </div>
+
+          <div
+            className={clsx(
+              " mt-5 grid grid-cols-3 gap-1 col-span-full md:col-span-1 border p-2 rounded-2xl divide-x"
+            )}
+          >
+            {["Followers", "Following", "Friends"].map((name, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center justify-between"
+              >
+                <span className="text-[10px] tracking-widest uppercase text-gray-400">
+                  {name}
+                </span>
+                <Skeleton className="h-6 w-12" />
+              </div>
+            ))}
+          </div>
+          {showWavelength && (
+            <div className="w-full flex justify-center mt-5">
+              <WavelengthIndicatorLoading />
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 };
 

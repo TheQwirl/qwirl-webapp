@@ -62,3 +62,9 @@ export const generateInitialPollOptionId = () =>
 export const getUnimplementedMessage = (feature: string) => {
   return `The ${feature} feature is not yet implemented. Coming very soon!`;
 };
+
+export const getFirstName = (fullName?: string | null) => {
+  if (!fullName?.trim()) return null;
+  const firstName = fullName?.split(" ")?.[0]?.trim();
+  return firstName || null;
+};

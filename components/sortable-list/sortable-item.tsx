@@ -7,7 +7,7 @@ import type {
 } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { RxDragHandleDots2 } from "react-icons/rx";
+import { GripVertical } from "lucide-react";
 interface Props {
   id: UniqueIdentifier;
   className?: string;
@@ -73,7 +73,7 @@ export function DragHandle() {
       {...listeners}
       ref={ref}
     >
-      <RxDragHandleDots2 className="h-5 w-5" />
+      <GripVertical className="h-5 w-5" />
     </button>
   );
 }
