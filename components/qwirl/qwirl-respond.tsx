@@ -22,6 +22,7 @@ import { SkipCounter } from "./skip-counter";
 import { getFirstName } from "@/lib/utils";
 import WavelengthProgress from "../wavelength-progress-animated";
 import InCompleteQwirl from "./incomplete-qwirl";
+import { Skeleton } from "../ui/skeleton";
 
 type QwirlResponseItem = {
   user_response: {
@@ -347,318 +348,322 @@ const QwirlRespond = ({ user }: { user: OtherUser | undefined }) => {
     }
   };
 
+  if (userQwirlQuery.isLoading || !user) {
+    return <QwirlRespondLoading />;
+  }
+
+  const isInCompleteQwirl =
+    !userQwirlQuery.isLoading && polls?.length < MIN_QWIRL_POLLS;
+
+  if (isInCompleteQwirl) {
+    return (
+      <InCompleteQwirl
+        ownerName={user?.name ?? ""}
+        ownerUsername={user?.username ?? ""}
+        ownerAvatar={user?.avatar ?? ""}
+        pollCount={polls?.length ?? 0}
+        onNotifyWhenReady={() => {
+          toast("You will be notified when the Qwirl is ready!", {
+            duration: 3000,
+            id: "notify-ready",
+          });
+        }}
+      />
+    );
+  }
+
   return (
     <div className={clsx("rounded-2xl border-2 p-4  relative ")}>
-      {userQwirlQuery.isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-500/20 backdrop-blur-[1px] z-10 rounded-2xl">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      )}
-      {!userQwirlQuery.isLoading && polls?.length < MIN_QWIRL_POLLS ? (
-        <InCompleteQwirl
-          ownerName={user?.name ?? ""}
-          ownerUsername={user?.username ?? ""}
-          ownerAvatar={user?.avatar ?? ""}
-          pollCount={polls?.length ?? 0}
-          onNotifyWhenReady={() => {
-            toast("You will be notified when the Qwirl is ready!", {
-              duration: 3000,
-              id: "notify-ready",
-            });
-          }}
-        />
-      ) : (
-        <>
-          <div className="absolute top-0 left-0 inset-x-0 flex  justify-between">
-            {userAnswer && (
-              <div className="flex items-center justify-center py-1 px-2 rounded-tl-xl rounded-br-2xl bg-primary text-primary-foreground text-xs ">
-                {submitAnswerMutation?.isPending ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="ml-2">Loading...</span>
-                  </div>
-                ) : (
-                  "Answered"
-                )}
+      <div className="absolute top-0 left-0 inset-x-0 flex  justify-between">
+        {userAnswer && (
+          <div className="flex items-center justify-center py-1 px-2 rounded-tl-xl rounded-br-2xl bg-primary text-primary-foreground text-xs ">
+            {submitAnswerMutation?.isPending ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="ml-2">Loading...</span>
               </div>
-            )}
-            <div className="flex items-center gap-3 flex-grow flex-1 flex-shrink-0 px-4 pt-1">
-              <ProgressBar
-                className="border border-primary rounded-full w-full"
-                value={currentPoll?.position}
-                max={polls?.length ?? 100}
-                customColors={{
-                  fill: "hsl(var(--primary))",
-                }}
-              />
-              <div className="rounded-full bg-primary text-primary-foreground p-2 text-xs">
-                <span>
-                  {currentPoll?.position}/{polls?.length}
-                </span>
-              </div>
-            </div>
-            {userQwirl?.session_status === "in_progress" && (
-              <div className="flex items-center justify-center rounded-bl-xl rounded-tr-2xl border-l-2 border-b-2 border-primary px-3 py-2">
-                <SkipCounter
-                  maxSkips={MAX_SKIPS}
-                  skippedCount={skippedQuestionsIds.length}
-                />
-              </div>
+            ) : (
+              "Answered"
             )}
           </div>
-          <div className="py-4 px-4 mt-4">
-            <AnimatePresence mode="wait">
-              {currentPoll && (
-                <motion.div
-                  key={currentPoll?.id}
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="space-y-6 pt-2"
-                >
-                  {/* Image */}
-                  {false && (
-                    <div className="relative">
-                      <Image
-                        src={"/placeholder.svg"}
-                        alt="Question image"
-                        className="w-full h-64 object-cover rounded-xl"
-                      />
-                    </div>
-                  )}
+        )}
+        <div className="flex items-center gap-3 flex-grow flex-1 flex-shrink-0 px-4 pt-1">
+          <ProgressBar
+            className="border border-primary rounded-full w-full"
+            value={currentPoll?.position}
+            max={polls?.length ?? 100}
+            customColors={{
+              fill: "hsl(var(--primary))",
+            }}
+          />
+          <div className="rounded-full bg-primary text-primary-foreground p-2 text-xs">
+            <span>
+              {currentPoll?.position}/{polls?.length}
+            </span>
+          </div>
+        </div>
+        {userQwirl?.session_status === "in_progress" && (
+          <div className="flex items-center justify-center rounded-bl-xl rounded-tr-2xl border-l-2 border-b-2 border-primary px-3 py-2">
+            <SkipCounter
+              maxSkips={MAX_SKIPS}
+              skippedCount={skippedQuestionsIds.length}
+            />
+          </div>
+        )}
+      </div>
+      <div className="py-4 px-4 mt-4">
+        <AnimatePresence mode="wait">
+          {currentPoll && (
+            <motion.div
+              key={currentPoll?.id}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="space-y-6 pt-2"
+            >
+              {/* Image */}
+              {false && (
+                <div className="relative">
+                  <Image
+                    src={"/placeholder.svg"}
+                    alt="Question image"
+                    className="w-full h-64 object-cover rounded-xl"
+                  />
+                </div>
+              )}
 
-                  {/* Question */}
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 leading-tight">
-                      {currentPoll?.question_text}
-                    </h3>
-                  </div>
+              {/* Question */}
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 leading-tight">
+                  {currentPoll?.question_text}
+                </h3>
+              </div>
 
-                  {/* Options */}
-                  <div className="space-y-3">
-                    {currentPoll?.options.map((option, index) => {
-                      const isSelected = userAnswer === option;
-                      const isOwnerChoice =
-                        option === currentPoll?.owner_answer;
-                      const optionStats = {
-                        count: currentPoll?.option_statistics?.[option] ?? 0,
-                        percentage: currentPoll?.option_statistics?.[option]
-                          ? currentPoll?.response_count
-                            ? ((currentPoll?.option_statistics?.[option] ?? 0) /
-                                currentPoll?.response_count) *
-                              100
-                            : 0
-                          : 0,
-                      };
-                      console.log(
-                        optionStats,
-                        "Option Stats",
-                        currentPoll?.option_statistics,
-                        currentPoll?.response_count
-                      );
-                      return (
+              {/* Options */}
+              <div className="space-y-3">
+                {currentPoll?.options.map((option, index) => {
+                  const isSelected = userAnswer === option;
+                  const isOwnerChoice = option === currentPoll?.owner_answer;
+                  const optionStats = {
+                    count: currentPoll?.option_statistics?.[option] ?? 0,
+                    percentage: currentPoll?.option_statistics?.[option]
+                      ? currentPoll?.response_count
+                        ? ((currentPoll?.option_statistics?.[option] ?? 0) /
+                            currentPoll?.response_count) *
+                          100
+                        : 0
+                      : 0,
+                  };
+                  console.log(
+                    optionStats,
+                    "Option Stats",
+                    currentPoll?.option_statistics,
+                    currentPoll?.response_count
+                  );
+                  return (
+                    <motion.div
+                      key={index}
+                      whileHover={!userAnswer ? { scale: 1.02 } : {}}
+                      whileTap={!userAnswer ? { scale: 0.98 } : {}}
+                      className="flex items-center gap-4 relative z-10"
+                    >
+                      <button
+                        onClick={() => handleVote(option)}
+                        disabled={!!userAnswer}
+                        className={clsx(
+                          "bg-background text-foreground relative w-full p-3 rounded-xl z-10 border text-left transition-all duration-200",
+                          {
+                            "shadow-lg":
+                              isSelected || (isOwnerChoice && userAnswer),
+                            "hover:shadow-md cursor-pointer": !userAnswer,
+                          }
+                        )}
+                      >
                         <motion.div
-                          key={index}
-                          whileHover={!userAnswer ? { scale: 1.02 } : {}}
-                          whileTap={!userAnswer ? { scale: 0.98 } : {}}
-                          className="flex items-center gap-4 relative z-10"
-                        >
-                          {/* <div className="w-full h-full absolute">
-                            {isSelected && !(isOwnerChoice && userAnswer) && (
-                              <div className="absolute -inset-2 rounded-lg -z-10 bg-gradient-to-r bg-primary opacity-75 blur" />
-                            )}
-                            {isOwnerChoice && userAnswer && !isSelected && (
-                              <div className="absolute -inset-2 rounded-lg -z-10 bg-gradient-to-r bg-secondary opacity-75 blur" />
-                            )}
-                            {isOwnerChoice && userAnswer && isSelected && (
-                              <div className="absolute -inset-2 rounded-lg -z-10 bg-gradient-to-r bg-accent opacity-75 blur" />
-                            )}
-                          </div> */}
+                          className="h-full absolute inset-0  bg-accent/40 rounded-l-xl transition-all duration-500"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${optionStats.percentage}%` }}
+                          style={{
+                            borderTopRightRadius:
+                              optionStats.percentage === 100
+                                ? "0.75rem"
+                                : "0.5rem",
+                            borderBottomRightRadius:
+                              optionStats.percentage === 100
+                                ? "0.75rem"
+                                : "0.5rem",
+                          }}
+                          transition={{
+                            delay: 0.2 + index * 0.1,
+                            duration: 0.5,
+                            ease: "easeInOut",
+                            bounce: 0.5,
+                          }}
+                        />
 
-                          <button
-                            onClick={() => handleVote(option)}
-                            disabled={!!userAnswer}
-                            className={clsx(
-                              "bg-background text-foreground relative w-full p-3 rounded-xl z-10 border text-left transition-all duration-200",
-                              {
-                                "shadow-lg":
-                                  isSelected || (isOwnerChoice && userAnswer),
-                                "hover:shadow-md cursor-pointer": !userAnswer,
-                              }
-                            )}
-                          >
-                            <motion.div
-                              className="h-full absolute inset-0  bg-accent/40 rounded-l-xl transition-all duration-500"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${optionStats.percentage}%` }}
-                              style={{
-                                borderTopRightRadius:
-                                  optionStats.percentage === 100
-                                    ? "0.75rem"
-                                    : "0.5rem",
-                                borderBottomRightRadius:
-                                  optionStats.percentage === 100
-                                    ? "0.75rem"
-                                    : "0.5rem",
-                              }}
-                              transition={{
-                                delay: 0.2 + index * 0.1,
-                                duration: 0.5,
-                                ease: "easeInOut",
-                                bounce: 0.5,
-                              }}
-                            />
-
-                            <div className="relative flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <span className="text-gray-900 font-medium">
-                                  {option}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 justify-end">
-                                <div className="flex gap-2 z-10">
-                                  {isSelected && (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs bg-background text-foreground  rounded-full flex items-center gap-1"
-                                    >
-                                      <div className="rounded-full h-3 w-3 bg-primary" />
-                                      You
-                                    </Badge>
-                                  )}
-                                  {isOwnerChoice && userAnswer && (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs bg-background text-foreground rounded-full flex items-center gap-1"
-                                    >
-                                      <div className="rounded-full h-3 w-3 bg-secondary" />
-                                      {getFirstName(user?.name) ?? user?.name}
-                                    </Badge>
-                                  )}
-                                </div>
-                                {userAnswer && (
-                                  <div className="flex items-center gap-2 text-sm font-medium">
-                                    {/* <span className="text-gray-600">
+                        <div className="relative flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-gray-900 font-medium">
+                              {option}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 justify-end">
+                            <div className="flex gap-2 z-10">
+                              {isSelected && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-background text-foreground  rounded-full flex items-center gap-1"
+                                >
+                                  <div className="rounded-full h-3 w-3 bg-primary" />
+                                  You
+                                </Badge>
+                              )}
+                              {isOwnerChoice && userAnswer && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-background text-foreground rounded-full flex items-center gap-1"
+                                >
+                                  <div className="rounded-full h-3 w-3 bg-secondary" />
+                                  {getFirstName(user?.name) ?? user?.name}
+                                </Badge>
+                              )}
+                            </div>
+                            {userAnswer && (
+                              <div className="flex items-center gap-2 text-sm font-medium">
+                                {/* <span className="text-gray-600">
                                     {optionStats?.count}
                                   </span> */}
-                                    <span className="">
-                                      {optionStats?.percentage?.toFixed(1)}%
-                                    </span>
-                                  </div>
-                                )}
+                                <span className="">
+                                  {optionStats?.percentage?.toFixed(1)}%
+                                </span>
                               </div>
-                            </div>
-                          </button>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Comment Section */}
-                  {userAnswer && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className="space-y-3 pt-4 border-t border-gray-200"
-                    >
-                      {!showCommentBox ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={MessageSquare}
-                          disabled
-                          iconPlacement="left"
-                          onClick={() => {
-                            setShowCommentBox(true);
-                            setComment("");
-                          }}
-                          className="h-8 text-xs"
-                        >
-                          {/* {currentAnswer?.comment
-                            ? "Edit that Something"
-                            : } */}
-                          Say Something
-                        </Button>
-                      ) : (
-                        <div className="space-y-3">
-                          <Label
-                            htmlFor="comment"
-                            className="text-xs font-medium"
-                          >
-                            Add a comment (optional)
-                          </Label>
-                          <Textarea
-                            id="comment"
-                            placeholder="Share your thoughts..."
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            className="min-h-[60px] resize-none text-sm"
-                            maxLength={500}
-                          />
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500">
-                              {comment.length}/500
-                            </span>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setShowCommentBox(false)}
-                                className="h-7 text-xs"
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => {}}
-                                className="bg-purple-600 hover:bg-purple-700 h-7 text-xs"
-                              >
-                                Save
-                              </Button>
-                            </div>
+                            )}
                           </div>
                         </div>
-                      )}
-                      {/* {currentAnswer?.comment && !showCommentBox && (
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-700">
-                            {currentAnswer.comment}
-                          </p>
-                        </div>
-                      )} */}
+                      </button>
                     </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Comment Section */}
+              {userAnswer && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="space-y-3 pt-4 border-t border-gray-200"
+                >
+                  {!showCommentBox ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={MessageSquare}
+                      disabled
+                      iconPlacement="left"
+                      onClick={() => {
+                        setShowCommentBox(true);
+                        setComment("");
+                      }}
+                      className="h-8 text-xs"
+                    >
+                      {/* {currentAnswer?.comment
+                            ? "Edit that Something"
+                            : } */}
+                      Say Something
+                    </Button>
+                  ) : (
+                    <div className="space-y-3">
+                      <Label htmlFor="comment" className="text-xs font-medium">
+                        Add a comment (optional)
+                      </Label>
+                      <Textarea
+                        id="comment"
+                        placeholder="Share your thoughts..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        className="min-h-[60px] resize-none text-sm"
+                        maxLength={500}
+                      />
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">
+                          {comment.length}/500
+                        </span>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowCommentBox(false)}
+                            className="h-7 text-xs"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => {}}
+                            className="bg-purple-600 hover:bg-purple-700 h-7 text-xs"
+                          >
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </motion.div>
               )}
-            </AnimatePresence>
-          </div>
-          <div className="flex items-center justify-between mt-4">
-            <Button
-              icon={ChevronLeft}
-              iconPlacement="left"
-              onClick={handlePrevious}
-              disabled={currentPoll?.position === 1}
-              variant={"outline"}
-              size={"sm"}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <div className="flex items-center justify-between mt-4">
+        <Button
+          icon={ChevronLeft}
+          iconPlacement="left"
+          onClick={handlePrevious}
+          disabled={currentPoll?.position === 1}
+          variant={"outline"}
+          size={"sm"}
+        >
+          Previous
+        </Button>
+        <Button
+          className=""
+          icon={ChevronRight}
+          loading={finishQwirlSessionMutation.isPending}
+          iconPlacement="right"
+          onClick={handleNextSkipOrFinish}
+          variant={"outline"}
+          disabled={currentPoll?.position === polls?.length}
+          size={"sm"}
+        >
+          {getButtonText()}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const QwirlRespondLoading = () => {
+  return (
+    <div className="rounded-2xl border-2 p-4">
+      <div className="">
+        <Skeleton className="h-6 w-1/3 mb-4" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              className="bg-background text-foreground relative w-full p-3 rounded-xl z-10 text-left transition-all duration-200"
+              key={index}
             >
-              Previous
-            </Button>
-            <Button
-              className=""
-              icon={ChevronRight}
-              loading={finishQwirlSessionMutation.isPending}
-              iconPlacement="right"
-              onClick={handleNextSkipOrFinish}
-              variant={"outline"}
-              disabled={currentPoll?.position === polls?.length}
-              size={"sm"}
-            >
-              {getButtonText()}
-            </Button>
-          </div>
-        </>
-      )}
+              <Skeleton
+                className={clsx("h-6", {
+                  "w-3/4": index % 2 === 0,
+                  "w-1/2": index % 2 !== 0,
+                })}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

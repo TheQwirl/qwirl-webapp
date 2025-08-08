@@ -59,14 +59,14 @@ const ProfileSidebar = () => {
   return (
     <div className="space-y-6">
       {/* Suggested Users */}
-      <Card>
+      <Card className="bg-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Users className="h-5 w-5" />
             People you may know
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="flex flex-col space-y-3">
           {suggestedUsers.map((user) => (
             <UserCard key={user.id} user={user} variant="suggestion" />
           ))}
@@ -77,7 +77,7 @@ const ProfileSidebar = () => {
       </Card>
 
       {/* Trending Qwirls */}
-      <Card>
+      <Card className="bg-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
@@ -109,7 +109,7 @@ const ProfileSidebar = () => {
       </Card>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="bg-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Quick Actions</CardTitle>
         </CardHeader>
@@ -139,7 +139,7 @@ const ProfileSidebar = () => {
 export const ProfileSidebarLoading = () => {
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -156,7 +156,7 @@ export const ProfileSidebarLoading = () => {
           </Button>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="bg-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
@@ -188,7 +188,7 @@ export const ProfileSidebarLoading = () => {
           </Button>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="bg-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Quick Actions</CardTitle>
         </CardHeader>

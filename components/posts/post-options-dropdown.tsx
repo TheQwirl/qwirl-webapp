@@ -14,6 +14,9 @@ import { useConfirmationModal } from "@/stores/useConfirmationModal";
 import { Post } from "@/types/posts";
 import clsx from "clsx";
 import $api from "@/lib/api/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { authStore } from "@/stores/useAuthStore";
+import { toast } from "sonner";
 
 type PostOptionsDropdownProps = {
   post: Post;
@@ -25,11 +28,13 @@ export const PostOptionsDropdown: React.FC<PostOptionsDropdownProps> = ({
   className,
 }) => {
   const { show } = useConfirmationModal();
+  const queryClient = useQueryClient();
+  const { user } = authStore();
 
   const deleteMutation = $api.useMutation("delete", "/post/{post_id}");
+  const queryKey = React.useMemo(() => ["feed"], []);
 
   const handleShare = () => {
-    // Placeholder: open share modal or copy link
     console.log("Share post", post);
   };
 
@@ -40,7 +45,30 @@ export const PostOptionsDropdown: React.FC<PostOptionsDropdownProps> = ({
       confirmLabel: "Delete",
       cancelLabel: "Cancel",
       onConfirm: () => {
-        deleteMutation.mutateAsync({ params: { path: { post_id: post.id } } });
+        toast.loading("Deleting Post...", {
+          id: "delete-post",
+        });
+        return deleteMutation.mutateAsync(
+          { params: { path: { post_id: post.id } } },
+          {
+            onSuccess: async () => {
+              toast.success("Post deleted successfully!", {
+                id: "delete-post",
+              });
+              await queryClient.invalidateQueries({
+                queryKey,
+              });
+              await queryClient.invalidateQueries({
+                queryKey: ["posts", user?.id],
+              });
+            },
+            onError: () => {
+              toast.error("Failed to delete post. Please try again.", {
+                id: "delete-post",
+              });
+            },
+          }
+        );
       },
     });
   };
@@ -52,7 +80,14 @@ export const PostOptionsDropdown: React.FC<PostOptionsDropdownProps> = ({
       confirmLabel: "Report",
       cancelLabel: "Cancel",
       onConfirm: () => {
-        console.log("Report post", post);
+        return new Promise((resolve) =>
+          setTimeout(() => {
+            toast.success("Post reported successfully!", {
+              id: "report-post",
+            });
+            resolve();
+          }, 1000)
+        );
         // Implement report logic here
       },
     });

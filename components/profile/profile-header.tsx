@@ -55,7 +55,6 @@ const ProfileHeader = ({
       "/users/{user_id}",
       {
         params: { path: { user_id: initialUser?.id ?? 0 } },
-        // initialData: initialUser,
       },
     ],
     [initialUser?.id]
@@ -82,6 +81,7 @@ const ProfileHeader = ({
       enabled: !!initialUser?.id,
     }
   );
+
   const isDataLoading = isLoading || (isQueryLoading && !user);
 
   const wavelength =
@@ -132,6 +132,8 @@ const ProfileHeader = ({
   const handleFollow = () => {
     if (user && profileOf === "other") {
       toggleFollow(user.relationship?.is_following ?? false);
+    } else {
+      toast.error("You cannot follow yourself.");
     }
   };
 
@@ -185,9 +187,9 @@ const ProfileHeader = ({
             <div className="flex items-center gap-4 flex-col md:flex-row">
               <div className="flex-shrink-0">{renderUserAvatar()}</div>
               <div className="flex-1">
-                <div className="flex items-center justify-between flex-col md:flex-row gap-y-4">
+                <div className="flex text-center lg:text-left items-center justify-between flex-col md:flex-row gap-y-4">
                   <div>
-                    <h1 className="text-2xl font-semibold whitespace-nowrap">
+                    <h1 className="text-2xl font-semibold whitespace-nowrap max-w-48 truncate">
                       {user?.name}
                     </h1>
                     <div className="text-muted-foreground text-xs">

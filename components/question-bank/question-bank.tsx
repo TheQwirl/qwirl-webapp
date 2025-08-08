@@ -141,6 +141,8 @@ export function QuestionBank({ onQuestionSelect }: QuestionBankProps) {
                   key={question.id}
                   answers={question.options}
                   question={question.question_text}
+                  tags={question.tags}
+                  category={question.category_name}
                   customActions={
                     <Button
                       onClick={() => onQuestionSelect(question)}

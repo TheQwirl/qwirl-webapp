@@ -1,13 +1,13 @@
 "use client";
 import clsx from "clsx";
 import { Edit3, Eye, LayoutGrid, PlusIcon } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 import { RadialProgress } from "@/components/ui/radial-progress";
 import HorizontalBarGraph from "@/components/ui/horizontal-bar-graph";
 import PageHeader from "@/components/layout/page-header";
 import { Label } from "@/components/ui/label";
 import { ViewToggle } from "@/components/icon-toggle";
-import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
+import { useQwirlEditor, ViewMode } from "@/hooks/qwirl/useQwirlEditor";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,17 +15,17 @@ import VerticalEditView from "@/components/qwirl/vertical-edit-view";
 import AddPollDialog from "@/components/qwirl/add-poll-dialog";
 import SingleCardView from "@/components/qwirl/single-card-view";
 
-type ViewMode = "edit" | "view";
 const MAX_POLL_COUNT = 15;
 
 const PrimaryQwirlEditor = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>("edit");
   const {
     polls,
     setShowAddDialog,
     addPollToQwirlMutation,
     handleAddPoll,
     showAddDialog,
+    viewMode,
+    setViewMode,
   } = useQwirlEditor();
 
   return (
@@ -65,7 +65,7 @@ const PrimaryQwirlEditor = () => {
           />
 
           <div className="relative grid grid-cols-12 gap-5 py-8">
-            <div className="overflow-y-hidden col-span-full lg:col-span-full px-4 pb-4 space-y-4">
+            <div className="overflow-hidden col-span-full lg:col-span-full px-4 pb-4 space-y-4">
               <Card className="">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-3 flex-wrap justify-center lg:justify-between lg:flex-nowrap">
@@ -108,13 +108,13 @@ const PrimaryQwirlEditor = () => {
 
         <div className="hidden lg:block lg:sticky  lg:top-1 lg:col-span-3 py-7">
           <div className="col-span-full max-h-fit lg:col-span-4 lg:sticky lg:top-4 flex flex-col gap-6">
-            <div className="flex p-4 rounded-2xl  border  border-gray-300 flex-col items-center justify-center">
+            <div className="flex p-4 rounded-2xl  border flex-col items-center justify-center">
               <div className="text-lg font-semibold text-center">
                 Qwirl Completed
               </div>
               <RadialProgress current={polls?.length} total={MAX_POLL_COUNT} />
             </div>
-            <div className=" flex p-4 rounded-2xl border  border-gray-300 flex-col items-center justify-center">
+            <div className=" flex p-4 rounded-2xl border flex-col items-center justify-center">
               <div className="text-lg font-semibold text-center">
                 Qwirl Split
               </div>

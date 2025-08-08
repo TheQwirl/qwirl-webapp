@@ -6,7 +6,8 @@ import Empty from "../empty";
 import Image from "next/image";
 import { components } from "@/lib/api/v1";
 import { MyUser, OtherUser } from "./types";
-import { useProfile } from "@/contexts/ProfileForContext";
+import { useProfileStore } from "@/stores/profile-store";
+import { authStore } from "@/stores/useAuthStore";
 
 type User = {
   id: number;
@@ -22,7 +23,8 @@ type Users = components["schemas"]["UserFollowerResponse"][];
 export default function PeoplesTab() {
   const [activeTab, setActiveTab] = useState("friends");
 
-  const { user } = useProfile();
+  const { user } = useProfileStore();
+
   return (
     <div className="">
       <div className="mb-4">
@@ -63,6 +65,7 @@ export const UserList = ({
 }) => {
   const observer = useRef<IntersectionObserver | null>(null);
   const endpoint = tabToEndpoints[endpointKey];
+  const { user: loggedInUser } = authStore();
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
     $api.useInfiniteQuery(
       "get",
@@ -123,16 +126,15 @@ export const UserList = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-y-4">
       {users.map((u, index) => {
-        console.log(u, user, u?.name);
         return (
           <UserCard
             ref={index === users.length - 1 ? lastElementRef : null}
             key={`${u.id}-${index}`}
             user={u}
             variant="detailed"
-            showActions={u?.id !== user?.id}
+            showActions={u?.id !== loggedInUser?.id}
           />
         );
       })}

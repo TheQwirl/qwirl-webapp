@@ -78,34 +78,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/users/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get User Profile */
-        get: operations["get_user_profile_api_v1_users_me_get"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete User Account
-         * @description Delete the authenticated user's account
-         *
-         *     Args:
-         *         hard_delete: If True, permanently removes all user data. If False, soft-deletes the account.
-         *
-         *     Returns:
-         *         No content on success
-         */
-        delete: operations["delete_user_account_api_v1_users_me_delete"];
-        options?: never;
-        head?: never;
-        /** Update User */
-        patch: operations["update_user_api_v1_users_me_patch"];
-        trace?: never;
-    };
     "/api/v1/users/avatar": {
         parameters: {
             query?: never;
@@ -189,9 +161,91 @@ export interface paths {
          *         user_id: ID of the user to retrieve
          *
          *     Returns:
-         *         User profile with relationship status information
+         *         User profile with relationship status information (using denormalized counts)
          */
         get: operations["get_user_by_id_api_v1_users__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User Profile
+         * @description Return user profile with denormalized counts
+         */
+        get: operations["get_user_profile_api_v1_users_me_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete User Account
+         * @description Delete the authenticated user's account
+         *
+         *     Args:
+         *         hard_delete: If True, permanently removes all user data. If False, soft-deletes the account.
+         *
+         *     Returns:
+         *         No content on success
+         */
+        delete: operations["delete_user_account_api_v1_users_me_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update User
+         * @description Update user and return updated profile with denormalized counts
+         */
+        patch: operations["update_user_api_v1_users_me_patch"];
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/top-wavelengths": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User Top Wavelengths
+         * @description Get users with the highest wavelength scores for a specific user
+         *
+         *     Args:
+         *         user_id: ID of the user to get top wavelengths for
+         *         limit: Maximum number of results to return (1-50)
+         *         current_user: The authenticated user making the request
+         *
+         *     Returns:
+         *         List of users sorted by highest wavelength scores with relationship information
+         */
+        get: operations["get_user_top_wavelengths_api_v1_users__user_id__top_wavelengths_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/top-wavelengths-simple": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User Top Wavelengths Simple
+         * @description Get users with the highest wavelength scores (simplified response)
+         */
+        get: operations["get_user_top_wavelengths_simple_api_v1_users__user_id__top_wavelengths_simple_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1000,6 +1054,8 @@ export interface components {
         };
         /** OptionItem */
         OptionItem: {
+            /** Option Index */
+            option_index: number;
             /** Option Id */
             option_id: number;
             /** Option Text */
@@ -1355,6 +1411,8 @@ export interface components {
         };
         /** ResultItem */
         ResultItem: {
+            /** Option Index */
+            option_index: number;
             /** Option Id */
             option_id: number;
             /** Option Text */
@@ -1392,6 +1450,13 @@ export interface components {
             selected_answer: string;
             /** Comment */
             comment?: string | null;
+        };
+        /** TopWavelengthsResponse */
+        TopWavelengthsResponse: {
+            /** Users */
+            users: components["schemas"]["WavelengthUserResponse"][];
+            /** Total Count */
+            total_count: number;
         };
         /** UserFollowerResponse */
         UserFollowerResponse: {
@@ -1468,6 +1533,19 @@ export interface components {
         VoteRequest: {
             /** Poll Option Id */
             poll_option_id: number;
+        };
+        /** WavelengthUserResponse */
+        WavelengthUserResponse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string | null;
+            /** Username */
+            username: string;
+            /** Avatar */
+            avatar: string | null;
+            /** Wavelength Score */
+            wavelength_score: number;
         };
         /** UserResponse */
         api__feed__schema__UserResponse: {
@@ -1642,104 +1720,6 @@ export interface operations {
             };
         };
     };
-    get_user_profile_api_v1_users_me_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                access_token?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["api__user__schemas__UserResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    delete_user_account_api_v1_users_me_delete: {
-        parameters: {
-            query?: {
-                /** @description Whether to permanently delete all user data */
-                hard_delete?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: {
-                access_token?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    update_user_api_v1_users_me_patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                access_token?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserUpdate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["api__user__schemas__UserResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     upload_profile_image_api_v1_users_avatar_post: {
         parameters: {
             query?: never;
@@ -1861,6 +1841,175 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserWithRelationshipResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_user_profile_api_v1_users_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["api__user__schemas__UserResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_user_account_api_v1_users_me_delete: {
+        parameters: {
+            query?: {
+                /** @description Whether to permanently delete all user data */
+                hard_delete?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_user_api_v1_users_me_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["api__user__schemas__UserResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_user_top_wavelengths_api_v1_users__user_id__top_wavelengths_get: {
+        parameters: {
+            query?: {
+                /** @description Maximum number of results to return */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserWithRelationshipResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_user_top_wavelengths_simple_api_v1_users__user_id__top_wavelengths_simple_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopWavelengthsResponse"];
                 };
             };
             /** @description Validation Error */

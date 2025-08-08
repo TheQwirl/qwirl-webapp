@@ -1,17 +1,27 @@
+"use client";
+
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TabViewProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  onTabChange?: (tabValue: string) => void;
 }
 
-export default function TabView({ activeTab, setActiveTab }: TabViewProps) {
+export default function TabView({ activeTab, onTabChange }: TabViewProps) {
+  const handleTabChange = (tabValue: string) => {
+    onTabChange?.(tabValue);
+  };
+
   return (
     <div className="mb-8">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="w-full"
+      >
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="posts">Posts</TabsTrigger>
           <TabsTrigger value="myQwirl">My Qwirl</TabsTrigger>
+          <TabsTrigger value="posts">Posts</TabsTrigger>
           <TabsTrigger value="myPeople">My People</TabsTrigger>
         </TabsList>
       </Tabs>

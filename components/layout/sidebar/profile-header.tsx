@@ -8,7 +8,7 @@ const ProfileHeader = () => {
   const { user } = authStore();
   return (
     <SidebarHeader>
-      <div className="flex items-center justify-center flex-col">
+      <div className="flex items-center justify-center flex-col text-center">
         {user ? (
           <>
             <UserAvatar
@@ -16,10 +16,13 @@ const ProfileHeader = () => {
               image={user?.avatar ?? ""}
               size={"lg"}
               className="object-cover text-xl"
+              linkTo={`/profile/${user?.id}`}
             />
-            <div className="font-bold text-lg mt-3">{user?.name}</div>
+            <div className="font-bold text-lg mt-3 truncate max-w-full">
+              {user?.name}
+            </div>
             <div className="text-muted-foreground text-xs">
-              @{user?.username}
+              {user?.username}
             </div>
           </>
         ) : (

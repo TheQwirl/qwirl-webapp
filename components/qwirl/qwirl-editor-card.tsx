@@ -8,7 +8,6 @@ import { Card, CardContent } from "../ui/card";
 import { GripVertical, ImageIcon, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import clsx from "clsx";
-import DeleteConfirmationDialog from "../delete-confirmation-dialog";
 import { Skeleton } from "../ui/skeleton";
 
 type Props = {
@@ -22,7 +21,6 @@ const QwirlEditorCard: React.FC<Props> = ({
   poll,
   className,
   handleDelete,
-  isDeleting = false,
 }) => {
   return (
     <motion.div
@@ -99,42 +97,26 @@ const QwirlEditorCard: React.FC<Props> = ({
                 </Badge>
                 <span>{poll.options.length} options</span>
                 <div className="flex-shrink-0 block lg:hidden">
-                  <DeleteConfirmationDialog
-                    onConfirm={handleDelete}
-                    title="Delete Poll"
-                    description="Are you sure you want to delete this poll? This action cannot be undone. All relevant statistics and data will be permanently removed."
-                    isSubmitting={isDeleting}
-                    trigger={
-                      <Button
-                        variant="destructive"
-                        loading={isDeleting}
-                        className="!py-2 !px-2 !rounded-md !text-xs !h-8 !w-8 shadow-none"
-                      >
-                        <Trash2 className="h-2 w-2" />
-                      </Button>
-                    }
-                  />
+                  <Button
+                    variant="destructive"
+                    onClick={handleDelete}
+                    className="!py-2 !px-2 !rounded-md !text-xs !h-8 !w-8 shadow-none"
+                  >
+                    <Trash2 className="h-2 w-2" />
+                  </Button>
                 </div>
               </div>
             </div>
 
             <div className="flex-shrink-0 hidden lg:block">
-              <DeleteConfirmationDialog
-                onConfirm={handleDelete}
-                title="Delete Poll"
-                description="Are you sure you want to delete this poll? This action cannot be undone. All relevant statistics and data will be permanently removed."
-                isSubmitting={isDeleting}
-                trigger={
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    loading={isDeleting}
-                    className=""
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                }
-              />
+              <Button
+                onClick={handleDelete}
+                variant="destructive"
+                size="sm"
+                className=""
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </CardContent>

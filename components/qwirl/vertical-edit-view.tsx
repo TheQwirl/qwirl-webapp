@@ -21,7 +21,7 @@ const VerticalEditView = () => {
 
   if (qwirlQuery?.data?.items?.length === 0) {
     return (
-      <Card className="border-0 shadow-lg">
+      <Card className="border-0 shadow-lg bg-white overflow-none">
         <CardContent className="p-12 text-center">
           <div className="text-gray-500">
             <GripVertical className="mx-auto h-12 w-12 mb-4 opacity-50" />

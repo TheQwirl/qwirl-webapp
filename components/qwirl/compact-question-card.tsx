@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ThumbsUp, Repeat, Plus } from "lucide-react";
-import { UserAvatar } from "../user-avatar";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
 
 interface CompactQuestionCardProps {
@@ -16,6 +16,8 @@ interface CompactQuestionCardProps {
   };
   className?: string;
   customActions?: React.ReactNode;
+  category?: string;
+  tags?: string[];
 }
 
 export const CompactQuestionCard = React.forwardRef<
@@ -31,6 +33,8 @@ export const CompactQuestionCard = React.forwardRef<
       creator,
       className,
       customActions,
+      category,
+      tags,
     },
     ref
   ) => {
@@ -43,16 +47,38 @@ export const CompactQuestionCard = React.forwardRef<
         )}
       >
         <CardContent className="p-5 md:p-6">
+          {category && (
+            <div className="mb-3">
+              <Badge variant="secondary" className="text-xs font-medium">
+                {category}
+              </Badge>
+            </div>
+          )}
+
           <h3 className="text-lg font-semibold text-foreground mb-3">
             {question}
           </h3>
+
+          {tags && tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {tags.map((tag, index) => (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="text-xs px-2 py-0.5 bg-muted/30 hover:bg-muted/50 transition-colors"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           <div className="space-y-2 mb-4">
             {answers.map((answer, index) => (
               <div
                 key={index}
                 className={clsx(
-                  " bg-background flex items-center justify-between flex-wrap text-foreground w-full p-3 rounded-xl z-10 border text-left transition-all duration-200"
+                  " bg-background flex items-center justify-between flex-wrap text-foreground w-full p-2 rounded-xl z-10 border text-left transition-all duration-200"
                 )}
               >
                 <span className="text-gray-900 font-medium">{answer}</span>
@@ -76,11 +102,11 @@ export const CompactQuestionCard = React.forwardRef<
               )}
               {creator ? (
                 <div className="flex items-center space-x-2">
-                  <UserAvatar
-                    size="xs"
-                    image={creator.avatarUrl}
-                    name={creator.username}
-                  />
+                  <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-[8px] font-medium text-primary">
+                      {creator.username.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
                   <span className="text-xs">{creator.username}</span>
                 </div>
               ) : (

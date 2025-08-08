@@ -83,6 +83,7 @@ export function PollOptions({ options, append, remove }: PollOptionsProps) {
               render={({ field }) => (
                 <Input
                   {...field}
+                  autoComplete="off"
                   maxLength={60}
                   placeholder={`Option ${index + 1}`}
                   className="flex-1 text-sm sm:text-base"
