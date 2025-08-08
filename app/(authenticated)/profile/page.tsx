@@ -3,12 +3,19 @@ import ProfileHeader from "@/components/profile/profile-header";
 import ProfileTabs from "@/components/profile/profile-tabs";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { MyUser } from "@/components/profile/types";
+import ProfileStoreInitializer from "./_components/profile-store-initializer";
+import { serverFetchClient } from "@/lib/api/server";
 
 const Profile = async () => {
   const cookieStore = await cookies();
-  const userCookie = cookieStore.get("user")?.value;
-  const user: MyUser = userCookie ? JSON.parse(userCookie) : null;
+  const accessToken = cookieStore.get("access-token")?.value;
+
+  const userResponse = await serverFetchClient.GET("/api/v1/users/me", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const user = userResponse?.data;
 
   if (!user?.id) {
     return (
@@ -30,17 +37,25 @@ const Profile = async () => {
   }
 
   return (
-    <div className="grid grid-cols-12 gap-6">
-      <div className="col-span-full md:col-span-8">
-        <ProfileHeader profileOf="self" initialUser={user} isLoading={false} />
-        <div className="mt-6 pl-5 pb-10">
-          <ProfileTabs profileFor="self" user={user!} />
+    <>
+      <ProfileStoreInitializer profileFor="self" user={user} />
+
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-full md:col-span-8">
+          <ProfileHeader
+            profileOf="self"
+            initialUser={user}
+            isLoading={false}
+          />
+          <div className="mt-6 pl-5 pb-10">
+            <ProfileTabs />
+          </div>
+        </div>
+        <div className="col-span-full md:col-span-4">
+          <ProfileSidebar />
         </div>
       </div>
-      <div className="col-span-full md:col-span-4">
-        <ProfileSidebar />
-      </div>
-    </div>
+    </>
   );
 };
 

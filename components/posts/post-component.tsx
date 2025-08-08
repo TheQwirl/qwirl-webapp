@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useState } from "react";
+import { forwardRef, memo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -175,7 +175,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                                 }}
                                 transition={{
                                   delay: 0.2 + index * 0.1,
-                                  duration: 0.5,
+                                  duration: 0.1,
                                   ease: "easeInOut",
                                   bounce: 0.5,
                                 }}
@@ -213,9 +213,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                                   {/* <span className="text-gray-600">
                                     {optionResult.vote_count}
                                   </span> */}
-                                  <span className="text-purple-600">
-                                    {percentage}%
-                                  </span>
+                                  <span className="">{percentage}%</span>
                                 </div>
                               )}
                             </div>
@@ -363,4 +361,4 @@ export const PostComponentLoading = () => {
 };
 
 PostComponent.displayName = "PostComponent";
-export default PostComponent;
+export default memo(PostComponent);

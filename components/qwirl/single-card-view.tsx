@@ -34,24 +34,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { SingleCardNavigationDots } from "./single-card-navigation-dots";
 
 const SingleCardView = () => {
   const { qwirlQuery, handleReorder, handleDelete } = useQwirlEditor();
   const [showComments, setShowComments] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentPollId, setCurrentPollId] = useState<number | null>(null);
 
-  const polls = qwirlQuery?.data?.items
-    ? [...qwirlQuery.data.items].sort((a, b) => a.position - b.position)
-    : [];
-  const currentPoll = qwirlQuery?.data?.items?.[currentIndex];
+  const polls = React.useMemo(
+    () =>
+      qwirlQuery?.data?.items
+        ? [...qwirlQuery.data.items].sort((a, b) => a.position - b.position)
+        : [],
+    [qwirlQuery?.data?.items]
+  );
+  const currentIndex =
+    currentPollId != null
+      ? polls.findIndex((poll) => poll.id === currentPollId)
+      : 0;
+  const currentPoll = polls?.[currentIndex] || null;
+
+  React.useEffect(() => {
+    if (polls.length && currentPollId === null) {
+      setCurrentPollId(polls?.[0]?.id || null);
+    }
+  }, [polls, currentPollId]);
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => Math.max(0, prev - 1));
+    const index = polls.findIndex((p) => p.id === currentPollId);
+    if (index > 0) {
+      setCurrentPollId(polls?.[index - 1]?.id || null);
+    }
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => Math.min((polls?.length ?? 0) - 1, prev + 1));
+    const index = polls.findIndex((p) => p.id === currentPollId);
+    if (index < polls.length - 1) {
+      setCurrentPollId(polls?.[index + 1]?.id || null);
+    }
   };
 
   useKeyboardNavigation(
@@ -62,134 +83,53 @@ const SingleCardView = () => {
     polls.length > 0
   );
 
-  const handlingDelete = useCallback(() => {
-    if (currentPoll) {
-      handleDelete(currentPoll?.id);
-      if (currentIndex >= polls.length - 1) {
-        setCurrentIndex(Math.max(0, currentIndex - 1));
+  const handlingDelete = useCallback(async () => {
+    if (!currentPoll) return;
+
+    const currentIndex = polls.findIndex((p) => p.id === currentPoll.id);
+
+    await handleDelete(currentPoll.id);
+
+    const remainingPolls = polls.filter((p) => p.id !== currentPoll.id);
+
+    if (remainingPolls.length === 0) {
+      setCurrentPollId(null);
+    } else {
+      if (currentIndex >= remainingPolls.length) {
+        setCurrentPollId(remainingPolls[remainingPolls.length - 1]?.id || null);
+      } else {
+        setCurrentPollId(remainingPolls[currentIndex]?.id || null);
       }
     }
-  }, [currentPoll, handleDelete, currentIndex, polls.length]);
-
-  const movePoll = (fromIndex: number, toIndex: number) => {
-    const newPolls = [...polls];
-    const [movedPoll] = newPolls.splice(fromIndex, 1);
-    if (movedPoll) newPolls.splice(toIndex, 0, movedPoll);
-    handleReorder(newPolls);
-  };
+  }, [currentPoll, handleDelete, polls]);
 
   const handleMoveUp = () => {
     if (currentIndex > 0) {
-      movePoll(currentIndex, currentIndex - 1);
-      setCurrentIndex(currentIndex - 1);
+      const newPolls = [...polls];
+      const [movedPoll] = newPolls.splice(currentIndex, 1);
+      if (movedPoll) {
+        newPolls.splice(currentIndex - 1, 0, movedPoll);
+        handleReorder(newPolls);
+        setCurrentPollId(movedPoll?.id);
+      }
     }
   };
 
   const handleMoveDown = () => {
     if (currentIndex < polls.length - 1) {
-      movePoll(currentIndex, currentIndex + 1);
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const renderNavigationDots = () => {
-    const totalPolls = polls.length;
-
-    if (totalPolls <= 10) {
-      return (
-        <div className="flex justify-center gap-2">
-          {polls.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-3 h-3 rounded-full transition-colors duration-200 ${
-                index === currentIndex
-                  ? "bg-primary"
-                  : "bg-gray-300 hover:bg-gray-400"
-              }`}
-            />
-          ))}
-        </div>
-      );
-    } else {
-      // Show condensed version for more than 10 polls
-      const showStart = currentIndex <= 3;
-      const showEnd = currentIndex >= totalPolls - 4;
-      const showMiddle = !showStart && !showEnd;
-
-      return (
-        <div className="flex justify-center items-center gap-2">
-          {(showStart || showMiddle) && (
-            <>
-              {Array.from({
-                length: showStart ? Math.min(5, totalPolls) : 2,
-              }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`w-3 h-3 rounded-full transition-colors duration-200 ${
-                    index === currentIndex
-                      ? "bg-primary"
-                      : "bg-gray-300 hover:bg-gray-400"
-                  }`}
-                />
-              ))}
-              {!showStart && <span className="text-gray-400 px-1">...</span>}
-            </>
-          )}
-
-          {/* Middle dots */}
-          {showMiddle && (
-            <>
-              {Array.from({ length: 3 }).map((_, index) => {
-                const dotIndex = currentIndex - 1 + index;
-                return (
-                  <button
-                    key={dotIndex}
-                    onClick={() => setCurrentIndex(dotIndex)}
-                    className={`w-3 h-3 rounded-full transition-colors duration-200 ${
-                      dotIndex === currentIndex
-                        ? "bg-purple-600"
-                        : "bg-gray-300 hover:bg-gray-400"
-                    }`}
-                  />
-                );
-              })}
-              <span className="text-gray-400 px-1">...</span>
-            </>
-          )}
-
-          {/* Last few dots */}
-          {(showEnd || showMiddle) && (
-            <>
-              {Array.from({
-                length: showEnd ? Math.min(5, totalPolls) : 2,
-              }).map((_, index) => {
-                const dotIndex = showEnd
-                  ? totalPolls - (showEnd ? Math.min(5, totalPolls) : 2) + index
-                  : totalPolls - 2 + index;
-                return (
-                  <button
-                    key={dotIndex}
-                    onClick={() => setCurrentIndex(dotIndex)}
-                    className={`w-3 h-3 rounded-full transition-colors duration-200 ${
-                      dotIndex === currentIndex
-                        ? "bg-purple-600"
-                        : "bg-gray-300 hover:bg-gray-400"
-                    }`}
-                  />
-                );
-              })}
-            </>
-          )}
-        </div>
-      );
+      const newPolls = [...polls];
+      const [movedPoll] = newPolls.splice(currentIndex, 1);
+      if (movedPoll) {
+        newPolls.splice(currentIndex + 1, 0, movedPoll);
+        handleReorder(newPolls);
+        setCurrentPollId(movedPoll?.id);
+      }
     }
   };
 
   if (polls?.length === 0) {
     return (
-      <Card className="border-0 shadow-lg">
+      <Card className="border-0 shadow-lg bg-white overflow-none">
         <CardContent className="p-12 text-center">
           <div className="text-gray-500">
             <ChevronLeft className="mx-auto h-12 w-12 mb-4 opacity-50" />
@@ -409,7 +349,13 @@ const SingleCardView = () => {
               )}
             </AnimatePresence>
 
-            <div className="pt-4">{renderNavigationDots()}</div>
+            <div className="pt-4">
+              <SingleCardNavigationDots
+                polls={polls}
+                currentIndex={currentIndex}
+                setCurrentPollId={setCurrentPollId}
+              />
+            </div>
             {showComments && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}

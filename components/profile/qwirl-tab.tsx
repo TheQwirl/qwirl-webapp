@@ -1,10 +1,11 @@
+import React from "react";
 import { UserAvatar } from "../user-avatar";
 import QwirlRespond from "../qwirl/qwirl-respond";
-import { useProfile } from "@/contexts/ProfileForContext";
 import { OwnQwirlPreview } from "../qwirl/own-qwirl-preview";
+import { useProfileStore } from "@/stores/profile-store";
 
-export default function QwirlTab() {
-  const { user, profileFor } = useProfile();
+function QwirlTabInner() {
+  const { user, profileFor } = useProfileStore();
   return (
     <div className="bg-white p-4 rounded-2xl space-y-4">
       <div className="flex items-center gap-3">
@@ -25,7 +26,6 @@ export default function QwirlTab() {
         <QwirlRespond user={user} />
       ) : (
         <OwnQwirlPreview
-          // dummy data
           qwirl={{
             id: "1",
             createdAt: new Date(),
@@ -45,3 +45,6 @@ export default function QwirlTab() {
     </div>
   );
 }
+
+const QwirlTab = React.memo(QwirlTabInner);
+export default QwirlTab;

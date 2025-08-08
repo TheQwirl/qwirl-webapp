@@ -5,7 +5,7 @@ export type ConfirmationModalProps = {
   description?: React.ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
 };
 
 type ConfirmationModalStore = {
@@ -13,11 +13,15 @@ type ConfirmationModalStore = {
   data: ConfirmationModalProps | null;
   show: (data: ConfirmationModalProps) => void;
   hide: () => void;
+  isSubmitting: boolean;
+  setSubmitting: (isSubmitting: boolean) => void;
 };
 
 export const useConfirmationModal = create<ConfirmationModalStore>((set) => ({
   isOpen: false,
   data: null,
   show: (data) => set({ isOpen: true, data }),
-  hide: () => set({ isOpen: false, data: null }),
+  hide: () => set({ isOpen: false, data: null, isSubmitting: false }),
+  isSubmitting: false,
+  setSubmitting: (isSubmitting: boolean) => set({ isSubmitting }),
 }));

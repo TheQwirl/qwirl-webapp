@@ -12,9 +12,10 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { useConfirmationModal } from "@/stores/useConfirmationModal";
+import { Loader2 } from "lucide-react";
 
 export const ConfirmationModal = () => {
-  const { isOpen, data, hide } = useConfirmationModal();
+  const { isOpen, data, hide, isSubmitting } = useConfirmationModal();
 
   if (!data) return null;
 
@@ -26,8 +27,8 @@ export const ConfirmationModal = () => {
     cancelLabel = "Cancel",
   } = data;
 
-  const handleConfirm = () => {
-    onConfirm();
+  const handleConfirm = async () => {
+    await onConfirm();
     hide();
   };
 
@@ -41,9 +42,18 @@ export const ConfirmationModal = () => {
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm}>
-            {confirmLabel}
+          <AlertDialogCancel disabled={isSubmitting}>
+            {cancelLabel}
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirm} disabled={isSubmitting}>
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {confirmLabel}
+              </div>
+            ) : (
+              confirmLabel
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

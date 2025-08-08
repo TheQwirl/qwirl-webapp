@@ -4,9 +4,15 @@ import $api from "@/lib/api/client";
 import { Qwirl, QwirlItem } from "@/components/qwirl/types";
 import { useState } from "react";
 import { QwirlPollData } from "@/components/qwirl/schema";
+import { useConfirmationModal } from "@/stores/useConfirmationModal";
+
+export type ViewMode = "edit" | "view";
 
 export function useQwirlEditor() {
   const queryClient = useQueryClient();
+  const [viewMode, setViewMode] = useState<ViewMode>("edit");
+  const { show } = useConfirmationModal();
+
   const queryKey = ["get", "/qwirl/me"];
   const [showAddDialog, setShowAddDialog] = useState(false);
 
@@ -27,6 +33,13 @@ export function useQwirlEditor() {
           toast.success("Poll added successfully!", {
             id: "add-poll",
           });
+          if (viewMode === "edit") {
+            window.scrollTo({
+              top: document.body.scrollHeight,
+              left: 0,
+              behavior: "smooth",
+            });
+          }
           setShowAddDialog(false);
           await queryClient.invalidateQueries({
             queryKey: ["get", "/qwirl/me"],
@@ -51,27 +64,20 @@ export function useQwirlEditor() {
     "delete",
     "/qwirl/me/items/{item_id}",
     {
-      onMutate: async (variables) => {
-        await queryClient.cancelQueries({ queryKey });
-        const previousQwirlData = queryClient.getQueryData<Qwirl>(queryKey);
-        if (!previousQwirlData) return;
-        const newOptimisticItems = previousQwirlData?.items?.filter(
-          (item) => item.id !== variables.params.path.item_id
-        );
-        queryClient.setQueryData(queryKey, {
-          ...previousQwirlData,
-          items: newOptimisticItems,
-        });
-        return { previousQwirlData };
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({ queryKey });
-        toast.success("Poll deleted successfully!", { id: "delete-poll" });
-      },
+      // onMutate: async (variables) => {
+      //   await queryClient.cancelQueries({ queryKey });
+      //   const previousQwirlData = queryClient.getQueryData<Qwirl>(queryKey);
+      //   if (!previousQwirlData) return;
+      //   const newOptimisticItems = previousQwirlData?.items?.filter(
+      //     (item) => item.id !== variables.params.path.item_id
+      //   );
+      //   queryClient.setQueryData(queryKey, {
+      //     ...previousQwirlData,
+      //     items: newOptimisticItems,
+      //   });
+      //   return { previousQwirlData };
+      // },
       onError: (error) => {
-        toast.error("An error occurred while deleting the poll", {
-          id: "delete-poll",
-        });
         if ((error as { previousData: unknown })?.previousData) {
           queryClient.setQueryData(
             queryKey,
@@ -89,20 +95,22 @@ export function useQwirlEditor() {
       onMutate: async (variables) => {
         const reorderedPayload = variables.body;
         await queryClient.cancelQueries({ queryKey });
-        const previousQwirlData = queryClient.getQueryData<Qwirl>(queryKey);
-        if (!previousQwirlData) return;
 
-        const itemsMap = new Map(
-          previousQwirlData?.items?.map((item) => [item.id, item])
-        );
-        const newOptimisticItems = reorderedPayload.map(
-          (reorderedItem: { item_id: number }) =>
-            itemsMap.get(reorderedItem.item_id)!
-        );
+        const previousQwirlData = queryClient.getQueryData<Qwirl>(queryKey);
+        if (!previousQwirlData) return { previousQwirlData };
+
+        const updatedItems = previousQwirlData?.items?.map((item) => {
+          const newPos = reorderedPayload.find(
+            (r: { item_id: number; new_position: number }) =>
+              r.item_id === item.id
+          )?.new_position;
+
+          return newPos !== undefined ? { ...item, position: newPos } : item;
+        });
 
         queryClient.setQueryData(queryKey, {
           ...previousQwirlData,
-          items: newOptimisticItems,
+          items: updatedItems,
         });
 
         return { previousQwirlData };
@@ -121,6 +129,9 @@ export function useQwirlEditor() {
           );
         }
       },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey });
+      },
     }
   );
 
@@ -132,12 +143,88 @@ export function useQwirlEditor() {
     await reorderQwirlMutation.mutateAsync({ body: payload });
   };
 
-  const handleDelete = async (id: number) => {
-    if (!id) return;
-    toast.loading("Deleting poll...", { id: "delete-poll" });
-    await deleteMutation.mutateAsync({
-      params: { path: { item_id: id } },
+  const handleDelete = (id: number) => {
+    return new Promise<void>((resolve, reject) => {
+      show({
+        title: "Are you sure you want to delete this Qwirl Poll?",
+        description:
+          "This action is irreversible and all its votes will be lost.",
+        confirmLabel: "Delete",
+        cancelLabel: "Cancel",
+        onConfirm: async () => {
+          toast.loading("Deleting Poll...", {
+            id: "delete-qwirl-item",
+          });
+
+          try {
+            await deleteMutation.mutateAsync(
+              { params: { path: { item_id: id } } },
+              {
+                onSuccess: async () => {
+                  toast.success("Post deleted successfully!", {
+                    id: "delete-qwirl-item",
+                  });
+                  await queryClient.invalidateQueries({
+                    queryKey,
+                  });
+                  resolve();
+                },
+                onError: (error) => {
+                  toast.error("Failed to delete poll. Please try again.", {
+                    id: "delete-qwirl-item",
+                  });
+                  reject(error);
+                },
+              }
+            );
+          } catch (error) {
+            reject(error);
+          }
+        },
+      });
     });
+    // show({
+    //   title: "Are you sure you want to delete this Qwirl Poll?",
+    //   description:
+    //     "This action is irreversible and all its votes will be lost.",
+    //   confirmLabel: "Delete",
+    //   cancelLabel: "Cancel",
+    //   onConfirm: async () => {
+    //     toast.loading("Deleting Poll...", {
+    //       id: "delete-qwirl-item",
+    //     });
+
+    //     await deleteMutation.mutateAsync(
+    //       { params: { path: { item_id: id } } },
+    //       {
+    //         onSuccess: async () => {
+    //           toast.success("Post deleted successfully!", {
+    //             id: "delete-qwirl-item",
+    //           });
+    //           const previousQwirlData =
+    //             queryClient.getQueryData<Qwirl>(queryKey);
+    //           if (!previousQwirlData) return;
+    //           const newOptimisticItems = previousQwirlData?.items?.filter(
+    //             (item) => item.id !== id
+    //           );
+    //           queryClient.setQueryData(queryKey, {
+    //             ...previousQwirlData,
+    //             items: newOptimisticItems,
+    //           });
+
+    //           await queryClient.invalidateQueries({
+    //             queryKey,
+    //           });
+    //         },
+    //         onError: () => {
+    //           toast.error("Failed to delete poll. Please try again.", {
+    //             id: "delete-qwirl-item",
+    //           });
+    //         },
+    //       }
+    //     );
+    //   },
+    // });
   };
 
   return {
@@ -155,5 +242,7 @@ export function useQwirlEditor() {
     showAddDialog,
     setShowAddDialog,
     handleAddPoll,
+    viewMode,
+    setViewMode,
   };
 }
