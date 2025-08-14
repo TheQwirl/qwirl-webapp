@@ -30,7 +30,7 @@ const QwirlEditorCard: React.FC<Props> = ({
       transition={{ duration: 0.2 }}
       className={clsx(className)}
     >
-      <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-200 relative bg-white">
+      <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-200 relative">
         <CardContent className="p-5 md:p-6">
           <div className="flex items-start gap-4">
             <SortableList.DragHandle />

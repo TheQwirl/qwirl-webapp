@@ -2,39 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import UserCard, { UserCardLoading } from "@/components/user-card";
+import { UserCardLoading } from "@/components/user-card";
 import { Users, BookOpen, TrendingUp, Plus } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
+import SuggestedPeopleCard from "./suggested-people-card";
 
 const ProfileSidebar = () => {
-  // Mock data - replace with actual API calls
-  const suggestedUsers = [
-    {
-      id: 1,
-      name: "Alice Johnson",
-      username: "alice_j",
-      avatar: null,
-      mutualFriends: 5,
-      isFollowing: false,
-    },
-    {
-      id: 2,
-      name: "Bob Smith",
-      username: "bob_smith",
-      avatar: null,
-      mutualFriends: 3,
-      isFollowing: false,
-    },
-    {
-      id: 3,
-      name: "Carol Davis",
-      username: "carol_d",
-      avatar: null,
-      mutualFriends: 8,
-      isFollowing: true,
-    },
-  ];
-
   const trendingQwirls = [
     {
       id: 1,
@@ -59,22 +32,7 @@ const ProfileSidebar = () => {
   return (
     <div className="space-y-6">
       {/* Suggested Users */}
-      <Card className="bg-transparent">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            People you may know
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col space-y-3">
-          {suggestedUsers.map((user) => (
-            <UserCard key={user.id} user={user} variant="suggestion" />
-          ))}
-          <Button variant="ghost" className="w-full text-sm">
-            See all suggestions
-          </Button>
-        </CardContent>
-      </Card>
+      <SuggestedPeopleCard />
 
       {/* Trending Qwirls */}
       <Card className="bg-transparent">

@@ -1,14 +1,12 @@
-import PageHeader from "@/components/layout/page-header";
 import PostCreator from "@/components/posts/post-creator/post-creator";
-import clsx from "clsx";
 import ProfileSidebar from "@/components/profile/profile-sidebar";
 import { FeedTab } from "./_components/type";
 import { redirect } from "next/navigation";
-import FeedTabs from "./_components/feed-tabs";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Suspense } from "react";
 import FeedPostsList, { FeedPostsLoading } from "./_components/feed-posts-list";
 import FeedPostsListError from "./_components/feed-posts-list-error";
+import { PageLayout } from "@/components/layout/page-layout";
 
 const Feed = async ({
   searchParams,
@@ -23,28 +21,21 @@ const Feed = async ({
   }
 
   return (
-    <div className="grid grid-cols-12  sm:mt-0 gap-6">
-      <div className={clsx("col-span-full lg:col-span-8 flex flex-col h-full")}>
-        <PageHeader
-          pageTitle="Feed"
-          pageSubTitle="Check out the latest questions"
-          extraContent={<FeedTabs activeTab={activeTab} />}
-        />
-
-        <div className="pt-8">
-          <PostCreator />
-        </div>
-
-        <ErrorBoundary fallback={<FeedPostsListError />}>
-          <Suspense fallback={<FeedPostsLoading />} key={activeTab}>
-            <FeedPostsList tab={activeTab} />
-          </Suspense>
-        </ErrorBoundary>
-      </div>
-      <div className="col-span-4">
-        <ProfileSidebar />
-      </div>
-    </div>
+    <PageLayout
+      rightSidebar={<ProfileSidebar />}
+      backNavigation={{
+        title: "Feed",
+        subtitle: "Check out the latest questions",
+        hideBackButton: true,
+      }}
+    >
+      <PostCreator />
+      <ErrorBoundary fallback={<FeedPostsListError />}>
+        <Suspense fallback={<FeedPostsLoading />} key={activeTab}>
+          <FeedPostsList tab={activeTab} />
+        </Suspense>
+      </ErrorBoundary>
+    </PageLayout>
   );
 };
 

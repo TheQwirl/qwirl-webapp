@@ -108,7 +108,7 @@ const UserCard = React.forwardRef<HTMLDivElement, UserCardProps>(
             ref={ref}
             whileHover={{ scale: 1.02 }}
             onClick={(e) => onClick?.(e, user)}
-            className="p-3 rounded-lg border hover:shadow-md cursor-pointer transition-all"
+            className="bg-card text-card-foreground p-3 rounded-lg border hover:shadow-md cursor-pointer transition-all"
           >
             <div className="flex items-start gap-2">
               <UserAvatar
@@ -130,7 +130,7 @@ const UserCard = React.forwardRef<HTMLDivElement, UserCardProps>(
               </p>
             )} */}
               </div>
-              <div className="flex gap-1 mt-2 justify-end">
+              <div className="flex gap-1 justify-end">
                 <Button
                   size="sm"
                   variant={isFollowing ? "outline" : "default"}

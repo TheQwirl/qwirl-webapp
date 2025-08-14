@@ -2,15 +2,27 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import $api from "@/lib/api/client";
 import { Qwirl, QwirlItem } from "@/components/qwirl/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QwirlPollData } from "@/components/qwirl/schema";
 import { useConfirmationModal } from "@/stores/useConfirmationModal";
+import { useSearchParams } from "next/navigation";
 
 export type ViewMode = "edit" | "view";
 
 export function useQwirlEditor() {
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<ViewMode>("edit");
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "edit" || tabParam === "view") {
+      setViewMode(tabParam);
+    } else if (tabParam !== null) {
+      console.warn(`Invalid tab param: "${tabParam}". Defaulting to "edit".`);
+      setViewMode("edit");
+    }
+  }, [searchParams]);
   const { show } = useConfirmationModal();
 
   const queryKey = ["get", "/qwirl/me"];
@@ -183,48 +195,6 @@ export function useQwirlEditor() {
         },
       });
     });
-    // show({
-    //   title: "Are you sure you want to delete this Qwirl Poll?",
-    //   description:
-    //     "This action is irreversible and all its votes will be lost.",
-    //   confirmLabel: "Delete",
-    //   cancelLabel: "Cancel",
-    //   onConfirm: async () => {
-    //     toast.loading("Deleting Poll...", {
-    //       id: "delete-qwirl-item",
-    //     });
-
-    //     await deleteMutation.mutateAsync(
-    //       { params: { path: { item_id: id } } },
-    //       {
-    //         onSuccess: async () => {
-    //           toast.success("Post deleted successfully!", {
-    //             id: "delete-qwirl-item",
-    //           });
-    //           const previousQwirlData =
-    //             queryClient.getQueryData<Qwirl>(queryKey);
-    //           if (!previousQwirlData) return;
-    //           const newOptimisticItems = previousQwirlData?.items?.filter(
-    //             (item) => item.id !== id
-    //           );
-    //           queryClient.setQueryData(queryKey, {
-    //             ...previousQwirlData,
-    //             items: newOptimisticItems,
-    //           });
-
-    //           await queryClient.invalidateQueries({
-    //             queryKey,
-    //           });
-    //         },
-    //         onError: () => {
-    //           toast.error("Failed to delete poll. Please try again.", {
-    //             id: "delete-qwirl-item",
-    //           });
-    //         },
-    //       }
-    //     );
-    //   },
-    // });
   };
 
   return {

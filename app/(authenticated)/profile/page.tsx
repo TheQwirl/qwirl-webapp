@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import ProfileStoreInitializer from "./_components/profile-store-initializer";
 import { serverFetchClient } from "@/lib/api/server";
+import { PageLayout } from "@/components/layout/page-layout";
 
 const Profile = async () => {
   const cookieStore = await cookies();
@@ -37,25 +38,22 @@ const Profile = async () => {
   }
 
   return (
-    <>
+    <PageLayout
+      rightSidebar={<ProfileSidebar />}
+      backNavigation={{
+        title: "My Profile",
+      }}
+    >
       <ProfileStoreInitializer profileFor="self" user={user} />
 
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-full md:col-span-8">
-          <ProfileHeader
-            profileOf="self"
-            initialUser={user}
-            isLoading={false}
-          />
-          <div className="mt-6 pl-5 pb-10">
-            <ProfileTabs />
-          </div>
-        </div>
-        <div className="col-span-full md:col-span-4">
-          <ProfileSidebar />
-        </div>
+      <div className="">
+        <ProfileHeader profileOf="self" initialUser={user} isLoading={false} />
       </div>
-    </>
+
+      <div className="mt-4 pb-10">
+        <ProfileTabs />
+      </div>
+    </PageLayout>
   );
 };
 
