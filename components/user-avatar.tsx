@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cva, VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import Link from "next/link";
 
 const avatarVariants = cva("relative w-full h-full", {
@@ -81,7 +81,7 @@ export function UserAvatar({
       <AvatarFallback
         className={cn(rounded ? "rounded-full" : "rounded-lg", "uppercase")}
       >
-        {name?.split(" ")?.[0]?.slice(0, 2) || name?.split(" ")?.[0]}
+        {getInitials(name ?? "")}
       </AvatarFallback>
     </Avatar>
   );

@@ -1,4 +1,4 @@
-import HorizontalBarGraph from "@/components/ui/horizontal-bar-graph";
+// import HorizontalBarGraph from "@/components/ui/horizontal-bar-graph";
 import { RadialProgress } from "@/components/ui/radial-progress";
 import { QwirlItem } from "@/types/qwirl";
 import React from "react";
@@ -19,10 +19,10 @@ const PrimaryQwirlRightSidebar = ({
           </div>
           <RadialProgress current={polls?.length ?? 0} total={MAX_POLL_COUNT} />
         </div>
-        <div className=" flex p-4 rounded-2xl border flex-col items-center justify-center">
+        {/* <div className=" flex p-4 rounded-2xl border flex-col items-center justify-center">
           <div className="text-lg font-semibold text-center">Qwirl Split</div>
           <HorizontalBarGraph />
-        </div>
+        </div> */}
       </div>
     </div>
   );

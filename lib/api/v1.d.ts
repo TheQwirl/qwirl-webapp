@@ -692,24 +692,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get Responses By Users
-         * @description Get responses for a Qwirl filtered by specific user IDs.
-         *     This is a convenience endpoint for getting multiple users' responses at once.
-         *
-         *     Args:
-         *         qwirl_id (int): The ID of the Qwirl
-         *         user_ids (List[int]): List of user IDs to get responses for
-         *         include_details (bool): Whether to include detailed response data
-         *         user (User): The current authenticated user
-         *
-         *     Returns:
-         *         List of sessions with their responses for the specified users
-         *
-         *     Raises:
-         *         404: If Qwirl not found
-         *         403: If user doesn't have permission to view responses
-         */
+        /** Get Responses By Users */
         get: operations["get_responses_by_users_api_v1_qwirl_responses_responses_by_users_get"];
         put?: never;
         post?: never;
@@ -1493,7 +1476,7 @@ export interface components {
             tags: string[] | null;
             /** Items */
             items?: components["schemas"]["QwirlItemDetail"][] | null;
-            user?: components["schemas"]["QwirlUser"] | null;
+            user?: components["schemas"]["api__qwirl__schemas__QwirlUser"] | null;
             /**
              * Completed Response Count
              * @default 0
@@ -1696,7 +1679,7 @@ export interface components {
              * @default []
              */
             responses: components["schemas"]["SessionResponseBase"][];
-            responder?: components["schemas"]["QwirlUser"] | null;
+            responder?: components["schemas"]["api__qwirl_responses__schemas__QwirlUser"] | null;
             /**
              * Formatted Answers
              * @default []
@@ -1718,15 +1701,6 @@ export interface components {
             tags?: string[] | null;
             /** Is Deleted */
             is_deleted?: boolean | null;
-        };
-        /** QwirlUser */
-        QwirlUser: {
-            /** Name */
-            name: string | null;
-            /** Username */
-            username: string | null;
-            /** Id */
-            id: number | null;
         };
         /** RefreshTokenOnly */
         RefreshTokenOnly: {
@@ -1918,6 +1892,26 @@ export interface components {
             avatar: string | null;
             /** Header Img */
             header_img: string | null;
+        };
+        /** QwirlUser */
+        api__qwirl__schemas__QwirlUser: {
+            /** Name */
+            name: string | null;
+            /** Username */
+            username: string | null;
+            /** Id */
+            id: number | null;
+        };
+        /** QwirlUser */
+        api__qwirl_responses__schemas__QwirlUser: {
+            /** Name */
+            name: string | null;
+            /** Username */
+            username: string | null;
+            /** Id */
+            id: number | null;
+            /** Avatar */
+            avatar: string | null;
         };
         /** UserResponse */
         api__user__schemas__UserResponse: {

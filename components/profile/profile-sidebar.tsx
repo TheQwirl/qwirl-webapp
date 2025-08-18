@@ -8,63 +8,10 @@ import { Skeleton } from "../ui/skeleton";
 import SuggestedPeopleCard from "./suggested-people-card";
 
 const ProfileSidebar = () => {
-  const trendingQwirls = [
-    {
-      id: 1,
-      title: "Tech Trends 2024",
-      author: "TechGuru",
-      participants: 1234,
-    },
-    {
-      id: 2,
-      title: "Movie Preferences",
-      author: "FilmBuff",
-      participants: 856,
-    },
-    {
-      id: 3,
-      title: "Food Adventures",
-      author: "Foodie",
-      participants: 642,
-    },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Suggested Users */}
       <SuggestedPeopleCard />
-
-      {/* Trending Qwirls */}
-      <Card className="bg-transparent">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Trending Qwirls
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {trendingQwirls.map((qwirl) => (
-            <div
-              key={qwirl.id}
-              className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
-            >
-              <h4 className="font-medium text-sm">{qwirl.title}</h4>
-              <p className="text-xs text-gray-600 mt-1">by {qwirl.author}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                {qwirl.participants.toLocaleString()} participants
-              </p>
-            </div>
-          ))}
-          <Button
-            icon={BookOpen}
-            iconPlacement="left"
-            variant="ghost"
-            className="w-full text-sm"
-          >
-            Explore more Qwirls
-          </Button>
-        </CardContent>
-      </Card>
 
       {/* Quick Actions */}
       <Card className="bg-transparent">

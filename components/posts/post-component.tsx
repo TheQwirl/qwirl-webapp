@@ -25,6 +25,7 @@ interface PostComponentProps {
     name?: string | null;
     avatar?: string | null;
     username?: string | null;
+    id?: number | null;
   };
   onOptionSelect?: (postId: string, optionId: number) => void;
   onLike?: (postId: string, isLiked: boolean) => void;
@@ -84,6 +85,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                 name={user?.name ?? undefined}
                 image={user?.avatar ?? undefined}
                 size="sm"
+                linkTo={`/profile/${user?.id}`}
               />
               <div className="flex flex-col">
                 <div className="font-medium text-sm">

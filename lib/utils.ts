@@ -68,3 +68,11 @@ export const getFirstName = (fullName?: string | null) => {
   const firstName = fullName?.split(" ")?.[0]?.trim();
   return firstName || null;
 };
+
+export const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+};

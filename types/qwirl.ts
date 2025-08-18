@@ -6,3 +6,5 @@ export type Qwirl = components["schemas"]["QwirlBase"];
 
 export type QwirlItemOptionStatistics =
   components["schemas"]["OptionStatistics"];
+
+export type QwirlResponder = components["schemas"]["QwirlResponderSummary"];
