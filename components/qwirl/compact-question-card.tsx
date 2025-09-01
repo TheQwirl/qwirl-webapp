@@ -42,7 +42,7 @@ export const CompactQuestionCard = React.forwardRef<
       <Card
         ref={ref}
         className={clsx(
-          "border-0 bg-white shadow-sm transition-shadow hover:shadow-md",
+          "border-0 shadow-sm transition-shadow hover:shadow-md",
           className
         )}
       >

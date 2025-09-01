@@ -229,8 +229,8 @@ const PostsTab = () => {
   if (!posts?.length)
     return (
       <Empty
-        title="No posts yet"
-        description="Share your thoughts and experiences with the world. Start posting now!"
+        title="No pulse yet"
+        description=""
         containerClassName="min-h-[300px]"
       />
     );

@@ -368,4 +368,32 @@ export const ProfileHeaderLoading = ({
   );
 };
 
+export const ProfileHeaderEmpty = () => {
+  return (
+    <Card className="overflow-hidden p-4">
+      <div className="p-4">
+        <div className="">
+          <div className="flex items-center gap-4 flex-col md:flex-row">
+            <div className="flex-shrink-0">
+              <div className="h-24 w-24 text-xl border rounded-full bg-chart-4"></div>
+            </div>
+            <div className="flex-1">
+              <div className="flex text-center lg:text-left items-center justify-between flex-col md:flex-row gap-y-4">
+                <div>
+                  <h1 className="text-2xl font-semibold whitespace-nowrap max-w-48 truncate">
+                    {"Not found"}
+                  </h1>
+                  <div className="text-muted-foreground text-xs">
+                    @{"notFoundUsername"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+};
+
 export default ProfileHeader;

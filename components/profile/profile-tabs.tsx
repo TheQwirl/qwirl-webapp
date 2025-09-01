@@ -8,6 +8,7 @@ import PostsTab, { PostsTabLoading } from "./posts-tab";
 import { ErrorBoundary } from "../error-boundary";
 import { PostComponentLoading } from "../posts/post-component";
 import { useProfileStore } from "@/stores/profile-store";
+import { Card } from "../ui/card";
 
 const ProfileTabs = () => {
   const { profileFor, user } = useProfileStore();
@@ -26,7 +27,7 @@ const ProfileTabs = () => {
   };
 
   return (
-    <>
+    <Card className="p-4 bg-transparent">
       <TabView activeTab={activeTab} onTabChange={handleTabChange} />
 
       {activeTab === "myQwirl" && <QwirlTab />}
@@ -38,14 +39,14 @@ const ProfileTabs = () => {
         </ErrorBoundary>
       )}
       {activeTab === "myPeople" && <PeoplesTab />}
-    </>
+    </Card>
   );
 };
 
 export const ProfileTabsLoading = () => {
   return (
     <>
-      <TabView activeTab="posts" onTabChange={() => {}} />
+      <TabView activeTab="myQwirl" onTabChange={() => {}} />
       <div className="space-y-4 mt-4">
         {Array.from({ length: 3 }).map((_, index) => (
           <PostComponentLoading key={index} />

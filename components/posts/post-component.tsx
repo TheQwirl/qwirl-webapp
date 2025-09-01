@@ -25,6 +25,7 @@ interface PostComponentProps {
     name?: string | null;
     avatar?: string | null;
     username?: string | null;
+    id?: number | null;
   };
   onOptionSelect?: (postId: string, optionId: number) => void;
   onLike?: (postId: string, isLiked: boolean) => void;
@@ -74,7 +75,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
     return (
       <Card
         ref={ref}
-        className="bg-white relative border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
+        className=" relative border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
       >
         <PostOptionsDropdown post={post} className="absolute top-2 right-1" />
         <CardContent className="p-6 space-y-4">
@@ -84,6 +85,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                 name={user?.name ?? undefined}
                 image={user?.avatar ?? undefined}
                 size="sm"
+                linkTo={`/profile/${user?.id}`}
               />
               <div className="flex flex-col">
                 <div className="font-medium text-sm">
@@ -103,6 +105,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                 showHours
                 variant="default"
                 size="sm"
+                className=" mr-6"
               />
             )}
           </div>
@@ -287,7 +290,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
 
 export const PostComponentLoading = () => {
   return (
-    <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <Card className=" border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
       <CardContent className="p-6 space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">

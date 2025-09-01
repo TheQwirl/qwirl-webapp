@@ -37,7 +37,7 @@ const IncompleteQwirl = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="rounded-2xl border-2 p-4 "
+      className="rounded-2xl border-2 p-4 bg-card text-card-foreground"
     >
       <div className="space-y-6 p-8 text-center">
         <motion.div

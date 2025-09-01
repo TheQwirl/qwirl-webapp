@@ -275,9 +275,7 @@ const PostCreator = () => {
                               onClick={handleBackToTemplates}
                               className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3"
                             >
-                              <span className="hidden sm:inline">
-                                Change Template
-                              </span>
+                              <span className="hidden sm:inline">Reset</span>
                               <span className="sm:hidden">Change</span>
                             </Button>
                           )}
