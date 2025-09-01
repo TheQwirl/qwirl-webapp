@@ -1,15 +1,20 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  // CardHeader,
+  // CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+// import { Progress } from "@/components/ui/progress";
 import {
   Eye,
   Edit3,
   Share2,
-  TrendingUp,
+  // TrendingUp,
   Users,
-  MessageSquare,
+  // MessageSquare,
   Zap,
   BarChart3,
   Copy,
@@ -276,7 +281,7 @@ export function OwnQwirlPreview({ user }: OwnQwirlPreviewProps) {
       </Card>
 
       {/* Insights Card */}
-      <Card className="border-0 shadow-lg">
+      {/* <Card className="border-0 shadow-lg">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
@@ -329,14 +334,14 @@ export function OwnQwirlPreview({ user }: OwnQwirlPreviewProps) {
                       completed it fully
                     </p>
                   )}
-                {/* {stats.totalComments > 0 && (
+                {stats.totalComments > 0 && (
                   <p>• {stats.totalComments} thoughtful comments left</p>
-                )} */}
+                )}
               </div>
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }
