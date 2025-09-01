@@ -1,17 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Plus, BookOpenCheck } from "lucide-react";
-import { PollTemplate } from "./types";
+import { BookOpen, ChevronRight, Edit3 } from "lucide-react";
 import { UseFieldArrayAppend, useFormContext } from "react-hook-form";
 import { PostCreatorData } from "./schema";
-
-const templates = [
-  {
-    id: "questionbank",
-    name: "Question Bank",
-    icon: BookOpenCheck,
-    options: [],
-  },
-];
+import { Card, CardContent } from "@/components/ui/card";
 
 interface PollTemplatesProps {
   onShowQuestionBank: () => void;
@@ -40,43 +31,58 @@ export function PollTemplates({
     ]);
   };
 
-  const onSelectTemplate = (template: PollTemplate) => {
-    if (template.id === "questionbank") {
-      onShowQuestionBank();
-      return;
-    }
-
-    setValue("pollOptions", template.options);
-    setValue("question_text", `What's your choice?`);
-  };
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2">
-        {templates.map((template) => {
-          return (
-            <Button
-              key={template.id}
-              type="button"
-              icon={template.icon}
-              iconPlacement="left"
-              variant="ghost"
-              className=" border p-2 sm:p-3  sm:gap-2"
-              onClick={() => onSelectTemplate(template)}
-            >
-              {template.name}
-            </Button>
-          );
-        })}
-        <Button
-          type="button"
-          variant="ghost"
-          icon={Plus}
-          iconPlacement="left"
-          onClick={onStartFromScratch}
-          className=" border p-2 sm:p-3  sm:gap-2"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card
+          className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-primary/50"
+          onClick={onShowQuestionBank}
         >
-          Start from scratch
-        </Button>
+          <CardContent className="p-6 text-center space-y-4">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+              <BookOpen className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Question Bank</h3>
+              <p className="text-sm text-muted-foreground">
+                Choose from thousands of pre-made questions
+              </p>
+            </div>
+            <Button
+              icon={ChevronRight}
+              iconPlacement="right"
+              variant="outline"
+              className="w-full"
+            >
+              Browse Questions
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-primary/50"
+          onClick={onStartFromScratch}
+        >
+          <CardContent className="p-6 text-center space-y-4">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+              <Edit3 className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Custom Question</h3>
+              <p className="text-sm text-muted-foreground">
+                Create your own question from scratch
+              </p>
+            </div>
+            <Button
+              icon={ChevronRight}
+              iconPlacement="right"
+              variant="outline"
+              className="w-full"
+            >
+              Create Question
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

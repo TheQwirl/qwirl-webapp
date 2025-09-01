@@ -5,6 +5,8 @@ import { serverFetchClient } from "@/lib/api/server";
 import { safeToNumber } from "@/lib/utils";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import ProfileStoreInitializer from "../_components/profile-store-initializer";
+import { PageLayout } from "@/components/layout/page-layout";
 
 export default async function Page({
   params,
@@ -25,22 +27,26 @@ export default async function Page({
       },
     },
   });
-  const user = userResponse.data;
+  const user = userResponse?.data;
 
   if (userResponse?.error) {
     notFound();
   }
   return (
-    <div className="grid grid-cols-12 gap-6">
-      <div className="col-span-full lg:col-span-8">
-        <ProfileHeader profileOf="other" initialUser={user} isLoading={!user} />
-        <div className="mt-6 pl-5 pb-10">
-          <ProfileTabs profileFor="other" user={user} />
-        </div>
+    <PageLayout
+      rightSidebar={<ProfileSidebar />}
+      backNavigation={{
+        title: "Profile",
+      }}
+    >
+      <ProfileStoreInitializer profileFor="other" user={user} />
+
+      <div className="">
+        <ProfileHeader profileOf="other" initialUser={user} isLoading={false} />
       </div>
-      <div className="col-span-full lg:col-span-4">
-        <ProfileSidebar />
+      <div className="mt-6 pl-5 pb-10">
+        <ProfileTabs />
       </div>
-    </div>
+    </PageLayout>
   );
 }

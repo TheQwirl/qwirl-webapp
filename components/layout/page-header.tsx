@@ -12,7 +12,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   extraContent,
 }) => {
   return (
-    <div className="py-2 px-5 glass-background rounded sticky top-4 z-10">
+    <div className="py-2 px-5 glass-background rounded sticky top-4 z-[50]">
       <div className="flex flex-col sm:flex-row text-center sm:text-left justify-between items-center flex-wrap sm:flex-nowrap gap-y-3">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">{pageTitle}</h1>

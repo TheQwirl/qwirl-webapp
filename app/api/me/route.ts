@@ -44,6 +44,7 @@ export async function GET() {
   });
 
   if (!userResponse.response?.ok) {
+    console.log(userResponse?.error?.detail);
     return NextResponse.json(
       { user: null, isAuthenticated: false },
       { status: userResponse.response.status }

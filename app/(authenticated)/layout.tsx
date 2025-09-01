@@ -1,8 +1,5 @@
 "use client";
-import {
-  // SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import React, { useEffect, useRef } from "react";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { useIsMobile } from "../../hooks/use-mobile";
@@ -10,7 +7,6 @@ import QueryProvider from "@/components/query-provider";
 import ComingSoon from "@/components/coming-soon";
 import { MobileNavBar } from "@/components/layout/mobile-navbar";
 import PageLoader from "@/components/page-loader";
-// import { toast } from "sonner";
 import { authStore } from "@/stores/useAuthStore";
 import { InfoAlertProvider } from "@/components/info-alert-provider";
 import { ConfirmationModal } from "@/components/confirmation-modal";
@@ -28,9 +24,9 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
       isInitialLoad.current = false;
     }
   }, [checkSession]);
+
   return (
     <QueryProvider>
-      {" "}
       <InfoAlertProvider>
         <div className="max-w-7xl mx-auto relative">
           {!isMobile ? (
@@ -45,20 +41,19 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
             >
               <AppSidebar
                 collapsible="none"
-                className="border-r sticky top-0 h-screen"
+                className="sticky top-0 h-screen"
               />
               {isLoading ? (
                 <PageLoader />
               ) : (
                 <div className="flex-1">
-                  <main className="p-4">{children || <ComingSoon />}</main>
+                  <main className="">{children || <ComingSoon />}</main>
                 </div>
               )}
             </SidebarProvider>
           ) : (
             <>
               <div className="min-h-screen pb-14">
-                {" "}
                 <main className="p-4">{children || <ComingSoon />}</main>
               </div>
               <MobileNavBar />

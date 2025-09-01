@@ -83,7 +83,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   useEffect(() => {
     if (!disableAnimation) {
       setIsAnimating(true);
-      const startValue = displayValue;
+      const startValue = value; // Changed from displayValue to value
       const targetValue = clampedValue;
       const duration = animationDuration * 1000;
       const startTime = Date.now();
@@ -115,7 +115,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     animationDuration,
     disableAnimation,
     onAnimationComplete,
-    displayValue,
+    value,
   ]);
 
   // Variant styles

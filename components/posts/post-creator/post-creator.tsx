@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   useForm,
@@ -45,7 +45,6 @@ const PostCreator = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = authStore();
-  console.log("User in PostCreator:", user);
 
   const queryClient = useQueryClient();
 
@@ -97,6 +96,7 @@ const PostCreator = () => {
   };
 
   const createPostMutation = $api.useMutation("post", "/post");
+  const queryKey = useMemo(() => ["feed"], []);
 
   const selectQuestionFromBank = (question: Question) => {
     const options = question.options.map((opt, index) => ({
@@ -165,6 +165,9 @@ const PostCreator = () => {
           handleCollapse();
           await queryClient.invalidateQueries({
             queryKey: ["posts", user?.id],
+          });
+          await queryClient.invalidateQueries({
+            queryKey,
           });
         },
         onError: () => {
@@ -272,9 +275,7 @@ const PostCreator = () => {
                               onClick={handleBackToTemplates}
                               className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3"
                             >
-                              <span className="hidden sm:inline">
-                                Change Template
-                              </span>
+                              <span className="hidden sm:inline">Reset</span>
                               <span className="sm:hidden">Change</span>
                             </Button>
                           )}

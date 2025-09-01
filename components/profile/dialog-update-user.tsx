@@ -30,7 +30,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import $api from "@/lib/api/client";
-import { useQueryClient } from "@tanstack/react-query";
+// import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 // Define the zod schema
@@ -57,18 +57,15 @@ export function DialogUpdateUser({
   open,
   onOpenChange,
 }: DialogUpdateUserProps) {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   const userQuery = $api.useQuery("get", "/users/me");
   const user = userQuery?.data;
   const categoriesQuery = $api.useQuery("get", "/question-categories");
 
   const updateUserMutation = $api.useMutation("patch", "/users/me", {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["get", "/users/me", null],
-        exact: true,
-      });
       toast.success("Profile updated successfully");
+      window.location.reload();
     },
     onError: (error) => {
       console.error("Error updating user:", error);

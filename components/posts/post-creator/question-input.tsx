@@ -22,6 +22,7 @@ export function QuestionInput() {
           render={({ field }) => (
             <Input
               {...field}
+              autoComplete="off"
               placeholder="What's your question?"
               className="text-sm sm:text-base font-medium"
             />

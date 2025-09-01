@@ -8,55 +8,71 @@ body {
 
 @layer base {
   :root {
-    --background: 340 100% 97.0588%;
-    --foreground: 0 0% 35.6863%;
-    --card: 49.8592 100% 86.0784%;
-    --card-foreground: 0 0% 35.6863%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 35.6863%;
-    --primary: 325.5814 57.8475% 56.2745%;
+    /* base (pastel warm background) */
+    --background: 0 100% 95.8824%;
+    --foreground: 214.1379 18% 12%;
+
+    /* surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: var(--foreground);
+    --popover: 0 100% 99%;
+    --popover-foreground: var(--foreground);
+
+    /* main branding colors (from your palette) */
+    --primary: 192.8571 46% 47%; /* teal (use for avatar rings, primary CTAs) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 351.2195 100% 91.9608%;
-    --secondary-foreground: 0 2.3622% 24.902%;
-    --muted: 340 42.8571% 93.1373%;
-    --muted-foreground: 333.3333 7.2581% 51.3725%;
-    --accent: 33 98.3607% 76.0784%;
-    --accent-foreground: 0 0.9346% 20.9804%;
-    --destructive: 359.5652 92% 70.5882%;
+
+    --secondary: 22 80% 85%; /* pastel peach / apricot */
+    --secondary-foreground: 22 30% 25%;
+
+    /* accent & supporting pinks */
+    --accent: 0 67.7419% 78%; /* warm pastel pink (microinteractions, highlights) */
+    --accent-foreground: var(--foreground);
+
+    /* subtle / muted */
+    --muted: 192.8571 25% 92%;
+    --muted-foreground: 214.1379 14% 28%;
+
+    /* destructive / error */
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 325.5814 57.8475% 56.2745%;
-    --input: 0 0% 89.4118%;
-    --ring: 330 70.2381% 67.0588%;
-    --chart-1: 325.5814 57.8475% 56.2745%;
-    --chart-2: 173.8686 100% 26.8627%;
-    --chart-3: 33.4661 100% 49.2157%;
-    --chart-4: 41.5385 92.8571% 89.0196%;
-    --chart-5: 329.6386 77.5701% 79.0196%;
-    --sidebar: 326.25 69.5652% 90.9804%;
-    --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 330.3659 81.1881% 60.3922%;
+
+    /* borders & inputs */
+    --border: 214.1379 18% 85%;
+    --input: 0 100% 99%;
+    --ring: 192.8571 46% 65%;
+
+    /* charts (helpful palette for data viz) */
+    --chart-1: var(--primary);
+    --chart-2: 214.1379 40% 42%;
+    --chart-3: 0 67.7419% 68%;
+    --chart-4: 192.8571 30% 90%;
+    --chart-5: 214.1379 26.3636% 70%;
+
+    /* sidebar */
+    --sidebar: 0 100% 99%;
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: 192.8571 46% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 327.4074 87.0968% 81.7647%;
-    --sidebar-accent-foreground: 0 0% 20%;
-    --sidebar-border: 268.6957 100% 95.4902%;
-    --sidebar-ring: 330.3659 81.1881% 60.3922%;
-    --font-sans: Poppins, sans-serif;
+    --sidebar-accent: 0 67.7419% 86%;
+    --sidebar-accent-foreground: var(--foreground);
+    --sidebar-border: 214.1379 18% 92%;
+    --sidebar-ring: var(--sidebar-primary);
+
+    /* typography / spacing / shape */
+    --font-sans: Poppins, Inter, system-ui, sans-serif;
     --font-serif: Lora, serif;
-    --font-mono: Fira Code, monospace;
-    --radius: 1rem;
-    --shadow-2xs: 3px 3px 0px 0px hsl(325.78 58.18% 56.86% / 0.5);
-    --shadow-xs: 3px 3px 0px 0px hsl(325.78 58.18% 56.86% / 0.5);
-    --shadow-sm: 3px 3px 0px 0px hsl(325.78 58.18% 56.86% / 1),
-      3px 1px 2px -1px hsl(325.78 58.18% 56.86% / 1);
-    --shadow: 3px 3px 0px 0px hsl(325.78 58.18% 56.86% / 1),
-      3px 1px 2px -1px hsl(325.78 58.18% 56.86% / 1);
-    --shadow-md: 3px 3px 0px 0px hsl(325.78 58.18% 56.86% / 1),
-      3px 2px 4px -1px hsl(325.78 58.18% 56.86% / 1);
-    --shadow-lg: 3px 3px 0px 0px hsl(325.78 58.18% 56.86% / 1),
-      3px 4px 6px -1px hsl(325.78 58.18% 56.86% / 1);
-    --shadow-xl: 3px 3px 0px 0px hsl(325.78 58.18% 56.86% / 1),
-      3px 8px 10px -1px hsl(325.78 58.18% 56.86% / 1);
-    --shadow-2xl: 3px 3px 0px 0px hsl(325.78 58.18% 56.86% / 2.5);
+    --font-mono: "Fira Code", ui-monospace, monospace;
+    --radius: 0.75rem;
+
+    /* shadows using primary tint */
+    --shadow-2xs: 3px 3px 0 0 hsl(192.8571 46% 47% / 0.12);
+    --shadow-xs: 3px 3px 0 0 hsl(192.8571 46% 47% / 0.12);
+    --shadow-sm: 3px 3px 0 0 hsl(192.8571 46% 47% / 0.14),
+      3px 1px 2px -1px hsl(192.8571 46% 47% / 0.1);
+    --shadow: var(--shadow-sm);
+    --shadow-md: 3px 6px 18px -8px hsl(192.8571 46% 47% / 0.18);
+    --shadow-lg: 3px 8px 24px -12px hsl(192.8571 46% 47% / 0.18);
   }
 
   .dark {
@@ -114,7 +130,7 @@ body {
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border placeholder:text-gray-300;
   }
   body {
     @apply bg-background text-foreground;

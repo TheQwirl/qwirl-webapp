@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useState } from "react";
+import { forwardRef, memo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ interface PostComponentProps {
     name?: string | null;
     avatar?: string | null;
     username?: string | null;
+    id?: number | null;
   };
   onOptionSelect?: (postId: string, optionId: number) => void;
   onLike?: (postId: string, isLiked: boolean) => void;
@@ -74,7 +75,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
     return (
       <Card
         ref={ref}
-        className="bg-white relative border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
+        className=" relative border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
       >
         <PostOptionsDropdown post={post} className="absolute top-2 right-1" />
         <CardContent className="p-6 space-y-4">
@@ -84,6 +85,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                 name={user?.name ?? undefined}
                 image={user?.avatar ?? undefined}
                 size="sm"
+                linkTo={`/profile/${user?.id}`}
               />
               <div className="flex flex-col">
                 <div className="font-medium text-sm">
@@ -103,6 +105,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                 showHours
                 variant="default"
                 size="sm"
+                className=" mr-6"
               />
             )}
           </div>
@@ -175,7 +178,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                                 }}
                                 transition={{
                                   delay: 0.2 + index * 0.1,
-                                  duration: 0.5,
+                                  duration: 0.1,
                                   ease: "easeInOut",
                                   bounce: 0.5,
                                 }}
@@ -213,9 +216,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
                                   {/* <span className="text-gray-600">
                                     {optionResult.vote_count}
                                   </span> */}
-                                  <span className="text-purple-600">
-                                    {percentage}%
-                                  </span>
+                                  <span className="">{percentage}%</span>
                                 </div>
                               )}
                             </div>
@@ -289,7 +290,7 @@ const PostComponent = forwardRef<HTMLDivElement, PostComponentProps>(
 
 export const PostComponentLoading = () => {
   return (
-    <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <Card className=" border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
       <CardContent className="p-6 space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -363,4 +364,4 @@ export const PostComponentLoading = () => {
 };
 
 PostComponent.displayName = "PostComponent";
-export default PostComponent;
+export default memo(PostComponent);

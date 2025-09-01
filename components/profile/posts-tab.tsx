@@ -9,12 +9,13 @@ import {
   useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
 import { components } from "@/lib/api/v1-client-side";
-import { useProfile } from "@/contexts/ProfileForContext";
+import { useProfileStore } from "@/stores/profile-store";
 
 type Post = components["schemas"]["PostFetchByID"];
 
 const PostsTab = () => {
-  const { user } = useProfile();
+  const { user } = useProfileStore();
+
   const queryKey = useMemo(() => ["posts", user?.id], [user?.id]);
 
   const getUserPosts = useCallback(
@@ -195,43 +196,41 @@ const PostsTab = () => {
     },
   });
 
-  const handleVote = (postId: string, optionId: number) => {
-    voteMutation.mutate({
-      params: {
-        path: {
-          post_id: postId,
+  const handleVote = useCallback(
+    (postId: string, optionId: number) => {
+      voteMutation.mutate({
+        params: {
+          path: {
+            post_id: postId,
+          },
         },
-      },
-      body: {
-        poll_option_id: optionId,
-      },
-    });
-  };
-  const handleLike = (postId: string, isCurrentlyLiked: boolean) => {
-    if (isCurrentlyLiked) {
-      deleteLikeMutation.mutate({
+        body: {
+          poll_option_id: optionId,
+        },
+      });
+    },
+    [voteMutation]
+  );
+
+  const handleLike = useCallback(
+    (postId: string, isCurrentlyLiked: boolean) => {
+      const mutationFn = isCurrentlyLiked ? deleteLikeMutation : likeMutation;
+      mutationFn.mutate({
         params: {
           path: {
             post_id: postId,
           },
         },
       });
-    } else {
-      likeMutation.mutate({
-        params: {
-          path: {
-            post_id: postId,
-          },
-        },
-      });
-    }
-  };
+    },
+    [likeMutation, deleteLikeMutation]
+  );
 
   if (!posts?.length)
     return (
       <Empty
-        title="No posts yet"
-        description="Share your thoughts and experiences with the world. Start posting now!"
+        title="No pulse yet"
+        description=""
         containerClassName="min-h-[300px]"
       />
     );

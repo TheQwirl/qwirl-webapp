@@ -69,6 +69,7 @@ export const authStore = create<AuthState>((set, get) => ({
           // Only redirect if they were actually logged in
           redirect("/auth?logged_out=true");
         }
+        redirect("/auth?logged_out=true");
       }
     }
   },
