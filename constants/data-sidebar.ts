@@ -1,4 +1,12 @@
-import { BarChart3, Edit, MessageSquare, Settings, Users, HelpCircle, Waves } from "lucide-react";
+import {
+  BarChart3,
+  Edit,
+  MessageSquare,
+  Settings,
+  Users,
+  Library,
+  CircleHelp,
+} from "lucide-react";
 
 export interface MenuItem {
   title: string;
@@ -22,7 +30,7 @@ export const MENU_SECTIONS: MenuSection[] = [
     items: [
       {
         title: "My Qwirl",
-        icon: Waves,
+        icon: CircleHelp,
         type: "group",
         children: [
           {
@@ -51,14 +59,14 @@ export const MENU_SECTIONS: MenuSection[] = [
     title: "Explore",
     items: [
       {
-        title: "Community",
+        title: "Discover",
         icon: Users,
         url: "/community",
         type: "single",
       },
       {
-        title: "Question Bank",
-        icon: HelpCircle,
+        title: "Question Library",
+        icon: Library,
         url: "/question-bank",
         type: "single",
       },

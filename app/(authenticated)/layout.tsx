@@ -34,7 +34,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
               className="flex min-h-screen w-full"
               style={
                 {
-                  "--sidebar-width": "280px",
+                  "--sidebar-width": "220px",
                   "--sidebar-width-collapsed": "0px",
                 } as React.CSSProperties
               }

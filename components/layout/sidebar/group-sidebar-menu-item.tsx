@@ -14,7 +14,6 @@ import { MenuItem } from "@/constants/data-sidebar";
 import { ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
 
 type GroupSidebarMenuItemProps = {
   item: MenuItem;
@@ -22,7 +21,6 @@ type GroupSidebarMenuItemProps = {
 
 const GroupSidebarMenuItem = ({ item }: GroupSidebarMenuItemProps) => {
   const pathname = usePathname();
-  const [isHovered, setIsHovered] = useState(false);
 
   const activeUrls =
     item?.children
@@ -41,17 +39,17 @@ const GroupSidebarMenuItem = ({ item }: GroupSidebarMenuItemProps) => {
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
-            className="group/collapsible hover:text-white duration-300 transition-all relative"
+            className="group/collapsible hover:bg-sidebar-accent hover:text-sidebar-accent-foreground duration-300 transition-all relative data-[active=true]:bg-transparent"
             isActive={activeUrls.includes(pathname)}
             tooltip=""
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
           >
+            {/* Active indicator bar for parent when any child is active */}
+            {isAnyChildActive && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-primary" />
+            )}
             <item.icon
               style={{ width: "20px", height: "20px" }}
-              className={`mr-2 transition-transform duration-500 ${
-                isHovered ? "animate-[wave_0.6s_ease-in-out]" : ""
-              }`}
+              className="mr-2"
             />
             <span className="text-sm font-medium text-nowrap">
               {item.title}
@@ -69,14 +67,23 @@ const GroupSidebarMenuItem = ({ item }: GroupSidebarMenuItemProps) => {
                 return null;
               }
 
+              const isSubItemActive = pathname === subItem.url;
+
               return (
-                <SidebarMenuSubItem className="mt-1.5" key={subItem.title}>
+                <SidebarMenuSubItem
+                  className="mt-1.5 relative"
+                  key={subItem.title}
+                >
                   <SidebarMenuSubButton
-                    isActive={pathname === subItem.url}
+                    isActive={isSubItemActive}
                     asChild
-                    className="hover:text-white duration-300 transition-all"
+                    className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground duration-300 transition-all data-[active=true]:bg-transparent"
                   >
                     <Link href={subItem.url}>
+                      {/* Active indicator bar for subitem */}
+                      {isSubItemActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-primary" />
+                      )}
                       <subItem.icon
                         className="mr-2"
                         style={{ width: "16px", height: "16px" }}

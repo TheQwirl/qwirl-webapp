@@ -71,7 +71,7 @@ body {
     --sidebar-foreground: var(--foreground);
     --sidebar-primary: 192.8571 46% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 67.7419% 86%;
+    --sidebar-accent: 214.1379 10% 96%;
     --sidebar-accent-foreground: var(--foreground);
     --sidebar-border: 214.1379 18% 92%;
     --sidebar-ring: var(--sidebar-primary);
@@ -186,6 +186,69 @@ body {
       transform: rotate3d(0, 0, 1, 0deg);
     }
   }
+
+  /* Wave animation for My Qwirl icon */
+  @-webkit-keyframes wave {
+    0% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    15% {
+      -webkit-transform: rotate(14deg);
+      transform: rotate(14deg);
+    }
+    30% {
+      -webkit-transform: rotate(-8deg);
+      transform: rotate(-8deg);
+    }
+    40% {
+      -webkit-transform: rotate(14deg);
+      transform: rotate(14deg);
+    }
+    50% {
+      -webkit-transform: rotate(-4deg);
+      transform: rotate(-4deg);
+    }
+    60% {
+      -webkit-transform: rotate(10deg);
+      transform: rotate(10deg);
+    }
+    100% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+  }
+  @keyframes wave {
+    0% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    15% {
+      -webkit-transform: rotate(14deg);
+      transform: rotate(14deg);
+    }
+    30% {
+      -webkit-transform: rotate(-8deg);
+      transform: rotate(-8deg);
+    }
+    40% {
+      -webkit-transform: rotate(14deg);
+      transform: rotate(14deg);
+    }
+    50% {
+      -webkit-transform: rotate(-4deg);
+      transform: rotate(-4deg);
+    }
+    60% {
+      -webkit-transform: rotate(10deg);
+      transform: rotate(10deg);
+    }
+    100% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+  }
+
   .glass-background {
     @apply bg-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-[4.2px] border border-white/20;
   }
