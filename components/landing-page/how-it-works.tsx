@@ -10,7 +10,6 @@ import { Card } from "../ui/card"; // Using Card for the sticky visual
 type StepVisualProps = { stepIndex: number };
 const StepVisual: React.FC<StepVisualProps> = ({ stepIndex }) => {
   const visuals: React.ReactNode[] = [
-    // Step 1: Create
     <div
       key="step-1"
       className="flex flex-col items-center justify-center text-center p-8 h-full"
@@ -29,7 +28,6 @@ const StepVisual: React.FC<StepVisualProps> = ({ stepIndex }) => {
       <div className="w-full h-2 bg-muted rounded-full mt-3" />
       <div className="w-3/5 h-2 bg-muted rounded-full mt-3" />
     </div>,
-    // Step 2: Share
     <div
       key="step-2"
       className="flex flex-col items-center justify-center text-center p-8 h-full"
@@ -48,7 +46,6 @@ const StepVisual: React.FC<StepVisualProps> = ({ stepIndex }) => {
         qwirl.io/u/your-name
       </div>
     </div>,
-    // Step 3: Discover
     <div
       key="step-3"
       className="flex flex-col items-center justify-center text-center p-8 h-full"
@@ -109,12 +106,12 @@ const TextStep: React.FC<TextStepProps> = ({
   setActiveStep,
 }) => (
   <motion.div
-    className="py-16"
+    className=""
     onViewportEnter={() => setActiveStep(index)}
     tabIndex={0}
     aria-label={`Step ${index + 1}: ${title}`}
   >
-    <div className="mb-4">
+    <div className="">
       <span className="text-primary font-bold">Step {index + 1}</span>
     </div>
     <h3 className="text-3xl font-bold text-foreground mb-4">{title}</h3>
@@ -124,33 +121,40 @@ const TextStep: React.FC<TextStepProps> = ({
   </motion.div>
 );
 
+type Step = {
+  title: string;
+  description: string;
+};
+const steps: Step[] = [
+  {
+    title: "Create your Qwirl",
+    description:
+      "Pick 15 defining polls from our question bank or craft your own unique questions with up to 6 response options each.",
+  },
+  {
+    title: "Share with friends",
+    description:
+      "Send your Qwirl link to friends. They'll answer each poll and instantly see your choices and how others voted.",
+  },
+  {
+    title: "Discover your wavelength",
+    description:
+      "Get your compatibility score that reveals how aligned you and your friends really are across all your beliefs and preferences.",
+  },
+];
+
 export function HowItWorks(): React.ReactElement {
   const [activeStep, setActiveStep] = useState<number>(0);
 
-  type Step = {
-    title: string;
-    description: string;
-  };
-  const steps: Step[] = [
-    {
-      title: "Create your Qwirl",
-      description:
-        "Pick 15 defining polls from our question bank or craft your own unique questions with up to 6 response options each.",
-    },
-    {
-      title: "Share with friends",
-      description:
-        "Send your Qwirl link to friends. They'll answer each poll and instantly see your choices and how others voted.",
-    },
-    {
-      title: "Discover your wavelength",
-      description:
-        "Get your compatibility score that reveals how aligned you and your friends really are across all your beliefs and preferences.",
-    },
-  ];
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % 3);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <Wrapper className="bg-muted py-24 w-full !static !min-h-0 !relative">
+    <Wrapper className="bg-muted py-24 w-full !min-h-0 !relative">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="text-center mb-16"
@@ -172,9 +176,9 @@ export function HowItWorks(): React.ReactElement {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16 items-center">
           {/* Left Column: Sticky Visual */}
-          <div className="sticky top-32 h-[300px] lg:h-[500px] w-full">
+          <div className="sticky top-32 h-[300px] lg:h-[500px] w-full col-span-full lg:col-span-1">
             <Card
               className="w-full h-full overflow-hidden"
               aria-label="Step Visual"
@@ -184,7 +188,7 @@ export function HowItWorks(): React.ReactElement {
           </div>
 
           {/* Right Column: Scrolling Text */}
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-4 col-span-full lg:col-span-2">
             {steps.map((step, index) => (
               <TextStep
                 key={index}
@@ -214,9 +218,6 @@ export function HowItWorks(): React.ReactElement {
           >
             Get started now
           </Button>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Free to create • No signup required
-          </p>
         </motion.div>
       </div>
     </Wrapper>

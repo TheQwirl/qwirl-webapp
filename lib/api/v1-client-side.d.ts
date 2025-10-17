@@ -189,13 +189,14 @@ export interface paths {
         };
         /**
          * Get User By Id
-         * @description Get a user's profile by user ID with relationship status
+         * @description Get a user's profile by user ID with optional relationship status
          *
          *     Args:
          *         user_id: ID of the user to retrieve
+         *         current_user: Optional authenticated user (for relationship status)
          *
          *     Returns:
-         *         User profile with relationship status information (using denormalized counts)
+         *         User profile with relationship status if authenticated, basic info if not
          */
         get: operations["get_user_by_id_api_v1_users__user_id__get"];
         put?: never;
@@ -215,13 +216,14 @@ export interface paths {
         };
         /**
          * Get User By Username
-         * @description Get a user's profile by username with relationship status
+         * @description Get a user's profile by username with optional relationship status
          *
          *     Args:
          *         username: Username of the user to retrieve
+         *         current_user: Optional authenticated user (for relationship status)
          *
          *     Returns:
-         *         User profile with relationship status information (using denormalized counts)
+         *         User profile with relationship status if authenticated, basic info if not
          */
         get: operations["get_user_by_username_api_v1_users_username__username__get"];
         put?: never;
@@ -314,6 +316,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/qwirl/community": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Community Qwirls
+         * @description Get community Qwirls with advanced filtering, searching, and pagination.
+         *
+         *     Args:
+         *         search: Search query for qwirl titles and tags
+         *         tags: Filter by specific tags
+         *         qwirl_type: Filter by qwirl type (PROFILE, CUSTOM_PUBLIC, CUSTOM_PRIVATE)
+         *         sort_by: Sort criteria (recent, popular, trending, alphabetical)
+         *         page: Page number for pagination
+         *         limit: Number of items per page
+         *         min_responses: Minimum number of responses required
+         *         preview_items: Number of sample items to include for preview (0-3)
+         *
+         *     Returns:
+         *         Paginated list of community Qwirls with metadata and preview items
+         */
+        get: operations["get_community_qwirls_api_v1_qwirl_community_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/qwirl/me/cover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get My Qwirl Cover
+         * @description Get the current user's Profile Qwirl cover details.
+         *
+         *     Returns:
+         *         The user's Profile Qwirl cover information
+         */
+        get: operations["get_my_qwirl_cover_api_v1_qwirl_me_cover_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/qwirl/me": {
         parameters: {
             query?: never;
@@ -323,10 +381,10 @@ export interface paths {
         };
         /**
          * Get My Profile Qwirl
-         * @description Get the current user's own Profile Qwirl for viewing or editing.
+         * @description Get the current user's Profile Qwirl with items and statistics.
          *
          *     Returns:
-         *         The user's Profile Qwirl with all items (including soft-deleted ones)
+         *         The user's Profile Qwirl with visible items and option statistics
          */
         get: operations["get_my_profile_qwirl_api_v1_qwirl_me_get"];
         put?: never;
@@ -348,13 +406,13 @@ export interface paths {
         put?: never;
         /**
          * Add Profile Qwirl Item
-         * @description Adds a new poll item to the user's Profile Qwirl.
+         * @description Adds one or more poll items to the user's Profile Qwirl.
          *
          *     Args:
-         *         item_data: The question, options, and owner's answer
+         *         items_data: Single poll item or list of poll items (question, options, and owner's answer)
          *
          *     Returns:
-         *         The newly created QwirlItem
+         *         The newly created QwirlItem(s) with creation summary
          */
         post: operations["add_profile_qwirl_item_api_v1_qwirl_me_items_post"];
         delete?: never;
@@ -427,46 +485,6 @@ export interface paths {
         patch: operations["update_profile_qwirl_item_api_v1_qwirl_me_items__item_id__patch"];
         trace?: never;
     };
-    "/qwirl/{qwirl_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Qwirl Id
-         * @description Get qwirl by qwirl id
-         *
-         *     Returns:
-         *         Qwirl
-         */
-        get: operations["get_qwirl_id_api_v1_qwirl__qwirl_id__get"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete Qwirl
-         * @description Delete a qwirl
-         *
-         *     Returns:
-         *         Failure or 204
-         */
-        delete: operations["delete_qwirl_api_v1_qwirl__qwirl_id__delete"];
-        options?: never;
-        head?: never;
-        /**
-         * Update Qwirl
-         * @description Update a qwirl of logged in user
-         *
-         *     Args:
-         *         qwirl_id (int): qwirl id
-         *
-         *     Returns:
-         *         Qwirl
-         */
-        patch: operations["update_qwirl_api_v1_qwirl__qwirl_id__patch"];
-        trace?: never;
-    };
     "/qwirl/user/{user_id}/primary": {
         parameters: {
             query?: never;
@@ -518,6 +536,83 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/qwirl/{qwirl_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Qwirl Id
+         * @description Get qwirl by qwirl id
+         *
+         *     Returns:
+         *         Qwirl
+         */
+        get: operations["get_qwirl_id_api_v1_qwirl__qwirl_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Qwirl
+         * @description Delete a qwirl
+         *
+         *     Returns:
+         *         Failure or 204
+         */
+        delete: operations["delete_qwirl_api_v1_qwirl__qwirl_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Qwirl
+         * @description Update a qwirl of logged in user
+         *
+         *     Args:
+         *         qwirl_id (int): qwirl id
+         *
+         *     Returns:
+         *         Qwirl
+         */
+        patch: operations["update_qwirl_api_v1_qwirl__qwirl_id__patch"];
+        trace?: never;
+    };
+    "/qwirl/{qwirl_id}/cover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Qwirl Cover
+         * @description Get a specific Qwirl's cover details.
+         *
+         *     Args:
+         *         qwirl_id: The ID of the Qwirl
+         *
+         *     Returns:
+         *         The Qwirl's cover information
+         */
+        get: operations["get_qwirl_cover_api_v1_qwirl__qwirl_id__cover_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Qwirl Cover
+         * @description Update a specific Qwirl's cover details. Only the owner can update the cover.
+         *
+         *     Args:
+         *         qwirl_id: The ID of the Qwirl
+         *         cover_data: The cover fields to update
+         *
+         *     Returns:
+         *         The updated Qwirl cover information
+         */
+        patch: operations["update_qwirl_cover_api_v1_qwirl__qwirl_id__cover_patch"];
         trace?: never;
     };
     "/qwirl-responses/qwirls/{qwirl_id}/sessions/start": {
@@ -758,6 +853,41 @@ export interface paths {
          *         403: If user doesn't have permission to view stats
          */
         get: operations["get_qwirl_response_stats_api_v1_qwirl_responses_qwirls__qwirl_id__stats_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/qwirl-responses/qwirls/{qwirl_id}/items/{item_id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Qwirl Item Comments
+         * @description Get all comments for a specific Qwirl item (poll question).
+         *     Returns comments from all responders who have commented on this specific poll.
+         *
+         *     Args:
+         *         qwirl_id (int): The ID of the Qwirl
+         *         item_id (int): The ID of the specific QwirlItem (poll question)
+         *         skip (int): Number of records to skip for pagination
+         *         limit (int): Maximum number of comments to return
+         *         user (User): The current authenticated user
+         *
+         *     Returns:
+         *         List of comments for the specified Qwirl item with responder details
+         *
+         *     Raises:
+         *         404: If Qwirl or QwirlItem not found
+         *         403: If user doesn't have permission to view comments
+         */
+        get: operations["get_qwirl_item_comments_api_v1_qwirl_responses_qwirls__qwirl_id__items__item_id__comments_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1462,7 +1592,10 @@ export interface components {
             /** Category Name */
             category_name: string;
         };
-        /** QwirlBase */
+        /**
+         * QwirlBase
+         * @description Base Qwirl schema without session-related fields
+         */
         QwirlBase: {
             /** Id */
             id: number;
@@ -1492,10 +1625,14 @@ export interface components {
              * @default false
              */
             is_deleted: boolean;
-            /** Session Status */
-            session_status?: string | null;
-            /** Session Id */
-            session_id?: number | null;
+            /** Background Image */
+            background_image?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Visibility */
+            visibility?: boolean | null;
             /**
              * Answered Count
              * @default 0
@@ -1511,6 +1648,126 @@ export interface components {
              * @default 0
              */
             unanswered_count: number;
+        };
+        /** QwirlCommunityItem */
+        QwirlCommunityItem: {
+            /** Id */
+            id: number;
+            /** User Id */
+            user_id: number;
+            /** Title */
+            title: string;
+            /** Type */
+            type: string;
+            /**
+             * Tags
+             * @default []
+             */
+            tags: string[] | null;
+            /**
+             * Completed Response Count
+             * @default 0
+             */
+            completed_response_count: number;
+            /**
+             * Started Response Count
+             * @default 0
+             */
+            started_response_count: number;
+            /**
+             * Item Count
+             * @default 0
+             */
+            item_count: number;
+            /** Created At */
+            created_at?: string | null;
+            user?: components["schemas"]["api__qwirl__schemas__QwirlUser"] | null;
+            /**
+             * Preview Items
+             * @default []
+             */
+            preview_items: components["schemas"]["QwirlItemDetail"][] | null;
+            /** Background Image */
+            background_image?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Visibility */
+            visibility?: boolean | null;
+        };
+        /** QwirlCommunityResponse */
+        QwirlCommunityResponse: {
+            /** Qwirls */
+            qwirls: components["schemas"]["QwirlCommunityItem"][];
+            /** Total Count */
+            total_count: number;
+            /** Page */
+            page: number;
+            /** Limit */
+            limit: number;
+            /** Has More */
+            has_more: boolean;
+        };
+        /** QwirlCoverResponse */
+        QwirlCoverResponse: {
+            /** Id */
+            id: number;
+            /** Background Image */
+            background_image?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Visibility */
+            visibility?: boolean | null;
+            /** Title */
+            title: string;
+            /** Type */
+            type: string;
+        };
+        /** QwirlCoverUpdate */
+        QwirlCoverUpdate: {
+            /** Background Image */
+            background_image?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Visibility */
+            visibility?: boolean | null;
+        };
+        /** QwirlItemCommentBase */
+        QwirlItemCommentBase: {
+            /** Id */
+            id: number;
+            /** Comment */
+            comment: string | null;
+            /** Session Id */
+            session_id: number;
+            /** Responder Id */
+            responder_id: number;
+            responder?: components["schemas"]["api__qwirl_responses__schemas__QwirlUser"] | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Updated At */
+            updated_at?: string | null;
+        };
+        /** QwirlItemCommentsResponse */
+        QwirlItemCommentsResponse: {
+            /** Qwirl Id */
+            qwirl_id: number;
+            /** Item Id */
+            item_id: number;
+            /** Question Text */
+            question_text: string;
+            /**
+             * Comments
+             * @default []
+             */
+            comments: components["schemas"]["QwirlItemCommentBase"][];
+            /** Total Count */
+            total_count: number;
         };
         /** QwirlItemCreate */
         QwirlItemCreate: {
@@ -1564,6 +1821,26 @@ export interface components {
             selected_answer: string | null;
             /** Comment */
             comment: string | null;
+        };
+        /**
+         * QwirlItemsCreateFlexible
+         * @description Flexible schema that accepts either single item or list of items
+         */
+        QwirlItemsCreateFlexible: {
+            /** Items */
+            items: components["schemas"]["QwirlItemCreate"] | components["schemas"]["QwirlItemCreate"][];
+        };
+        /**
+         * QwirlItemsFlexibleResponse
+         * @description Flexible response that matches the input - single item or list
+         */
+        QwirlItemsFlexibleResponse: {
+            /** Items */
+            items: components["schemas"]["QwirlQuestion"] | components["schemas"]["QwirlQuestion"][];
+            /** Total Created */
+            total_created: number;
+            /** Message */
+            message: string;
         };
         /** QwirlQuestion */
         QwirlQuestion: {
@@ -1701,6 +1978,67 @@ export interface components {
             tags?: string[] | null;
             /** Is Deleted */
             is_deleted?: boolean | null;
+        };
+        /**
+         * QwirlWithSession
+         * @description Qwirl schema with session data for when users view others' Qwirls
+         */
+        QwirlWithSession: {
+            /** Id */
+            id: number;
+            /** User Id */
+            user_id: number;
+            /** Title */
+            title: string;
+            /** Type */
+            type: string;
+            /** Tags */
+            tags: string[] | null;
+            /** Items */
+            items?: components["schemas"]["QwirlItemDetail"][] | null;
+            user?: components["schemas"]["api__qwirl__schemas__QwirlUser"] | null;
+            /**
+             * Completed Response Count
+             * @default 0
+             */
+            completed_response_count: number;
+            /**
+             * Started Response Count
+             * @default 0
+             */
+            started_response_count: number;
+            /**
+             * Is Deleted
+             * @default false
+             */
+            is_deleted: boolean;
+            /** Background Image */
+            background_image?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Visibility */
+            visibility?: boolean | null;
+            /**
+             * Answered Count
+             * @default 0
+             */
+            answered_count: number;
+            /**
+             * Skipped Count
+             * @default 0
+             */
+            skipped_count: number;
+            /**
+             * Unanswered Count
+             * @default 0
+             */
+            unanswered_count: number;
+            /** Session Status */
+            session_status?: string | null;
+            /** Session Id */
+            session_id?: number | null;
         };
         /** RefreshTokenOnly */
         RefreshTokenOnly: {
@@ -1901,6 +2239,10 @@ export interface components {
             username: string | null;
             /** Id */
             id: number | null;
+            /** Avatar */
+            avatar?: string | null;
+            /** Categories */
+            categories?: string[] | null;
         };
         /** QwirlUser */
         api__qwirl_responses__schemas__QwirlUser: {
@@ -2288,7 +2630,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserWithRelationshipResponse"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -2321,7 +2663,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserWithRelationshipResponse"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -2471,6 +2813,83 @@ export interface operations {
             };
         };
     };
+    get_community_qwirls_api_v1_qwirl_community_get: {
+        parameters: {
+            query?: {
+                /** @description Search query for qwirl titles */
+                search?: string | null;
+                /** @description Filter by tags (comma-separated) */
+                tags?: string[] | null;
+                /** @description Filter by qwirl type (PROFILE, CUSTOM_PUBLIC, CUSTOM_PRIVATE) */
+                qwirl_type?: string | null;
+                /** @description Sort by: recent, popular, trending, alphabetical */
+                sort_by?: string;
+                /** @description Page number */
+                page?: number;
+                /** @description Number of items per page */
+                limit?: number;
+                /** @description Minimum number of responses */
+                min_responses?: number | null;
+                /** @description Number of preview items to show (0-3) */
+                preview_items?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlCommunityResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_my_qwirl_cover_api_v1_qwirl_me_cover_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlCoverResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_my_profile_qwirl_api_v1_qwirl_me_get: {
         parameters: {
             query?: never;
@@ -2513,7 +2932,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["QwirlItemCreate"];
+                "application/json": components["schemas"]["QwirlItemsCreateFlexible"];
             };
         };
         responses: {
@@ -2523,7 +2942,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QwirlQuestion"];
+                    "application/json": components["schemas"]["QwirlItemsFlexibleResponse"];
                 };
             };
             /** @description Validation Error */
@@ -2640,6 +3059,72 @@ export interface operations {
             };
         };
     };
+    get_user_primary_qwirl_api_v1_qwirl_user__user_id__primary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlWithSession"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_user_profile_qwirl_by_username_api_v1_qwirl_users__username__qwirl_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                username: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlWithSession"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_qwirl_id_api_v1_qwirl__qwirl_id__get: {
         parameters: {
             query?: never;
@@ -2741,16 +3226,14 @@ export interface operations {
             };
         };
     };
-    get_user_primary_qwirl_api_v1_qwirl_user__user_id__primary_get: {
+    get_qwirl_cover_api_v1_qwirl__qwirl_id__cover_get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                user_id: number;
+                qwirl_id: number;
             };
-            cookie?: {
-                access_token?: string | null;
-            };
+            cookie?: never;
         };
         requestBody?: never;
         responses: {
@@ -2760,7 +3243,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QwirlBase"];
+                    "application/json": components["schemas"]["QwirlCoverResponse"];
                 };
             };
             /** @description Validation Error */
@@ -2774,18 +3257,22 @@ export interface operations {
             };
         };
     };
-    get_user_profile_qwirl_by_username_api_v1_qwirl_users__username__qwirl_get: {
+    update_qwirl_cover_api_v1_qwirl__qwirl_id__cover_patch: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                username: string;
+                qwirl_id: number;
             };
             cookie?: {
                 access_token?: string | null;
             };
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QwirlCoverUpdate"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -2793,7 +3280,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QwirlBase"];
+                    "application/json": components["schemas"]["QwirlCoverResponse"];
                 };
             };
             /** @description Validation Error */
@@ -3088,6 +3575,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["QwirlResponseStats"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_qwirl_item_comments_api_v1_qwirl_responses_qwirls__qwirl_id__items__item_id__comments_get: {
+        parameters: {
+            query?: {
+                /** @description Number of records to skip for pagination */
+                skip?: number;
+                /** @description Maximum number of comments to return */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                qwirl_id: number;
+                item_id: number;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlItemCommentsResponse"];
                 };
             };
             /** @description Validation Error */

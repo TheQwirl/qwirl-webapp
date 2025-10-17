@@ -20,8 +20,9 @@ export function LiveWavelengthDemo() {
         <div className="mx-auto py-20  max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
-              <h3 className="text-3xl sm:text-4xl font-black tracking-tight">
-                Your wavelength with anyone
+              <h3 className="text-3xl sm:text-4xl font-black">
+                Your <span className="text-primary">wavelength</span> with
+                anyone
               </h3>
               <p className="mt-3 text-slate-600 max-w-prose">
                 When two people complete a Qwirl, we compute a simple similarity

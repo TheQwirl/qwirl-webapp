@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { QwirlPollData } from "@/components/qwirl/schema";
 import { useConfirmationModal } from "@/stores/useConfirmationModal";
 import { useSearchParams } from "next/navigation";
+import { authStore } from "@/stores/useAuthStore";
 
 export type ViewMode = "edit" | "view";
 
@@ -13,6 +14,7 @@ export function useQwirlEditor() {
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<ViewMode>("edit");
   const searchParams = useSearchParams();
+  const { isAuthenticated } = authStore();
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
@@ -35,9 +37,13 @@ export function useQwirlEditor() {
     await addPollToQwirlMutation.mutateAsync(
       {
         body: {
-          options: pollData.options,
-          question_text: pollData.question_text,
-          owner_answer: ownerAnswer,
+          items: [
+            {
+              options: pollData.options,
+              question_text: pollData.question_text,
+              owner_answer: ownerAnswer,
+            },
+          ],
         },
       },
       {
@@ -58,16 +64,23 @@ export function useQwirlEditor() {
           });
         },
         onError: () => {
-          toast.error("An error occurred while creating the post", {
+          toast.error("An error occurred while adding the poll.", {
             id: "add-poll",
           });
-          console.error("Error creating post:", addPollToQwirlMutation.error);
+          console.error("Error adding poll:", addPollToQwirlMutation.error);
         },
       }
     );
   };
 
-  const qwirlQuery = $api.useQuery("get", "/qwirl/me");
+  const qwirlQuery = $api.useQuery(
+    "get",
+    "/qwirl/me",
+    {},
+    {
+      enabled: isAuthenticated,
+    }
+  );
   const polls = qwirlQuery?.data?.items
     ? [...qwirlQuery.data.items].sort((a, b) => a.position - b.position)
     : [];

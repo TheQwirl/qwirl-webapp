@@ -3,13 +3,13 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import React, { useEffect, useRef } from "react";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { useIsMobile } from "../../hooks/use-mobile";
-import QueryProvider from "@/components/query-provider";
 import ComingSoon from "@/components/coming-soon";
 import { MobileNavBar } from "@/components/layout/mobile-navbar";
 import PageLoader from "@/components/page-loader";
 import { authStore } from "@/stores/useAuthStore";
 import { InfoAlertProvider } from "@/components/info-alert-provider";
 import { ConfirmationModal } from "@/components/confirmation-modal";
+import { OnboardingProvider } from "@/components/onboarding";
 
 const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
@@ -26,8 +26,8 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   }, [checkSession]);
 
   return (
-    <QueryProvider>
-      <InfoAlertProvider>
+    <InfoAlertProvider>
+      <OnboardingProvider>
         <div className="max-w-7xl mx-auto relative">
           {!isMobile ? (
             <SidebarProvider
@@ -61,8 +61,8 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
           )}
         </div>
         <ConfirmationModal />
-      </InfoAlertProvider>
-    </QueryProvider>
+      </OnboardingProvider>
+    </InfoAlertProvider>
   );
 };
 

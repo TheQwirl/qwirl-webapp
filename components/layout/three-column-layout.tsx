@@ -22,7 +22,12 @@ export const ThreeColumnLayout = ({
   const hasRightSidebar = !!rightSidebar;
 
   return (
-    <div className={clsx("grid grid-cols-12 gap-6 sm:mt-0", className)}>
+    <div
+      className={clsx(
+        "min-h-screen grid grid-cols-12 gap-6 sm:mt-0",
+        className
+      )}
+    >
       <div
         className={clsx(
           "col-span-full flex flex-col h-full",

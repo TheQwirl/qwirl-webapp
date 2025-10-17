@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+"use client";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -9,22 +10,16 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ArrowLeft,
-  BookOpen,
-  ChevronRight,
-  Edit3,
-  Plus,
-  X,
-} from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronRight, Edit3 } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { QuestionBank } from "../question-bank/question-bank";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QwirlPollData, QwirlPollSchema } from "./schema";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Checkbox } from "../ui/checkbox";
+import {
+  CompactQuestionCardEditable,
+  CompactQuestionCardEditableRef,
+} from "./compact-question-card-editable";
 
 interface Props {
   isModalOpen: boolean;
@@ -40,6 +35,8 @@ const AddPollDialog: React.FC<Props> = ({
   isSubmitting = false,
 }) => {
   const [step, setStep] = useState(1);
+  const questionCardRef = useRef<CompactQuestionCardEditableRef>(null);
+
   const methods = useForm<QwirlPollData>({
     resolver: zodResolver(QwirlPollSchema),
     defaultValues: {
@@ -47,8 +44,6 @@ const AddPollDialog: React.FC<Props> = ({
       options: [],
     },
   });
-  const options = methods.watch("options");
-  const ownerAnswerIndex = methods.watch("owner_answer_index");
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -80,39 +75,10 @@ const AddPollDialog: React.FC<Props> = ({
     });
   };
 
-  const addOption = () => {
-    const newOption = `Option ${options.length + 1}`;
-    const newOptions = [...options, newOption];
-    methods.setValue("options", newOptions, { shouldValidate: true });
-
-    const current = methods.getValues("owner_answer_index");
-    if (current === undefined || current >= newOptions.length) {
-      methods.setValue("owner_answer_index", 0, { shouldValidate: true });
-    }
-  };
-
-  const removeOption = (index: number) => {
-    if (options.length <= 2) {
-      console.warn(
-        "Cannot remove option. A poll requires at least two options."
-      );
-      return;
-    }
-
-    const newOptions = options.filter((_, i) => i !== index);
-    const currentIndex = methods.getValues("owner_answer_index");
-
-    methods.setValue("options", newOptions, { shouldValidate: true });
-
-    if (currentIndex === index) {
-      const fallback = Math.min(index, newOptions.length - 1);
-      methods.setValue("owner_answer_index", fallback, {
-        shouldValidate: true,
-      });
-    } else if (currentIndex > index) {
-      methods.setValue("owner_answer_index", currentIndex - 1, {
-        shouldValidate: true,
-      });
+  const handleQuestionSave = async () => {
+    const data = await questionCardRef.current?.submit();
+    if (data) {
+      handleAddPoll(data);
     }
   };
 
@@ -246,106 +212,22 @@ const AddPollDialog: React.FC<Props> = ({
 
           {step === 3 && (
             <motion.div
-              key="step2"
+              key="step3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
+              className="space-y-4"
             >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">Question</Label>
-                </div>
-                <motion.div
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <Controller
-                    name="question_text"
-                    control={methods.control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        placeholder="What's your question?"
-                        className="text-sm sm:text-base font-medium"
-                      />
-                    )}
-                  />
-                </motion.div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm">Options</Label>
-                {options.map((option, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-2 group"
-                  >
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <Checkbox
-                        checked={index === ownerAnswerIndex}
-                        onCheckedChange={() => {
-                          if (index !== ownerAnswerIndex) {
-                            methods.setValue("owner_answer_index", index, {
-                              shouldValidate: true,
-                            });
-                          }
-                        }}
-                      />
-                    </motion.div>
-                    <motion.div
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                      className="flex items-center gap-2 flex-1"
-                    >
-                      <Controller
-                        control={methods.control}
-                        name={`options.${index}` as const}
-                        defaultValue={option}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            maxLength={60}
-                            placeholder={`Option ${index + 1}`}
-                            className="flex-1 text-sm sm:text-base"
-                          />
-                        )}
-                      />
-                    </motion.div>
-                    <div className="flex items-center gap-1 group-hover:opacity-100 transition-opacity">
-                      {options.length > 2 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => removeOption(index)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-                {options.length < 6 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    icon={Plus}
-                    iconPlacement="left"
-                    className="w-full border-dashed text-xs sm:text-sm"
-                    onClick={addOption}
-                  >
-                    Add option
-                  </Button>
-                )}
-              </div>
+              <CompactQuestionCardEditable
+                ref={questionCardRef}
+                question={methods.watch("question_text")}
+                answers={methods.watch("options")}
+                selectedAnswer={
+                  methods.watch("options")[
+                    methods.watch("owner_answer_index") ?? 0
+                  ] || ""
+                }
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -363,8 +245,8 @@ const AddPollDialog: React.FC<Props> = ({
             </DialogClose>
             <Button
               type="submit"
-              disabled={!methods.formState.isValid}
-              onClick={methods.handleSubmit(handleAddPoll)}
+              disabled={!questionCardRef.current?.isValid()}
+              onClick={handleQuestionSave}
               loading={isSubmitting}
             >
               Add Poll

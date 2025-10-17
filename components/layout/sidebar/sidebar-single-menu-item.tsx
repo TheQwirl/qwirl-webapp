@@ -5,13 +5,19 @@ import { usePathname } from "next/navigation";
 
 const SidebarSingleMenuItem = ({ item }: { item: MenuItem }) => {
   const pathname = usePathname();
+
+  if (!item.url) {
+    console.warn(`SidebarSingleMenuItem: Missing URL for item "${item.title}"`);
+    return null;
+  }
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
         disabled={item.disabled}
         className="hover:text-white duration-300 transition-all"
         asChild
-        isActive={pathname === item?.url}
+        isActive={pathname === item.url}
       >
         {item.disabled ? (
           <div className="flex items-center cursor-not-allowed opacity-50">

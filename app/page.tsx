@@ -11,9 +11,9 @@ import { QwirlShowcase } from "@/components/landing-page/qwirl-showcase";
 import SocialProof from "@/components/landing-page/social-proof";
 import SiteNav from "@/components/site-nav";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white text-slate-900">
+    <div className="min-h-screen">
       <SiteNav />
       <main className="relative">
         <Hero />

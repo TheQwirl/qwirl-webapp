@@ -6,8 +6,8 @@ import clsx from "clsx";
 import { useSmartBackNavigation } from "@/hooks/use-smart-back-navigation";
 
 export interface BackNavigationConfig {
-  title?: string;
-  subtitle?: string;
+  title?: string | ReactNode;
+  subtitle?: string | ReactNode;
   fallbackPath?: string;
   customBackAction?: () => void;
   rightContent?: ReactNode;
@@ -17,8 +17,8 @@ export interface BackNavigationConfig {
 }
 
 interface BackNavigationProps {
-  title?: string;
-  subtitle?: string;
+  title?: string | ReactNode;
+  subtitle?: string | ReactNode;
   fallbackPath?: string;
   customBackAction?: () => void;
   rightContent?: ReactNode;
@@ -74,11 +74,14 @@ export const BackNavigation = ({
 
           {(title || subtitle) && (
             <div className="min-w-0 flex-1">
-              {title && (
-                <h1 className="font-semibold text-base leading-tight truncate">
-                  {title}
-                </h1>
-              )}
+              {title &&
+                (typeof title === "string" ? (
+                  <h1 className="font-semibold text-base leading-tight truncate">
+                    {title}
+                  </h1>
+                ) : (
+                  <>{title}</>
+                ))}
               {subtitle && (
                 <p className="text-sm text-muted-foreground truncate">
                   {subtitle}

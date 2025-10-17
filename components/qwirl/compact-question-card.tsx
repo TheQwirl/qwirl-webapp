@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ThumbsUp, Repeat, Plus } from "lucide-react";
+import { ThumbsUp, Repeat } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
+import PollOption from "./poll-option";
 
 interface CompactQuestionCardProps {
   question: string;
@@ -41,10 +41,7 @@ export const CompactQuestionCard = React.forwardRef<
     return (
       <Card
         ref={ref}
-        className={clsx(
-          "border-0 shadow-sm transition-shadow hover:shadow-md",
-          className
-        )}
+        className={clsx("transition-shadow hover:shadow-md", className)}
       >
         <CardContent className="p-5 md:p-6">
           {category && (
@@ -75,14 +72,12 @@ export const CompactQuestionCard = React.forwardRef<
 
           <div className="space-y-2 mb-4">
             {answers.map((answer, index) => (
-              <div
+              <PollOption
                 key={index}
-                className={clsx(
-                  " bg-background flex items-center justify-between flex-wrap text-foreground w-full p-2 rounded-xl z-10 border text-left transition-all duration-200"
-                )}
-              >
-                <span className="text-gray-900 font-medium">{answer}</span>
-              </div>
+                option={answer}
+                optionNumber={index + 1}
+                variant="display"
+              />
             ))}
           </div>
 
@@ -116,25 +111,7 @@ export const CompactQuestionCard = React.forwardRef<
               )}
             </div>
 
-            <div className="flex space-x-2">
-              {customActions ? (
-                customActions
-              ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center space-x-1"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    <span>Qwirl</span>
-                  </Button>
-                  <Button size="sm" className="bg-primary hover:bg-primary/90">
-                    Post Now
-                  </Button>
-                </>
-              )}
-            </div>
+            <div className="flex space-x-2">{customActions}</div>
           </div>
         </CardContent>
       </Card>

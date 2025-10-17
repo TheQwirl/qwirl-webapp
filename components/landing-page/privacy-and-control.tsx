@@ -80,10 +80,7 @@ export function PrivacyAndControl() {
                     viewport={{ once: true }}
                     transition={{ delay: 0.2 }}
                   >
-                    You control the{" "}
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-secondary-foreground">
-                      vibe
-                    </span>
+                    You control the <span className="text-primary">vibe</span>
                   </motion.h3>
                   <motion.p
                     className="mt-4 text-lg text-muted-foreground max-w-prose leading-relaxed"
@@ -95,8 +92,11 @@ export function PrivacyAndControl() {
                     Not every question is for every audience. Choose visibility
                     per Qwirl:{" "}
                     <span className="text-primary font-semibold">public</span>,
-                    <span className="text-accent font-semibold"> friends</span>,
-                    or
+                    <span className="text-accent-foreground font-semibold">
+                      {" "}
+                      friends
+                    </span>
+                    , or
                     <span className="text-secondary-foreground font-semibold">
                       {" "}
                       link‑only

@@ -80,10 +80,7 @@ export const QwirlShowcase = () => {
             viewport={{ once: true }}
             className="text-4xl md:text-5xl font-bold tracking-tighter mb-4"
           >
-            Discover Unique{" "}
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Qwirls
-            </span>
+            Discover Unique <span className="text-primary">Qwirls</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}

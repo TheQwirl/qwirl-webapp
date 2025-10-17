@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import PollAnimation from "../poll-animation";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
-import { Wand2, MousePointerClick, Users, Share2, Gauge } from "lucide-react";
+import { Wand2, Users, Share2, Gauge } from "lucide-react";
 import Link from "next/link";
 import Wrapper from "./wrapper";
 
@@ -72,11 +72,7 @@ function Hero() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight"
               >
-                Find{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-secondary-foreground">
-                  your people
-                </span>
-                . Fast.
+                Find <span className="text-primary">your people</span>. Fast.
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
@@ -100,11 +96,14 @@ function Hero() {
                   className="rounded-full w-full sm:w-auto"
                   asChild
                 >
-                  <Link href="/create" className="flex items-center gap-2">
+                  <Link
+                    href="/question-bank"
+                    className="flex items-center gap-2"
+                  >
                     Build your Qwirl <Wand2 className="size-4" />
                   </Link>
                 </Button>
-                <Button
+                {/* <Button
                   variant="outline"
                   size="lg"
                   className="rounded-full w-full sm:w-auto"
@@ -113,7 +112,7 @@ function Hero() {
                   <Link href="#demo" className="flex items-center gap-2">
                     Try the demo <MousePointerClick className="size-4" />
                   </Link>
-                </Button>
+                </Button> */}
               </motion.div>
 
               <motion.div
