@@ -27,7 +27,10 @@ export default function SiteNav() {
               <Link href="/auth">Sign in</Link>
             </Button>
             <Button className="rounded-2xl" asChild>
-              <Link href="/question-bank" className="flex items-center gap-2">
+              <Link
+                href="/question-library"
+                className="flex items-center gap-2"
+              >
                 Create your Qwirl <ArrowRight className="size-4" />
               </Link>
             </Button>

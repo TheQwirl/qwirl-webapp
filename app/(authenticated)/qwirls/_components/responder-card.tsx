@@ -26,6 +26,7 @@ type ResponderData = {
   started_at: string;
   completed_at?: string | null | undefined;
   response_count: number;
+  wavelength: number;
 };
 
 interface ResponderCardProps {
@@ -172,17 +173,17 @@ export const ResponderCard: React.FC<ResponderCardProps> = ({
               </div>
             </div>
 
-            {/* Right section - Progress and actions */}
+            {/* Right section - Wavelength/Progress and actions */}
             <div className="flex items-center gap-8">
-              {/* Progress indicator */}
+              {/* Wavelength/Progress indicator */}
               <div className="flex flex-col items-center">
                 <div className={`text-3xl font-bold ${statusConfig.textColor}`}>
-                  {getProgressPercentage()}%
+                  {isCompleted
+                    ? `${Math.round(responder.wavelength)}%`
+                    : `${getProgressPercentage()}%`}
                 </div>
                 <div className="text-xs text-muted-foreground font-medium tracking-wide">
-                  {responder.status === "completed"
-                    ? "COMPLETED"
-                    : "IN PROGRESS"}
+                  {isCompleted ? "WAVELENGTH" : "IN PROGRESS"}
                 </div>
               </div>
 

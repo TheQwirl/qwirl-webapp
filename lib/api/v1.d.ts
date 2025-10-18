@@ -759,13 +759,14 @@ export interface paths {
          *
          *     Args:
          *         qwirl_id (int): The ID of the Qwirl
-         *         status (str, optional): Filter by session status (in_progress, completed, abandoned)
+         *         status (SessionStatusEnum): Filter by session status (defaults to 'completed')
          *         skip (int): Number of records to skip for pagination
          *         limit (int): Maximum number of records to return
+         *         sort_by (ResponderSortByEnum): Sort by 'started_at' or 'wavelength' (defaults to 'started_at')
          *         user (User): The current authenticated user
          *
          *     Returns:
-         *         List of users who have responded to the Qwirl with session info
+         *         List of users who have responded to the Qwirl with session info and wavelength
          *
          *     Raises:
          *         404: If Qwirl not found
@@ -1868,8 +1869,7 @@ export interface components {
             avatar: string | null;
             /** Session Id */
             session_id: number;
-            /** Status */
-            status: string;
+            status: components["schemas"]["SessionStatusEnum"];
             /**
              * Started At
              * Format: date-time
@@ -1879,6 +1879,8 @@ export interface components {
             completed_at?: string | null;
             /** Response Count */
             response_count: number;
+            /** Wavelength */
+            wavelength: number;
         };
         /** QwirlRespondersResponse */
         QwirlRespondersResponse: {
@@ -2056,6 +2058,12 @@ export interface components {
             /** Wavelength */
             wavelength: number;
         };
+        /**
+         * ResponderSortByEnum
+         * @description Sort by options for responders endpoint
+         * @enum {string}
+         */
+        ResponderSortByEnum: "started_at" | "wavelength";
         /** ResponseBody */
         ResponseBody: {
             /** Message */
@@ -2115,6 +2123,12 @@ export interface components {
             /** Comment */
             comment?: string | null;
         };
+        /**
+         * SessionStatusEnum
+         * @description Session status values
+         * @enum {string}
+         */
+        SessionStatusEnum: "in_progress" | "completed" | "abandoned";
         /** TopWavelengthsResponse */
         TopWavelengthsResponse: {
             /** Users */
@@ -3476,11 +3490,13 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by session status */
-                status?: string;
+                status?: components["schemas"]["SessionStatusEnum"];
                 /** @description Number of records to skip */
                 skip?: number;
                 /** @description Maximum number of records to return */
                 limit?: number;
+                /** @description Sort by field */
+                sort_by?: components["schemas"]["ResponderSortByEnum"];
             };
             header?: never;
             path: {

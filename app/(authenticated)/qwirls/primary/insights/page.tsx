@@ -10,6 +10,7 @@ import { InsightsOverviewTab } from "../../_components/insights-overview-tab";
 import $api from "@/lib/api/client";
 import { authStore } from "@/stores/useAuthStore";
 import QwirlResponsesViewer from "@/components/qwirl/qwirl-response-viewer";
+import { components } from "@/lib/api/v1-client-side";
 
 const PrimaryQwirlInsightsPage = () => {
   const { polls } = useQwirlEditor();
@@ -17,7 +18,6 @@ const PrimaryQwirlInsightsPage = () => {
   const searchParams = useSearchParams();
   const responderIdRaw = searchParams.get("responder");
 
-  // Determine initial tab based on responder query param
   const initialTab = responderIdRaw ? "details" : "overview";
   const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [selectedResponderId, setSelectedResponderId] = useState<
@@ -28,7 +28,19 @@ const PrimaryQwirlInsightsPage = () => {
       : undefined
   );
 
-  const { data, isLoading, isError, refetch } = $api.useQuery(
+  // Filter states
+  const [sortBy, setSortBy] = useState<string>("wavelength");
+  const [showInProgress, setShowInProgress] = useState<boolean>(false);
+
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = $api.useInfiniteQuery(
     "get",
     "/qwirl-responses/qwirls/{qwirl_id}/responders",
     {
@@ -36,17 +48,45 @@ const PrimaryQwirlInsightsPage = () => {
         path: {
           qwirl_id: user?.primary_qwirl_id ?? 0,
         },
-        query: {},
+        query: {
+          sort_by: sortBy as "wavelength" | "started_at",
+          status: showInProgress ? "in_progress" : "completed",
+          limit: 12,
+          skip: 0,
+        },
       },
     },
     {
       enabled: !!user?.primary_qwirl_id,
+      initialPageParam: 0,
+      pageParamName: "skip",
+      getNextPageParam: (
+        lastPage: components["schemas"]["QwirlRespondersResponse"],
+        allPages: components["schemas"]["QwirlRespondersResponse"][]
+      ) => {
+        const currentCount = allPages.reduce(
+          (sum, page) => sum + (page.responders?.length || 0),
+          0
+        );
+        if (currentCount >= (lastPage.total_count || 0)) return undefined;
+        return currentCount;
+      },
     }
   );
+
+  const responders = data?.pages.flatMap((page) => page.responders) ?? [];
 
   const handleResponderClick = (responderId: number) => {
     setSelectedResponderId(responderId);
     setActiveTab("details");
+  };
+
+  const handleSortChange = (newSort: string) => {
+    setSortBy(newSort);
+  };
+
+  const handleShowInProgressChange = (show: boolean) => {
+    setShowInProgress(show);
   };
 
   return (
@@ -73,11 +113,18 @@ const PrimaryQwirlInsightsPage = () => {
               </TabsList>
               <TabsContent value="overview" className="mt-6">
                 <InsightsOverviewTab
-                  data={data}
+                  responders={responders}
                   isLoading={isLoading}
                   isError={isError}
+                  isFetchingNextPage={isFetchingNextPage}
+                  hasNextPage={hasNextPage || false}
                   refetch={refetch}
+                  fetchNextPage={fetchNextPage}
                   onResponderClick={handleResponderClick}
+                  sortBy={sortBy}
+                  onSortChange={handleSortChange}
+                  showInProgress={showInProgress}
+                  onShowInProgressChange={handleShowInProgressChange}
                 />
               </TabsContent>
               <TabsContent value="details" className="mt-6">

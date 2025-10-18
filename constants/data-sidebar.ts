@@ -54,13 +54,13 @@ export const MENU_SECTIONS: MenuSection[] = [
       {
         title: "Discover",
         icon: Users,
-        url: "/community",
+        url: "/discover",
         type: "single",
       },
       {
         title: "Question Library",
         icon: Library,
-        url: "/question-bank",
+        url: "/question-library",
         type: "single",
       },
       {

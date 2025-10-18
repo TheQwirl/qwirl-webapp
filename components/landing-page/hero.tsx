@@ -97,7 +97,7 @@ function Hero() {
                   asChild
                 >
                   <Link
-                    href="/question-bank"
+                    href="/question-library"
                     className="flex items-center gap-2"
                   >
                     Build your Qwirl <Wand2 className="size-4" />

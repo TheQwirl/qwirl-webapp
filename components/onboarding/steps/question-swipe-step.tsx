@@ -13,7 +13,6 @@ import {
 import $api from "@/lib/api/client";
 import { toast } from "sonner";
 import { components } from "@/lib/api/v1-client-side";
-import { QwirlPollData } from "@/components/qwirl/schema";
 import Link from "next/link";
 
 type Question = components["schemas"]["QuestionSearchResponse"];
@@ -282,8 +281,8 @@ export function QuestionSwipeStep({
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
             Don&apos;t see what you like? You can add more questions later from
             the{" "}
-            <Link className="underline" href="/question-bank">
-              Question Bank
+            <Link className="underline" href="/question-library">
+              Question Library
             </Link>{" "}
             or{" "}
             <Link className="underline" href="/qwirls/primary/edit">

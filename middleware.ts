@@ -22,7 +22,7 @@ export const config = {
 };
 
 const PROTECTED_ROUTES = ["/settings"];
-const PUBLIC_ROUTES = ["/qwirl", "/question-bank"];
+const PUBLIC_ROUTES = ["/qwirl", "/question-library", "/discover"];
 const AUTH_PATH = "/auth";
 
 export async function middleware(request: NextRequest) {

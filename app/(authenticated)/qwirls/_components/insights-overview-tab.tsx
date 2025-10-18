@@ -1,12 +1,19 @@
 "use client";
-import React from "react";
+import React, { useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { XCircle, Users, TrendingUp } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { XCircle, Users } from "lucide-react";
 import { ResponderLoadingSkeleton } from "./responder-loading-skeleton";
 import { ResponderCard } from "./responder-card";
-import pluralize from "pluralize";
 
 type ResponderData = {
   id: number;
@@ -18,17 +25,22 @@ type ResponderData = {
   started_at: string;
   completed_at?: string | null | undefined;
   response_count: number;
+  wavelength: number;
 };
 
 interface InsightsOverviewTabProps {
-  data?: {
-    responders: ResponderData[];
-    total_count: number;
-  };
+  responders: ResponderData[];
   isLoading: boolean;
   isError: boolean;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
   refetch: () => void;
+  fetchNextPage: () => void;
   onResponderClick: (responderId: number) => void;
+  sortBy: string;
+  onSortChange: (sort: string) => void;
+  showInProgress: boolean;
+  onShowInProgressChange: (show: boolean) => void;
 }
 
 const EmptyState = () => (
@@ -49,45 +61,77 @@ const EmptyState = () => (
 );
 
 export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
-  data,
+  responders,
   isLoading,
   isError,
+  isFetchingNextPage,
+  hasNextPage,
   refetch,
+  fetchNextPage,
   onResponderClick,
+  sortBy,
+  onSortChange,
+  showInProgress,
+  onShowInProgressChange,
 }) => {
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastResponderElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (isLoading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (
+          entries?.[0]?.isIntersecting &&
+          hasNextPage &&
+          !isFetchingNextPage
+        ) {
+          fetchNextPage();
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]
+  );
+
   return (
     <div className="space-y-4">
-      {/* Stats Header */}
-      <div className="mb-4">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 text-sm text-muted-foreground"
-        >
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span>
-              {isLoading
-                ? "Loading..."
-                : `${data?.total_count || 0} ${pluralize(
-                    "response",
-                    data?.total_count || 0
-                  )}`}
-            </span>
+      {/* Filter Controls */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-muted/30 p-4 rounded-lg border border-border/50">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-1">
+          <div className="flex items-center gap-3">
+            <Label
+              htmlFor="sort-select"
+              className="text-sm font-medium whitespace-nowrap"
+            >
+              Sort by:
+            </Label>
+            <Select value={sortBy} onValueChange={onSortChange}>
+              <SelectTrigger id="sort-select" className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="wavelength">Highest Wavelength</SelectItem>
+                <SelectItem value="started_at">Most Recent</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          {!isLoading && data?.responders && data?.responders.length > 0 && (
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              <span>
-                {
-                  data?.responders.filter((r) => r.status === "completed")
-                    .length
-                }{" "}
-                completed
-              </span>
-            </div>
-          )}
-        </motion.div>
+
+          <div className="flex items-center gap-3">
+            <Switch
+              id="show-in-progress"
+              checked={showInProgress}
+              onCheckedChange={onShowInProgressChange}
+            />
+            <Label
+              htmlFor="show-in-progress"
+              className="text-sm font-medium cursor-pointer"
+            >
+              Show in-progress responses
+            </Label>
+          </div>
+        </div>
       </div>
 
       {/* Error State */}
@@ -120,18 +164,36 @@ export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
       {/* Content */}
       {!isLoading && !isError && (
         <div className="space-y-4">
-          {data?.responders && data?.responders.length > 0 ? (
-            data?.responders.map((responder, index) => (
-              <ResponderCard
-                key={responder.id}
-                responder={responder}
-                index={index}
-                onClick={() => onResponderClick(responder.id)}
-              />
-            ))
+          {responders && responders.length > 0 ? (
+            <>
+              {responders.map((responder, index) => {
+                const isLastElement = responders.length === index + 1;
+                return (
+                  <div
+                    key={responder.id}
+                    ref={isLastElement ? lastResponderElementRef : null}
+                  >
+                    <ResponderCard
+                      responder={responder}
+                      index={index}
+                      onClick={() => onResponderClick(responder.id)}
+                    />
+                  </div>
+                );
+              })}
+            </>
           ) : (
             <EmptyState />
           )}
+        </div>
+      )}
+
+      {/* Loading More State */}
+      {isFetchingNextPage && (
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <ResponderLoadingSkeleton key={i} index={i} />
+          ))}
         </div>
       )}
     </div>
