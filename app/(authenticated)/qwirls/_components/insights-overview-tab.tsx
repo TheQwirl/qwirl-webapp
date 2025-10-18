@@ -1,16 +1,35 @@
 "use client";
 import React from "react";
-import { PageLayout } from "@/components/layout/page-layout";
-import $api from "@/lib/api/client";
-import { authStore } from "@/stores/useAuthStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { XCircle, BarChart3, Users, TrendingUp } from "lucide-react";
-import { ResponderLoadingSkeleton } from "../../_components/responder-loading-skeleton";
-import { ResponderCard } from "../../_components/responder-card";
+import { XCircle, Users, TrendingUp } from "lucide-react";
+import { ResponderLoadingSkeleton } from "./responder-loading-skeleton";
+import { ResponderCard } from "./responder-card";
 import pluralize from "pluralize";
+
+type ResponderData = {
+  id: number;
+  name: string | null;
+  username: string;
+  avatar: string | null;
+  session_id: number;
+  status: string;
+  started_at: string;
+  completed_at?: string | null | undefined;
+  response_count: number;
+};
+
+interface InsightsOverviewTabProps {
+  data?: {
+    responders: ResponderData[];
+    total_count: number;
+  };
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+  onResponderClick: (responderId: number) => void;
+}
 
 const EmptyState = () => (
   <div className="w-full">
@@ -28,65 +47,16 @@ const EmptyState = () => (
     </Card>
   </div>
 );
-const PrimaryQwirlResponsesPage = () => {
-  const { user } = authStore();
-  const router = useRouter();
 
-  const { data, isLoading, isError, refetch } = $api.useQuery(
-    "get",
-    "/qwirl-responses/qwirls/{qwirl_id}/responders",
-    {
-      params: {
-        path: {
-          qwirl_id: user?.primary_qwirl_id ?? 0,
-        },
-        query: {
-          // status: "",
-        },
-      },
-    },
-    {
-      enabled: !!user?.primary_qwirl_id,
-    }
-  );
-
-  if (!user?.primary_qwirl_id) {
-    return (
-      <PageLayout
-        backNavigation={{
-          title: "Primary Qwirl Responses",
-          subtitle: "View and manage responses to your primary qwirl",
-          hideBackButton: true,
-        }}
-      >
-        <div className="container mx-auto px-4 py-8">
-          <Card className="border-dashed border-2 border-muted-foreground/25">
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <BarChart3 className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                No Primary Qwirl Set
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-sm mb-4">
-                You need to set a primary Qwirl before you can view responses.
-              </p>
-              <Button onClick={() => router.push("/qwirls")} variant="outline">
-                Go to Qwirls
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </PageLayout>
-    );
-  }
-
+export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
+  data,
+  isLoading,
+  isError,
+  refetch,
+  onResponderClick,
+}) => {
   return (
-    <PageLayout
-      backNavigation={{
-        title: "Primary Qwirl Responses",
-        subtitle: "View and manage responses to your primary qwirl",
-        hideBackButton: true,
-      }}
-    >
+    <div className="space-y-4">
       {/* Stats Header */}
       <div className="mb-4">
         <motion.div
@@ -129,7 +99,7 @@ const PrimaryQwirlResponsesPage = () => {
               Failed to Load Responses
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {"An error occurred while loading responder data."}
+              An error occurred while loading responder data.
             </p>
             <Button onClick={() => refetch()} variant="outline">
               Try Again
@@ -156,6 +126,7 @@ const PrimaryQwirlResponsesPage = () => {
                 key={responder.id}
                 responder={responder}
                 index={index}
+                onClick={() => onResponderClick(responder.id)}
               />
             ))
           ) : (
@@ -163,8 +134,6 @@ const PrimaryQwirlResponsesPage = () => {
           )}
         </div>
       )}
-    </PageLayout>
+    </div>
   );
 };
-
-export default PrimaryQwirlResponsesPage;

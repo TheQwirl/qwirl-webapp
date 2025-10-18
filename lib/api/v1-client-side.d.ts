@@ -2140,6 +2140,39 @@ export interface components {
              */
             is_following: boolean;
         };
+        /**
+         * UserProfileResponse
+         * @description Full user profile with relationship status for authenticated requests
+         */
+        UserProfileResponse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string | null;
+            /** Username */
+            username: string;
+            /** Primary Qwirl Id */
+            primary_qwirl_id: number | null;
+            /** Avatar */
+            avatar: string | null;
+            /** Categories */
+            categories: string[];
+            /** Email */
+            email?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Header Img */
+            header_img?: string | null;
+            /** Has Seen Onboarding */
+            has_seen_onboarding?: boolean | null;
+            /** Followers Count */
+            followers_count?: number | null;
+            /** Following Count */
+            following_count?: number | null;
+            /** Friends Count */
+            friends_count?: number | null;
+            relationship?: components["schemas"]["RelationshipStatus"] | null;
+        };
         /** UserUpdate */
         UserUpdate: {
             /** Name */
@@ -2630,7 +2663,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["UserProfileResponse"];
                 };
             };
             /** @description Validation Error */
@@ -2663,7 +2696,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["UserProfileResponse"];
                 };
             };
             /** @description Validation Error */

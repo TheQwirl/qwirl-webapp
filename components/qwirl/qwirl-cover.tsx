@@ -136,7 +136,7 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
               </Button>
             </Link>
           ) : variant === "owner" ? (
-            <Link href="/qwirls/primary/analytics">
+            <Link href="/qwirls/primary/insights">
               <Button
                 size="lg"
                 className="rounded-full shadow-lg hover:shadow-xl transition-all"

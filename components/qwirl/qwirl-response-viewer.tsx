@@ -425,7 +425,7 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
   }
 
   return (
-    <>
+    <div className="space-y-4">
       <Card className="">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -518,7 +518,7 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
           </div>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 };
 

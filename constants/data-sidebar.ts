@@ -1,7 +1,6 @@
 import {
   BarChart3,
   Edit,
-  MessageSquare,
   Settings,
   Users,
   Library,
@@ -41,15 +40,9 @@ export const MENU_SECTIONS: MenuSection[] = [
           },
           {
             title: "Insights",
-            url: "/qwirls/primary/analytics",
+            url: "/qwirls/primary/insights",
             type: "single",
             icon: BarChart3,
-          },
-          {
-            title: "Responses",
-            url: "/qwirls/primary/responses",
-            type: "single",
-            icon: MessageSquare,
           },
         ],
       },

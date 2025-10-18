@@ -9,7 +9,7 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  Calendar,
+  // Calendar,
   MessageSquare,
   ArrowRight,
 } from "lucide-react";
@@ -31,11 +31,13 @@ type ResponderData = {
 interface ResponderCardProps {
   responder: ResponderData;
   index?: number;
+  onClick?: (responderId: number) => void;
 }
 
 export const ResponderCard: React.FC<ResponderCardProps> = ({
   responder,
   index = 0,
+  onClick,
 }) => {
   const router = useRouter();
   const isCompleted = responder.status === "completed";
@@ -82,13 +84,17 @@ export const ResponderCard: React.FC<ResponderCardProps> = ({
 
   const handleCardClick = () => {
     if (isCompleted) {
-      router.push(`/qwirls/primary/analytics?responder=${responder.id}`);
+      if (onClick) {
+        onClick(responder.id);
+      } else {
+        router.push(`/qwirls/primary/insights?responder=${responder.id}`);
+      }
     }
   };
 
-  const timeAgo = formatDistanceToNow(new Date(responder.started_at), {
-    addSuffix: true,
-  });
+  // const timeAgo = formatDistanceToNow(new Date(responder.started_at), {
+  //   addSuffix: true,
+  // });
   const completedTimeAgo = responder.completed_at
     ? formatDistanceToNow(new Date(responder.completed_at), { addSuffix: true })
     : null;
@@ -149,10 +155,10 @@ export const ResponderCard: React.FC<ResponderCardProps> = ({
                     <span>{responder.response_count} responses</span>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
+                  {/* <div className="flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5" />
                     <span>Started {timeAgo}</span>
-                  </div>
+                  </div> */}
 
                   {responder.status === "completed" && completedTimeAgo && (
                     <div
