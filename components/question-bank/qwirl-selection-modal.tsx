@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,12 +29,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
-import { QwirlPollData } from "@/components/qwirl/schema";
+import { QwirlPollData, QwirlPollSchema } from "@/components/qwirl/schema";
 import { toast } from "sonner";
 import { CompactQuestionCardEditable } from "@/components/qwirl/compact-question-card-editable";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface SortablePollItemProps {
   id: string;
@@ -47,7 +49,6 @@ interface SortablePollItemProps {
 function SortablePollItem({
   id,
   poll,
-  index,
   onRemove,
   onUpdate,
 }: SortablePollItemProps) {
@@ -66,26 +67,40 @@ function SortablePollItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const cardRef = React.useRef<any>(null);
+  // Create form for this specific poll
+  const methods = useForm<QwirlPollData>({
+    resolver: zodResolver(QwirlPollSchema),
+    defaultValues: {
+      question_text: poll.question_text,
+      options: poll.options,
+      owner_answer_index: poll.owner_answer_index,
+    },
+    mode: "onChange",
+  });
 
-  // Handle updates from the editable card
-  React.useEffect(() => {
-    if (cardRef.current) {
-      const checkForUpdates = () => {
-        const formData = cardRef.current.getFormData();
-        if (
-          formData.question_text !== poll.question_text ||
-          JSON.stringify(formData.options) !== JSON.stringify(poll.options) ||
-          formData.owner_answer_index !== poll.owner_answer_index
-        ) {
-          onUpdate(formData);
-        }
-      };
+  const { watch, reset } = methods;
+  const formValues = watch();
 
-      const interval = setInterval(checkForUpdates, 1000);
-      return () => clearInterval(interval);
+  // Update parent when form values change
+  useEffect(() => {
+    const hasChanges =
+      formValues.question_text !== poll.question_text ||
+      JSON.stringify(formValues.options) !== JSON.stringify(poll.options) ||
+      formValues.owner_answer_index !== poll.owner_answer_index;
+
+    if (hasChanges) {
+      onUpdate(formValues);
     }
-  }, [poll, onUpdate]);
+  }, [formValues, poll, onUpdate]);
+
+  // Reset form when poll prop changes (from external updates)
+  useEffect(() => {
+    reset({
+      question_text: poll.question_text,
+      options: poll.options,
+      owner_answer_index: poll.owner_answer_index,
+    });
+  }, [poll.question_text, poll.options, poll.owner_answer_index, reset]);
 
   return (
     <div ref={setNodeRef} style={style} className="relative group">
@@ -109,12 +124,9 @@ function SortablePollItem({
           <X className="h-4 w-4" />
         </Button>
 
-        <CompactQuestionCardEditable
-          ref={cardRef}
-          question={poll.question_text}
-          answers={poll.options}
-          selectedAnswer={poll.options[poll.owner_answer_index]}
-        />
+        <FormProvider {...methods}>
+          <CompactQuestionCardEditable />
+        </FormProvider>
       </div>
     </div>
   );

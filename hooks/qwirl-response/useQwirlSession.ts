@@ -1,9 +1,11 @@
-import { OtherUser } from "@/components/profile/types";
 import $api from "@/lib/api/client";
+import { components } from "@/lib/api/v1-client-side";
 import { authStore } from "@/stores/useAuthStore";
 import { useMemo } from "react";
 
-export const useQwirlSession = (user: OtherUser | undefined) => {
+export const useQwirlSession = (
+  user: components["schemas"]["UserProfileResponse"] | undefined
+) => {
   const { isAuthenticated } = authStore();
   const queryKey = useMemo(
     () => [

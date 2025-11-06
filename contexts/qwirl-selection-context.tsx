@@ -121,5 +121,7 @@ export function useQwirlSelection() {
 }
 
 export function useQwirlSelectionForm() {
-  return useFormContext<QwirlSelectionForm>();
+  const formContext = useFormContext<QwirlSelectionForm>();
+  // formContext will be undefined/null when used outside FormProvider
+  return formContext;
 }

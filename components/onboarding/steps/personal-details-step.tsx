@@ -10,9 +10,18 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { User, Phone, AtSign } from "lucide-react";
+import {
+  User,
+  Phone,
+  AtSign,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+} from "lucide-react";
 import { authStore } from "@/stores/useAuthStore";
 import { EditableUserAvatar } from "@/components/editable-user-avatar";
+import { useUsernameValidation } from "@/hooks/useUsernameValidation";
+import { cn } from "@/lib/utils";
 
 interface PersonalDetailsFormData {
   name: string;
@@ -26,6 +35,14 @@ interface PersonalDetailsStepProps {
 
 export function PersonalDetailsStep({ form }: PersonalDetailsStepProps) {
   const { user } = authStore();
+  const usernameValue = form.watch("username");
+
+  const { isCheckingUsername, usernameStatus, hasUsernameChanged } =
+    useUsernameValidation({
+      username: usernameValue,
+      currentUsername: user?.username,
+      form,
+    });
 
   return (
     <div className="space-y-8">
@@ -75,10 +92,39 @@ export function PersonalDetailsStep({ form }: PersonalDetailsStepProps) {
                   Username
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="johndoe" {...field} />
+                  <div className="relative">
+                    <Input
+                      placeholder="johndoe"
+                      {...field}
+                      className={cn(
+                        "pr-10",
+                        usernameStatus === "available" &&
+                          "border-green-500 focus-visible:ring-green-500",
+                        usernameStatus === "unavailable" &&
+                          "border-destructive focus-visible:ring-destructive"
+                      )}
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {isCheckingUsername && (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      )}
+                      {!isCheckingUsername &&
+                        usernameStatus === "available" && (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        )}
+                      {!isCheckingUsername &&
+                        usernameStatus === "unavailable" && (
+                          <XCircle className="h-4 w-4 text-destructive" />
+                        )}
+                    </div>
+                  </div>
                 </FormControl>
                 <FormDescription>
-                  Your unique username for sharing Qwirls
+                  {!hasUsernameChanged
+                    ? "Your current username"
+                    : usernameStatus === "available"
+                    ? "This username is available"
+                    : "Your unique username for sharing Qwirls"}
                 </FormDescription>
                 <FormMessage />
               </FormItem>

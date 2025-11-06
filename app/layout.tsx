@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import QueryProvider from "@/components/query-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -38,7 +39,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
+          </QueryProvider>
           <Toaster />
         </ThemeProvider>
       </body>

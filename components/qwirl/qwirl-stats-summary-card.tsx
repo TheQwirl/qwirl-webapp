@@ -3,41 +3,19 @@ import $api from "@/lib/api/client";
 import { authStore } from "@/stores/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { CheckCircle2, Timer, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 function formatNumber(n: number | null | undefined) {
   if (n === null || n === undefined || Number.isNaN(n)) return "-";
   return new Intl.NumberFormat().format(n);
 }
 
-function formatPercent(p: number | null | undefined) {
-  if (p === null || p === undefined || Number.isNaN(p)) return "-";
-  // Accept either 0-1 or 0-100 inputs
-  const value = p <= 1 ? p * 100 : p;
-  return `${value.toFixed(1)}%`;
-}
-
-type Orientation = "default" | "vertical";
-type Variant = "simple" | "complex";
-
 interface QwirlStatsSummaryCardProps {
-  orientation?: Orientation;
-  variant?: Variant;
   showTitle?: boolean;
   title?: string;
 }
 
-const QwirlStatsSummaryCard: React.FC<QwirlStatsSummaryCardProps> = ({
-  orientation = "default",
-  variant = "simple",
-  showTitle = true,
-  title = "Your Qwirl Activity",
-}) => {
+const QwirlStatsSummaryCard: React.FC<QwirlStatsSummaryCardProps> = () => {
   const { user } = authStore();
 
   const hasPrimary = !!user?.primary_qwirl_id;
@@ -57,213 +35,100 @@ const QwirlStatsSummaryCard: React.FC<QwirlStatsSummaryCardProps> = ({
     }
   );
 
-  const { data, isLoading, isError, refetch, isFetching, dataUpdatedAt } =
-    qwirlStatsQuery;
+  const { data, isLoading, isError, refetch, isFetching } = qwirlStatsQuery;
 
   if (!hasPrimary) {
     return (
-      <div>
-        {showTitle && (
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">{title}</h3>
-          </div>
-        )}
-        <div className="text-sm text-muted-foreground">
-          Set a primary Qwirl to see your engagement and response insights here.
-        </div>
+      <div className="text-xs sm:text-sm text-muted-foreground bg-muted/30 p-3 sm:p-4 rounded-lg border border-border/50">
+        Set a primary Qwirl to see your engagement insights here.
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div>
-        {showTitle && (
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <Skeleton className="h-8 w-24 rounded-md" />
-          </div>
-        )}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-6 w-16" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-6 w-16" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-6 w-16" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-6 w-16" />
+      <div className="flex items-center justify-between bg-muted/30 p-3 sm:p-4 rounded-lg border border-border/50 gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-md flex-shrink-0" />
+          <div className="space-y-1 min-w-0">
+            <Skeleton className="h-4 sm:h-5 w-12 sm:w-16" />
+            <Skeleton className="h-2 sm:h-3 w-20 sm:w-24" />
           </div>
         </div>
+        <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div>
-        {showTitle && (
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <Button variant="outline" onClick={() => refetch()}>
-              Retry
-            </Button>
-          </div>
-        )}
-        <p className="text-sm text-destructive">
-          Failed to load summary. Please try again.
+      <div className="flex items-center justify-between bg-muted/30 p-3 sm:p-4 rounded-lg border border-border/50 gap-2">
+        <p className="text-xs sm:text-sm text-destructive min-w-0 flex-1">
+          Failed to load summary
         </p>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => refetch()}
+          className="h-8 w-8 flex-shrink-0"
+        >
+          <RefreshCw className="h-4 w-4" />
+        </Button>
       </div>
     );
   }
 
-  const lastUpdated = dataUpdatedAt
-    ? new Date(dataUpdatedAt).toLocaleTimeString()
-    : null;
+  const totalResponders =
+    (data?.completed_sessions ?? 0) + (data?.in_progress_sessions ?? 0);
 
-  const allTiles = [
-    {
-      key: "completed_sessions",
-      label: "People Completed",
-      value: data?.completed_sessions,
-      icon: CheckCircle2,
-      priority: "high" as const,
-      isPercentage: false,
-    },
-    {
-      key: "in_progress_sessions",
-      label:
-        data?.in_progress_sessions === 1
-          ? "Person Answering"
-          : "People Answering",
-      value: data?.in_progress_sessions,
-      icon: Timer,
-      priority: "high" as const,
-      isPercentage: false,
-    },
-  ] as const;
-
-  const displayTiles =
-    variant === "simple"
-      ? allTiles.filter((tile) => tile.priority === "high")
-      : allTiles;
-
-  const renderStatTile = (tile: (typeof allTiles)[number]) => {
-    const formattedValue = tile.isPercentage
-      ? formatPercent(tile.value)
-      : formatNumber(tile.value);
-
-    if (orientation === "vertical") {
-      return (
-        <div
-          key={tile.key}
-          className="flex items-center gap-3 p-3 rounded-lg bg-card border"
-        >
-          <div className="rounded-md bg-muted p-2 flex-shrink-0">
-            <tile.icon className="h-4 w-4 text-foreground" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-foreground">
-              {formattedValue}
-            </div>
-            <div className="text-xs text-muted-foreground">{tile.label}</div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div
-        key={tile.key}
-        className="flex flex-col justify-center items-center gap-2 p-3 rounded-lg bg-card border"
-      >
-        <div className="rounded-md bg-muted p-2">
-          <tile.icon className="h-4 w-4 text-foreground" />
-        </div>
-        <div className="text-center">
-          <div className="text-lg font-semibold" aria-live="polite">
-            {formattedValue}
-          </div>
-          <div className="text-xs text-muted-foreground">{tile.label}</div>
-        </div>
-      </div>
-    );
-  };
-
-  const getGridClass = () => {
-    if (orientation === "vertical") {
-      return "space-y-3";
-    }
-
-    // With only 2 stats, use a simple 2-column layout
-    return "grid grid-cols-2 gap-4";
-  };
+  const totalQuestions = data?.total_items ?? 0;
 
   return (
-    <div>
-      {showTitle && (
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <div className="flex items-center gap-2">
-            {lastUpdated && (
-              <span className="text-xs text-muted-foreground">
-                Updated {lastUpdated}
-              </span>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Refresh"
-                  onClick={() => refetch()}
-                  disabled={isFetching}
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Refresh</TooltipContent>
-            </Tooltip>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between bg-muted/30 p-3 sm:p-4 rounded-lg border border-border/50 gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <div className="text-xl sm:text-2xl font-bold text-foreground flex-shrink-0">
+            {formatNumber(totalResponders)}
+          </div>
+          <div className="text-xs sm:text-sm text-muted-foreground min-w-0">
+            {totalResponders === 1 ? "Total Responder" : "Total Responders"}
           </div>
         </div>
-      )}
-
-      <div className={getGridClass()}>{displayTiles.map(renderStatTile)}</div>
-
-      {!showTitle && (
-        <div className="flex items-center justify-between gap-2 mt-4 pt-4 border-t">
-          {lastUpdated && (
-            <span className="text-xs text-muted-foreground">
-              Updated {lastUpdated}
-            </span>
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Refresh"
-                onClick={() => refetch()}
-                disabled={isFetching}
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Refresh</TooltipContent>
-          </Tooltip>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Refresh"
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="h-8 w-8 flex-shrink-0"
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+          />
+        </Button>
+      </div>
+      <div className="flex items-center justify-between bg-muted/30 p-3 sm:p-4 rounded-lg border border-border/50 gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <div className="text-xl sm:text-2xl font-bold text-foreground flex-shrink-0">
+            {formatNumber(totalQuestions)}
+          </div>
+          <div className="text-xs sm:text-sm text-muted-foreground min-w-0">
+            {totalResponders === 1 ? "Question in Qwirl" : "Questions in Qwirl"}
+          </div>
         </div>
-      )}
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Refresh"
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="h-8 w-8 flex-shrink-0"
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+          />
+        </Button>
+      </div>
     </div>
   );
 };

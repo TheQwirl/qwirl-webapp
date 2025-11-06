@@ -2,18 +2,18 @@ import React from "react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { QwirlItem } from "@/components/qwirl/types";
-import { OtherUser } from "@/components/profile/types";
 import { CONSTANTS } from "@/constants/qwirl-respond";
 import Header from "@/components/qwirl/qwirl-respond/header";
 import QuestionHeader from "@/components/qwirl/qwirl-respond/question-header";
 import OptionsList from "@/components/qwirl/qwirl-respond/options-list";
 import CommentsSection from "@/components/qwirl/qwirl-respond/comment-section";
 import Footer from "@/components/qwirl/qwirl-respond/footer";
+import { components } from "@/lib/api/v1-client-side";
 
 interface QwirlInteractiveProps {
   currentPoll: QwirlItem | undefined;
   pollsLength: number;
-  user: OtherUser;
+  user: components["schemas"]["UserProfileResponse"];
   // State
   isAnsweredCurrent: boolean;
   isSkippedCurrent: boolean;

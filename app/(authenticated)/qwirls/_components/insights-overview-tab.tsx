@@ -10,10 +10,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 import { XCircle, Users } from "lucide-react";
 import { ResponderLoadingSkeleton } from "./responder-loading-skeleton";
 import { ResponderCard } from "./responder-card";
+import $api from "@/lib/api/client";
+import { authStore } from "@/stores/useAuthStore";
 
 type ResponderData = {
   id: number;
@@ -28,6 +36,8 @@ type ResponderData = {
   wavelength: number;
 };
 
+type SortByOption = "wavelength" | "started_at";
+
 interface InsightsOverviewTabProps {
   responders: ResponderData[];
   isLoading: boolean;
@@ -37,28 +47,9 @@ interface InsightsOverviewTabProps {
   refetch: () => void;
   fetchNextPage: () => void;
   onResponderClick: (responderId: number) => void;
-  sortBy: string;
-  onSortChange: (sort: string) => void;
-  showInProgress: boolean;
-  onShowInProgressChange: (show: boolean) => void;
+  sortBy: SortByOption;
+  onSortChange: (sort: SortByOption) => void;
 }
-
-const EmptyState = () => (
-  <div className="w-full">
-    <Card className="border-dashed border-2 border-muted-foreground/25">
-      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-        <Users className="h-12 w-12 text-muted-foreground/50 mb-4" />
-        <h3 className="text-lg font-semibold text-foreground mb-2">
-          No responses yet
-        </h3>
-        <p className="text-sm text-muted-foreground max-w-sm">
-          When people start responding to your Qwirl, you&apos;ll see their
-          cards here. Share your Qwirl to get started!
-        </p>
-      </CardContent>
-    </Card>
-  </div>
-);
 
 export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
   responders,
@@ -71,10 +62,9 @@ export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
   onResponderClick,
   sortBy,
   onSortChange,
-  showInProgress,
-  onShowInProgressChange,
 }) => {
   const observer = useRef<IntersectionObserver | null>(null);
+  const { user } = authStore();
   const lastResponderElementRef = useCallback(
     (node: HTMLDivElement) => {
       if (isLoading) return;
@@ -95,20 +85,35 @@ export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
     [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]
   );
 
+  const totalQwirlPollsQuery = $api.useQuery(
+    "get",
+    "/qwirl/{qwirl_id}/items/count",
+    {
+      params: {
+        path: {
+          qwirl_id: user?.primary_qwirl_id ?? 0,
+        },
+      },
+    },
+    {
+      enabled: !!user?.primary_qwirl_id,
+    }
+  );
+
   return (
     <div className="space-y-4">
       {/* Filter Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-muted/30 p-4 rounded-lg border border-border/50">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-1">
-          <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between bg-muted/30 p-3 sm:p-4 rounded-lg border border-border/50">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center flex-1 w-full sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Label
               htmlFor="sort-select"
-              className="text-sm font-medium whitespace-nowrap"
+              className="text-xs sm:text-sm font-medium whitespace-nowrap"
             >
               Sort by:
             </Label>
             <Select value={sortBy} onValueChange={onSortChange}>
-              <SelectTrigger id="sort-select" className="w-[180px]">
+              <SelectTrigger id="sort-select" className="w-full sm:w-[230px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -117,35 +122,21 @@ export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
               </SelectContent>
             </Select>
           </div>
-
-          <div className="flex items-center gap-3">
-            <Switch
-              id="show-in-progress"
-              checked={showInProgress}
-              onCheckedChange={onShowInProgressChange}
-            />
-            <Label
-              htmlFor="show-in-progress"
-              className="text-sm font-medium cursor-pointer"
-            >
-              Show in-progress responses
-            </Label>
-          </div>
         </div>
       </div>
 
       {/* Error State */}
       {isError && (
         <Card className="border-destructive/50 bg-destructive/5">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <XCircle className="h-12 w-12 text-destructive mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
+          <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12 text-center px-4">
+            <XCircle className="h-10 w-10 sm:h-12 sm:w-12 text-destructive mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1 sm:mb-2">
               Failed to Load Responses
             </h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
               An error occurred while loading responder data.
             </p>
-            <Button onClick={() => refetch()} variant="outline">
+            <Button onClick={() => refetch()} variant="outline" size="sm">
               Try Again
             </Button>
           </CardContent>
@@ -176,6 +167,9 @@ export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
                     <ResponderCard
                       responder={responder}
                       index={index}
+                      total_qwirl_polls={
+                        totalQwirlPollsQuery?.data?.total_items || 0
+                      }
                       onClick={() => onResponderClick(responder.id)}
                     />
                   </div>
@@ -183,7 +177,18 @@ export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
               })}
             </>
           ) : (
-            <EmptyState />
+            <Empty className="border-dashed border-2">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Users />
+                </EmptyMedia>
+                <EmptyTitle>No responses yet</EmptyTitle>
+                <EmptyDescription>
+                  When people start responding to your Qwirl, you&apos;ll see
+                  their cards here. Share your Qwirl to get started!
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </div>
       )}

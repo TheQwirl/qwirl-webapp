@@ -38,7 +38,7 @@ export const ThreeColumnLayout = ({
         {backNavigation && <BackNavigation {...backNavigation} />}
         <div
           className={clsx(
-            "p-4 border-r border-l",
+            "p-2 sm:p-4 border-r border-l",
             backNavigation && "flex-1 overflow-auto "
           )}
         >

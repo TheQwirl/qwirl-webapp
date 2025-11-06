@@ -1,15 +1,14 @@
 import Image from "next/image";
 import React from "react";
-import { SortableList } from "../sortable-list/sortable-list";
 import { Badge } from "@/components/ui/badge";
 import { QwirlItem } from "./types";
-import { motion } from "framer-motion";
 import { Card, CardContent } from "../ui/card";
-import { ImageIcon, Trash2 } from "lucide-react";
+import { ImageIcon, Trash2, GripVertical } from "lucide-react";
 import { Button } from "../ui/button";
 import clsx from "clsx";
 import { Skeleton } from "../ui/skeleton";
 import PollOption from "./poll-option";
+import { useSortableItemContext } from "./sortable-qwirl-card";
 
 type Props = {
   poll: QwirlItem;
@@ -17,6 +16,42 @@ type Props = {
   handleDelete: () => void;
   isDeleting: boolean;
 };
+
+function DragHandle() {
+  const context = useSortableItemContext();
+
+  // If no context (used outside sortable), return null or a disabled handle
+  if (!context) {
+    return null;
+  }
+
+  const { attributes, listeners, ref, isDragging } = context;
+
+  return (
+    <button
+      className={clsx(
+        "group flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-none select-none",
+        "hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500",
+        "cursor-grab active:cursor-grabbing",
+        {
+          "opacity-50": isDragging,
+          "bg-gray-100": isDragging,
+        }
+      )}
+      {...attributes}
+      {...listeners}
+      ref={ref}
+      aria-label="Drag to reorder"
+    >
+      <GripVertical
+        className={clsx(
+          "h-5 w-5 text-gray-400 transition-colors duration-200",
+          "group-hover:text-gray-600 group-active:text-gray-700"
+        )}
+      />
+    </button>
+  );
+}
 
 const QwirlEditorCard: React.FC<Props> = ({
   poll,
@@ -32,9 +67,9 @@ const QwirlEditorCard: React.FC<Props> = ({
         className
       )}
     >
-      <CardContent className="p-5 md:p-6">
-        <div className="flex items-start gap-4">
-          <SortableList.DragHandle />
+      <CardContent className="p-4 md:p-6">
+        <div className="flex items-start gap-2 sm:gap-4">
+          <DragHandle />
 
           <div className="flex-1 space-y-4 min-w-0">
             <h3 className="text-lg font-semibold leading-tight line-clamp-2">
@@ -65,19 +100,14 @@ const QwirlEditorCard: React.FC<Props> = ({
               {poll?.options?.map((option, optionIndex) => {
                 const isMyChoice = poll?.owner_answer === option;
                 return (
-                  <motion.div
-                    key={optionIndex}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.2, delay: optionIndex * 0.05 }}
-                  >
+                  <div key={optionIndex}>
                     <PollOption
                       option={option}
                       optionNumber={optionIndex + 1}
                       variant="display"
                       isMyChoice={isMyChoice}
                     />
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -89,12 +119,12 @@ const QwirlEditorCard: React.FC<Props> = ({
               <span className="text-xs">{poll.options.length} options</span>
               <div className="flex-shrink-0 block lg:hidden">
                 <Button
-                  variant="destructive"
-                  onClick={handleDelete}
+                  variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 hover:scale-105 transition-transform duration-200"
+                  onClick={handleDelete}
+                  className="h-8 w-8 p-0 text-gray-400 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 hover:scale-105"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>

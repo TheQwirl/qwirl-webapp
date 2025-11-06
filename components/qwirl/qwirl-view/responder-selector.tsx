@@ -7,7 +7,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserAvatar } from "@/components/user-avatar";
-import { Badge } from "@/components/ui/badge";
 import { QwirlResponder } from "@/types/qwirl";
 
 interface ResponderSelectorProps {
@@ -33,7 +32,7 @@ const ResponderSelector: React.FC<ResponderSelectorProps> = ({
             <SelectItem
               key={user.id}
               value={user.id.toString()}
-              className="text-xs sm:text-sm"
+              className="text-xs sm:text-sm cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <UserAvatar
@@ -43,9 +42,6 @@ const ResponderSelector: React.FC<ResponderSelectorProps> = ({
                   rounded={true}
                 />
                 <span>{user.name}</span>
-                <Badge variant="outline" className="text-xs">
-                  {user.status !== "completed" ? "Incomplete" : "Complete"}
-                </Badge>
               </div>
             </SelectItem>
           ))

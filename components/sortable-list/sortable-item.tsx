@@ -36,9 +36,9 @@ export function SortableItem({
   children,
   id,
   className,
-  isActive,
-  isOver,
-}: PropsWithChildren<Props>) {
+}: // isActive,
+// isOver,
+PropsWithChildren<Props>) {
   const {
     attributes,
     isDragging,
@@ -66,10 +66,9 @@ export function SortableItem({
   );
 
   const style: CSSProperties = {
-    opacity: isDragging ? 0 : undefined, // Completely hide the original when dragging
+    opacity: isDragging ? 0.4 : undefined, // Keep item visible but faded when dragging
     transform: CSS.Translate.toString(transform),
     transition,
-    zIndex: isDragging ? 999 : undefined,
   };
 
   return (
@@ -78,9 +77,7 @@ export function SortableItem({
         className={clsx(
           "relative transition-all duration-150 ease-out",
           {
-            "scale-105 shadow-lg": isActive,
-            "scale-[1.02] shadow-md": isOver && !isActive,
-            "opacity-0": isDragging,
+            "opacity-40": isDragging, // Fade out the original
           },
           className
         )}

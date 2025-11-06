@@ -19,7 +19,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <div className="px-6 py-6">
-        <ProfileHeader />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex-1">
+            <ProfileHeader />
+          </div>
+        </div>
         <SidebarContent className="mt-6">
           {MENU_SECTIONS.map((section, sectionIndex) => (
             <React.Fragment key={section.title}>
@@ -44,7 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </React.Fragment>
           ))}
         </SidebarContent>
-        <SidebarFooter>
+        <SidebarFooter className="">
           <LogoutComponent />
         </SidebarFooter>
       </div>

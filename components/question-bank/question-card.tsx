@@ -24,46 +24,57 @@ interface QuestionCardProps {
   onSelect?: (question: Question) => void;
   className?: string;
   showSelectButton?: boolean;
+  isSelected?: boolean;
 }
 
 export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(
   (
-    { question, onSelect, className, showSelectButton = true, ...props },
+    {
+      question,
+      onSelect,
+      className,
+      showSelectButton = true,
+      isSelected: isSelectedProp,
+      ...props
+    },
     ref
   ) => {
-    const {
-      addQuestion,
-      removeQuestion,
-      isQuestionSelected,
-      selectedCount,
-      maxSelections,
-    } = useQwirlSelection();
-    const { getValues } = useQwirlSelectionForm();
-    const questionIsSelected = isQuestionSelected(question.question_text);
-    const canSelectMore = selectedCount < maxSelections;
+    // These hooks handle missing context gracefully
+    const contextSelection = useQwirlSelection();
+    const contextForm = useQwirlSelectionForm();
+
+    const questionIsSelected = contextSelection.isQuestionSelected(
+      question.question_text
+    );
+    const canSelectMore =
+      contextSelection.selectedCount < contextSelection.maxSelections;
 
     const handleSelect = () => {
+      if (!contextForm) return; // Context not provided
+
       if (questionIsSelected) {
         // Find the index of the question to remove
-        const currentPolls = getValues("polls");
+        const currentPolls = contextForm.getValues("polls");
         const indexToRemove = currentPolls.findIndex(
           (poll) => poll.question_text === question.question_text
         );
         if (indexToRemove !== -1) {
-          removeQuestion(indexToRemove);
+          contextSelection.removeQuestion(indexToRemove);
         }
         return;
       }
 
       if (canSelectMore) {
-        addQuestion(question);
+        contextSelection.addQuestion(question);
       }
     };
 
     // If onSelect is provided, use that instead of context logic
     const finalOnSelect =
-      onSelect || (showSelectButton ? handleSelect : undefined);
-    const isSelected = onSelect ? false : questionIsSelected;
+      onSelect || (showSelectButton && contextForm ? handleSelect : undefined);
+    // Use isSelectedProp if provided, otherwise fall back to context selection
+    const isSelected =
+      isSelectedProp !== undefined ? isSelectedProp : questionIsSelected;
     const canSelect = onSelect ? true : canSelectMore;
 
     return (
@@ -105,22 +116,29 @@ export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(
               </div>
             ))}
           </div>
-          {showSelectButton && finalOnSelect && (
-            <Button
-              onClick={() => finalOnSelect(question)}
-              variant={isSelected ? "secondary" : "default"}
-              className="w-full mt-2"
-              size="sm"
-              disabled={!isSelected && !canSelect}
-              icon={isSelected ? Check : Plus}
-              iconPlacement="left"
-            >
+          {showSelectButton && (
+            <>
               {isSelected ? (
-                <>Selected</>
+                <div className="w-full mt-2 flex items-center justify-center gap-2 h-9 px-4 py-2 rounded-md bg-secondary text-secondary-foreground text-sm font-medium">
+                  <Check className="h-4 w-4" />
+                  Selected
+                </div>
               ) : (
-                <>{canSelect ? "Select Question" : "Limit Reached"}</>
+                finalOnSelect && (
+                  <Button
+                    onClick={() => finalOnSelect(question)}
+                    variant="default"
+                    className="w-full mt-2"
+                    size="sm"
+                    disabled={!canSelect}
+                    icon={Plus}
+                    iconPlacement="left"
+                  >
+                    {canSelect ? "Select Question" : "Limit Reached"}
+                  </Button>
+                )
               )}
-            </Button>
+            </>
           )}
         </CardFooter>
       </Card>

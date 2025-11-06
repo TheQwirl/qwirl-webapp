@@ -5,6 +5,7 @@ import {
   Users,
   Library,
   CircleHelp,
+  Home,
 } from "lucide-react";
 
 export interface MenuItem {
@@ -27,6 +28,12 @@ export const MENU_SECTIONS: MenuSection[] = [
   {
     title: "Your Space",
     items: [
+      {
+        title: "Home",
+        icon: Home,
+        url: "/home",
+        type: "single",
+      },
       {
         title: "My Qwirl",
         icon: CircleHelp,

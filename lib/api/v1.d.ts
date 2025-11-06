@@ -70,6 +70,8 @@ export interface paths {
         /**
          * Refresh Access Token
          * @description Refresh the access token using a valid refresh token.
+         *     Idempotent: Multiple calls with the same refresh token within a short window
+         *     will return the same new tokens to prevent race conditions.
          */
         post: operations["refresh_access_token_api_v1_users_refresh_token_post"];
         delete?: never;
@@ -234,6 +236,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/check-username/{username}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check Username Availability
+         * @description Check if a username is available (fast, efficient endpoint for registration).
+         *
+         *     This endpoint is optimized for speed:
+         *     - Uses database-level EXISTS query (no data fetching)
+         *     - Leverages indexed username column
+         *     - No authentication required (public endpoint)
+         *     - Returns minimal response payload
+         *
+         *     Args:
+         *         username: Username to check for availability
+         *
+         *     Returns:
+         *         UsernameAvailabilityResponse with availability status
+         *
+         *     Example:
+         *         GET /user/check-username/john_doe
+         *         Response: {"available": false, "username": "john_doe"}
+         */
+        get: operations["check_username_availability_api_v1_users_check_username__username__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/users/{user_id}/top-wavelengths": {
         parameters: {
             query?: never;
@@ -316,6 +354,93 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/me/socials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User Socials
+         * @description Get all social links for the authenticated user (owner view).
+         *     Returns both visible and hidden socials.
+         *
+         *     Security:
+         *     - Requires authentication
+         *     - Users can only access their own socials
+         *
+         *     Returns:
+         *         GetSocialsResponse: List of all social links (visible and hidden)
+         */
+        get: operations["get_user_socials_api_v1_users_me_socials_get"];
+        /**
+         * Update User Socials
+         * @description Update user's social links (upsert operation).
+         *     Creates new entries or updates existing ones.
+         *
+         *     Validation:
+         *     - Maximum 5 visible socials
+         *     - Maximum 9 total socials
+         *     - No duplicate platforms
+         *     - URLs must not be empty and will be trimmed
+         *
+         *     Args:
+         *         payload: UpdateSocialsRequest containing list of socials to upsert
+         *         current_user: Authenticated user from JWT token
+         *
+         *     Returns:
+         *         UpdateSocialsResponse: List of updated social links
+         *
+         *     Raises:
+         *         HTTPException 400: Validation errors (exceeds limits, duplicates, empty URLs)
+         *         HTTPException 500: Server errors
+         */
+        put: operations["update_user_socials_api_v1_users_me_socials_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/socials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Public Socials
+         * @description Get visible social links for a user (public view).
+         *     Only returns socials if the requesting user has completed the target user's Qwirl.
+         *
+         *     Access Requirements:
+         *     - User must be authenticated
+         *     - User must have completed a QwirlSession for the target user's primary Qwirl
+         *     - Session status must be 'completed'
+         *
+         *     Args:
+         *         user_id: ID of the user whose socials to retrieve
+         *         current_user: Authenticated user from JWT token
+         *
+         *     Returns:
+         *         GetPublicSocialsResponse: Contains access status and list of visible socials
+         *
+         *     Raises:
+         *         HTTPException 404: User not found
+         *         HTTPException 500: Server errors
+         */
+        get: operations["get_public_socials_api_v1_users__user_id__socials_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/qwirl/community": {
         parameters: {
             query?: never;
@@ -326,6 +451,7 @@ export interface paths {
         /**
          * Get Community Qwirls
          * @description Get community Qwirls with advanced filtering, searching, and pagination.
+         *     Returns cover info and session info (if authenticated) for efficient display.
          *
          *     Args:
          *         search: Search query for qwirl titles and tags
@@ -335,10 +461,11 @@ export interface paths {
          *         page: Page number for pagination
          *         limit: Number of items per page
          *         min_responses: Minimum number of responses required
-         *         preview_items: Number of sample items to include for preview (0-3)
+         *         exclude_own: Exclude logged-in user's own qwirl (default: True)
+         *         current_user: Optional authenticated user (auto-injected if logged in)
          *
          *     Returns:
-         *         Paginated list of community Qwirls with metadata and preview items
+         *         Paginated list of community Qwirls with cover info, session info, and metadata
          */
         get: operations["get_community_qwirls_api_v1_qwirl_community_get"];
         put?: never;
@@ -408,8 +535,13 @@ export interface paths {
          * Add Profile Qwirl Item
          * @description Adds one or more poll items to the user's Profile Qwirl.
          *
+         *     When items are added, completed sessions are reopened and a background task
+         *     notifies all users who previously completed this qwirl about the update.
+         *
          *     Args:
          *         items_data: Single poll item or list of poll items (question, options, and owner's answer)
+         *         background_tasks: FastAPI background tasks for async notifications
+         *         user: Authenticated user
          *
          *     Returns:
          *         The newly created QwirlItem(s) with creation summary
@@ -538,46 +670,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/qwirl/{qwirl_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Qwirl Id
-         * @description Get qwirl by qwirl id
-         *
-         *     Returns:
-         *         Qwirl
-         */
-        get: operations["get_qwirl_id_api_v1_qwirl__qwirl_id__get"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete Qwirl
-         * @description Delete a qwirl
-         *
-         *     Returns:
-         *         Failure or 204
-         */
-        delete: operations["delete_qwirl_api_v1_qwirl__qwirl_id__delete"];
-        options?: never;
-        head?: never;
-        /**
-         * Update Qwirl
-         * @description Update a qwirl of logged in user
-         *
-         *     Args:
-         *         qwirl_id (int): qwirl id
-         *
-         *     Returns:
-         *         Qwirl
-         */
-        patch: operations["update_qwirl_api_v1_qwirl__qwirl_id__patch"];
-        trace?: never;
-    };
     "/api/v1/qwirl/{qwirl_id}/cover": {
         parameters: {
             query?: never;
@@ -605,14 +697,50 @@ export interface paths {
          * Update Qwirl Cover
          * @description Update a specific Qwirl's cover details. Only the owner can update the cover.
          *
+         *     Security:
+         *     - Requires authentication
+         *     - Only the Qwirl owner can update the cover
+         *
          *     Args:
          *         qwirl_id: The ID of the Qwirl
-         *         cover_data: The cover fields to update
+         *         cover_data: The cover fields to update (name, description, background_image, visibility)
+         *         user: Authenticated user from JWT token
          *
          *     Returns:
          *         The updated Qwirl cover information
+         *
+         *     Raises:
+         *         HTTPException 404: Qwirl not found or deleted
+         *         HTTPException 403: Not authorized (not the owner)
          */
         patch: operations["update_qwirl_cover_api_v1_qwirl__qwirl_id__cover_patch"];
+        trace?: never;
+    };
+    "/api/v1/qwirl/{qwirl_id}/items/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Qwirl Item Count
+         * @description Get the total number of items (items) in a qwirl.
+         *     Extremely lightweight endpoint that returns only the count.
+         *
+         *     Args:
+         *         qwirl_id: The ID of the Qwirl
+         *
+         *     Returns:
+         *         The qwirl ID and total item count
+         */
+        get: operations["get_qwirl_item_count_api_v1_qwirl__qwirl_id__items_count_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/qwirl-responses/qwirls/{qwirl_id}/sessions/start": {
@@ -759,7 +887,7 @@ export interface paths {
          *
          *     Args:
          *         qwirl_id (int): The ID of the Qwirl
-         *         status (SessionStatusEnum): Filter by session status (defaults to 'completed')
+         *         status (Optional[SessionStatusEnum]): Filter by session status (optional, no default)
          *         skip (int): Number of records to skip for pagination
          *         limit (int): Maximum number of records to return
          *         sort_by (ResponderSortByEnum): Sort by 'started_at' or 'wavelength' (defaults to 'started_at')
@@ -1280,6 +1408,81 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/activities/me/recent-activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get My Recent Activity
+         * @description Get the authenticated user's recent activity feed.
+         *
+         *     Returns activities where the user is the audience, sorted by most recent first.
+         *     Each activity includes the actor (who performed the action) and optionally
+         *     the subject (what the action was about, e.g., a Qwirl).
+         *
+         *     Args:
+         *         skip: Number of activities to skip for pagination
+         *         limit: Maximum number of activities to return (1-100)
+         *         user: Authenticated user from JWT token
+         *
+         *     Returns:
+         *         ActivityListResponse: Paginated list of activities with total count
+         */
+        get: operations["get_my_recent_activity_api_v1_activities_me_recent_activity_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/activities/admin/cleanup-activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cleanup Old Activities
+         * @description Deletes all activity records older than the specified number of days.
+         *
+         *     **ADMIN ONLY** - This endpoint should be protected with an admin check.
+         *     Currently it just requires authentication.
+         *
+         *     This is designed to be called by a cron job to keep the activities table
+         *     from growing indefinitely. Example cron setup:
+         *
+         *     ```bash
+         *     # Run cleanup daily at 3 AM
+         *     0 3 * * * curl -X POST "https://your-api.com/api/v1/activities/admin/cleanup-activities?days=90" \
+         *               -H "Authorization: Bearer <ADMIN_TOKEN>"
+         *     ```
+         *
+         *     Args:
+         *         days: Delete activities older than this many days (minimum 30 to prevent accidents)
+         *         user: Authenticated user (should be admin in production)
+         *
+         *     Returns:
+         *         204 No Content on success
+         *
+         *     Security Note:
+         *         TODO: Add proper admin role checking. For now, any authenticated user can call this.
+         *         In production, you should verify user.is_admin or similar.
+         */
+        post: operations["cleanup_old_activities_api_v1_activities_admin_cleanup_activities_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/": {
         parameters: {
             query?: never;
@@ -1301,6 +1504,63 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * ActivityActor
+         * @description The user who performed the action
+         */
+        ActivityActor: {
+            /** Id */
+            id: number;
+            /** Username */
+            username: string;
+            /** Name */
+            name?: string | null;
+            /** Avatar */
+            avatar?: string | null;
+        };
+        /**
+         * ActivityListResponse
+         * @description Paginated list of activities
+         */
+        ActivityListResponse: {
+            /** Activities */
+            activities: components["schemas"]["ActivityResponse"][];
+            /** Total Count */
+            total_count: number;
+        };
+        /**
+         * ActivityResponse
+         * @description A single activity in the feed
+         */
+        ActivityResponse: {
+            /** Id */
+            id: number;
+            /** Type */
+            type: string;
+            /** Is Read */
+            is_read: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            actor: components["schemas"]["ActivityActor"];
+            subject?: components["schemas"]["ActivitySubject"] | null;
+            /** Extra Data */
+            extra_data?: Record<string, never> | null;
+        };
+        /**
+         * ActivitySubject
+         * @description The entity the activity is about (e.g., a Qwirl)
+         */
+        ActivitySubject: {
+            /** Id */
+            id: number;
+            /** Title */
+            title: string;
+            /** Type */
+            type: string;
+        };
         /** AuthResponse */
         AuthResponse: {
             user: components["schemas"]["api__user__schemas__UserResponse"];
@@ -1354,6 +1614,50 @@ export interface components {
             /** Results */
             results?: components["schemas"]["ResultItem"][] | null;
             userdata: components["schemas"]["api__post__schema__UserResponse"];
+        };
+        /**
+         * GetPublicSocialsData
+         * @description Data wrapper for public socials with access control
+         */
+        GetPublicSocialsData: {
+            /** Has Access */
+            has_access: boolean;
+            /** Socials */
+            socials: components["schemas"]["SocialLinkPublic"][];
+            /** Message */
+            message?: string | null;
+        };
+        /**
+         * GetPublicSocialsResponse
+         * @description Response for getting public socials
+         */
+        GetPublicSocialsResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            data: components["schemas"]["GetPublicSocialsData"];
+        };
+        /**
+         * GetSocialsData
+         * @description Data wrapper for socials list
+         */
+        GetSocialsData: {
+            /** Socials */
+            socials: components["schemas"]["SocialLinkResponse"][];
+        };
+        /**
+         * GetSocialsResponse
+         * @description Response for getting user's own socials
+         */
+        GetSocialsResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            data: components["schemas"]["GetSocialsData"];
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -1592,6 +1896,11 @@ export interface components {
             categories_id: number;
             /** Category Name */
             category_name: string;
+            /**
+             * In My Qwirl
+             * @default false
+             */
+            in_my_qwirl: boolean | null;
         };
         /**
          * QwirlBase
@@ -1650,21 +1959,16 @@ export interface components {
              */
             unanswered_count: number;
         };
-        /** QwirlCommunityItem */
+        /**
+         * QwirlCommunityItem
+         * @description Community Qwirl item with cover and optional session info
+         */
         QwirlCommunityItem: {
             /** Id */
             id: number;
             /** User Id */
             user_id: number;
-            /** Title */
-            title: string;
-            /** Type */
-            type: string;
-            /**
-             * Tags
-             * @default []
-             */
-            tags: string[] | null;
+            cover: components["schemas"]["QwirlCoverInfo"];
             /**
              * Completed Response Count
              * @default 0
@@ -1684,18 +1988,11 @@ export interface components {
             created_at?: string | null;
             user?: components["schemas"]["api__qwirl__schemas__QwirlUser"] | null;
             /**
-             * Preview Items
-             * @default []
+             * Is Visible
+             * @default true
              */
-            preview_items: components["schemas"]["QwirlItemDetail"][] | null;
-            /** Background Image */
-            background_image?: string | null;
-            /** Name */
-            name?: string | null;
-            /** Description */
-            description?: string | null;
-            /** Visibility */
-            visibility?: boolean | null;
+            is_visible: boolean;
+            session?: components["schemas"]["QwirlSessionInfo"] | null;
         };
         /** QwirlCommunityResponse */
         QwirlCommunityResponse: {
@@ -1709,6 +2006,22 @@ export interface components {
             limit: number;
             /** Has More */
             has_more: boolean;
+        };
+        /**
+         * QwirlCoverInfo
+         * @description Cover information for a Qwirl
+         */
+        QwirlCoverInfo: {
+            /** Background Image */
+            background_image?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Title */
+            title: string;
+            /** Type */
+            type: string;
         };
         /** QwirlCoverResponse */
         QwirlCoverResponse: {
@@ -1808,13 +2121,13 @@ export interface components {
         /** QwirlItemUpdate */
         QwirlItemUpdate: {
             /** Question Text */
-            question_text?: string;
+            question_text?: string | null;
             /** Options */
-            options?: string[];
+            options?: string[] | null;
             /** Owner Answer */
-            owner_answer?: string;
+            owner_answer?: string | null;
             /** Is Soft Deleted */
-            is_soft_deleted?: boolean;
+            is_soft_deleted?: boolean | null;
         };
         /** QwirlItemUserResponse */
         QwirlItemUserResponse: {
@@ -1842,6 +2155,16 @@ export interface components {
             total_created: number;
             /** Message */
             message: string;
+        };
+        /**
+         * QwirlPollItemResponse
+         * @description Lightweight response containing only the item count
+         */
+        QwirlPollItemResponse: {
+            /** Qwirl Id */
+            qwirl_id: number;
+            /** Total Items */
+            total_items: number;
         };
         /** QwirlQuestion */
         QwirlQuestion: {
@@ -1965,21 +2288,26 @@ export interface components {
              */
             formatted_answers: Record<string, never>[];
         };
+        /**
+         * QwirlSessionInfo
+         * @description Session information for authenticated users
+         */
+        QwirlSessionInfo: {
+            /** Session Id */
+            session_id: number;
+            /** Status */
+            status: string;
+            /** Started At */
+            started_at?: string | null;
+            /** Completed At */
+            completed_at?: string | null;
+        };
         /** QwirlSessionListResponse */
         QwirlSessionListResponse: {
             /** Sessions */
             sessions: components["schemas"]["QwirlSessionDetailResponse"][];
             /** Total Count */
             total_count: number;
-        };
-        /** QwirlUpdate */
-        QwirlUpdate: {
-            /** Title */
-            title?: string | null;
-            /** Tags */
-            tags?: string[] | null;
-            /** Is Deleted */
-            is_deleted?: boolean | null;
         };
         /**
          * QwirlWithSession
@@ -2129,12 +2457,97 @@ export interface components {
          * @enum {string}
          */
         SessionStatusEnum: "in_progress" | "completed" | "abandoned";
+        /**
+         * SocialLinkBase
+         * @description Base schema for social link
+         */
+        SocialLinkBase: {
+            platform: components["schemas"]["SocialPlatformEnum"];
+            /** Url */
+            url: string;
+            /**
+             * Is Visible
+             * @default false
+             */
+            is_visible: boolean;
+        };
+        /**
+         * SocialLinkPublic
+         * @description Public schema for social link (viewer sees only platform and URL)
+         */
+        SocialLinkPublic: {
+            platform: components["schemas"]["SocialPlatformEnum"];
+            /** Url */
+            url: string;
+        };
+        /**
+         * SocialLinkResponse
+         * @description Response schema for social link (owner view)
+         */
+        SocialLinkResponse: {
+            platform: components["schemas"]["SocialPlatformEnum"];
+            /** Url */
+            url: string;
+            /**
+             * Is Visible
+             * @default false
+             */
+            is_visible: boolean;
+            /** Id */
+            id: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * SocialPlatformEnum
+         * @description Valid social media platforms
+         * @enum {string}
+         */
+        SocialPlatformEnum: "instagram" | "twitter" | "facebook" | "linkedin" | "youtube" | "github" | "website" | "spotify" | "discord";
         /** TopWavelengthsResponse */
         TopWavelengthsResponse: {
             /** Users */
             users: components["schemas"]["WavelengthUserResponse"][];
             /** Total Count */
             total_count: number;
+        };
+        /**
+         * UpdateSocialsData
+         * @description Data wrapper for updated socials list
+         */
+        UpdateSocialsData: {
+            /** Socials */
+            socials: components["schemas"]["SocialLinkResponse"][];
+        };
+        /**
+         * UpdateSocialsRequest
+         * @description Request to update user's social links
+         */
+        UpdateSocialsRequest: {
+            /** Socials */
+            socials: components["schemas"]["SocialLinkBase"][];
+        };
+        /**
+         * UpdateSocialsResponse
+         * @description Response for updating socials
+         */
+        UpdateSocialsResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            /** Message */
+            message: string;
+            data: components["schemas"]["UpdateSocialsData"];
         };
         /** UserFollowerResponse */
         UserFollowerResponse: {
@@ -2232,6 +2645,16 @@ export interface components {
             /** Primary Qwirl Id */
             primary_qwirl_id: number | null;
             relationship: components["schemas"]["RelationshipStatus"];
+        };
+        /**
+         * UsernameAvailabilityResponse
+         * @description Response for username availability check
+         */
+        UsernameAvailabilityResponse: {
+            /** Available */
+            available: boolean;
+            /** Username */
+            username: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -2724,6 +3147,37 @@ export interface operations {
             };
         };
     };
+    check_username_availability_api_v1_users_check_username__username__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsernameAvailabilityResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_user_top_wavelengths_api_v1_users__user_id__top_wavelengths_get: {
         parameters: {
             query?: {
@@ -2860,6 +3314,105 @@ export interface operations {
             };
         };
     };
+    get_user_socials_api_v1_users_me_socials_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetSocialsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_user_socials_api_v1_users_me_socials_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSocialsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpdateSocialsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_public_socials_api_v1_users__user_id__socials_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetPublicSocialsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_community_qwirls_api_v1_qwirl_community_get: {
         parameters: {
             query?: {
@@ -2877,12 +3430,14 @@ export interface operations {
                 limit?: number;
                 /** @description Minimum number of responses */
                 min_responses?: number | null;
-                /** @description Number of preview items to show (0-3) */
-                preview_items?: number;
+                /** @description Exclude logged-in user's own qwirl from results */
+                exclude_own?: boolean;
             };
             header?: never;
             path?: never;
-            cookie?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
         };
         requestBody?: never;
         responses: {
@@ -3172,107 +3727,6 @@ export interface operations {
             };
         };
     };
-    get_qwirl_id_api_v1_qwirl__qwirl_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                qwirl_id: number;
-            };
-            cookie?: {
-                access_token?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QwirlBase"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    delete_qwirl_api_v1_qwirl__qwirl_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                qwirl_id: number;
-            };
-            cookie?: {
-                access_token?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    update_qwirl_api_v1_qwirl__qwirl_id__patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                qwirl_id: number;
-            };
-            cookie?: {
-                access_token?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["QwirlUpdate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QwirlBase"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     get_qwirl_cover_api_v1_qwirl__qwirl_id__cover_get: {
         parameters: {
             query?: never;
@@ -3328,6 +3782,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["QwirlCoverResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_qwirl_item_count_api_v1_qwirl__qwirl_id__items_count_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qwirl_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlPollItemResponse"];
                 };
             };
             /** @description Validation Error */
@@ -3490,7 +3975,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by session status */
-                status?: components["schemas"]["SessionStatusEnum"];
+                status?: components["schemas"]["SessionStatusEnum"] | null;
                 /** @description Number of records to skip */
                 skip?: number;
                 /** @description Maximum number of records to return */
@@ -3703,10 +4188,14 @@ export interface operations {
                 params: string;
                 skip?: number;
                 limit?: number;
+                /** @description Include in_my_qwirl flag for each question */
+                include_in_my_qwirl?: boolean;
             };
             header?: never;
             path?: never;
-            cookie?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
         };
         requestBody?: never;
         responses: {
@@ -4439,6 +4928,74 @@ export interface operations {
                 content: {
                     "application/json": unknown;
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_my_recent_activity_api_v1_activities_me_recent_activity_get: {
+        parameters: {
+            query?: {
+                /** @description Number of activities to skip */
+                skip?: number;
+                /** @description Maximum number of activities to return */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cleanup_old_activities_api_v1_activities_admin_cleanup_activities_post: {
+        parameters: {
+            query?: {
+                /** @description Delete activities older than this many days (minimum 30) */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

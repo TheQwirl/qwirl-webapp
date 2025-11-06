@@ -25,7 +25,7 @@ const Settings = () => {
         rightContent: null,
       }}
     >
-      <div className="max-w-6xl mx-auto pb-8 px-2 sm:px-4">
+      <div className=" pb-8 px-2 sm:px-4">
         <Tabs
           defaultValue="personal"
           className="flex flex-col md:flex-row gap-4 md:gap-6 items-start w-full"

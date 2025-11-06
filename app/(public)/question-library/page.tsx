@@ -1,6 +1,10 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -18,9 +22,9 @@ import {
 } from "@/components/question-bank/question-card";
 import { useDebounce } from "@/hooks/useDebounce";
 import { authStore } from "@/stores/useAuthStore";
-import { QwirlSelectionProvider } from "@/contexts/qwirl-selection-context";
-import { QwirlCartButton } from "@/components/question-bank/qwirl-cart-button";
-import { QwirlSelectionModal } from "@/components/question-bank/qwirl-selection-modal";
+import { AdaptiveLayout } from "@/components/layout/adaptive-layout";
+import { useQuestionCart } from "@/hooks/useQuestionCart";
+import { toast } from "sonner";
 
 type Question = components["schemas"]["QuestionSearchResponse"];
 
@@ -41,8 +45,9 @@ const QuestionBankPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const { isAuthenticated } = authStore();
+  const { addQuestion, canAddMore, isInCart } = useQuestionCart();
+
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
     $api.useInfiniteQuery(
       "get",
@@ -105,8 +110,22 @@ const QuestionBankPage = () => {
     setSearchQuery("");
   };
 
+  const handleAddToCart = (question: Question) => {
+    if (!canAddMore()) {
+      toast.error("Cart is full", {
+        description: "You can only add up to 30 questions to your cart.",
+      });
+      return;
+    }
+
+    addQuestion(question);
+    toast.success("Added to cart", {
+      description: `"${question.question_text}" added to your question cart.`,
+    });
+  };
+
   return (
-    <QwirlSelectionProvider>
+    <AdaptiveLayout>
       <QuestionBankContent
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -119,10 +138,10 @@ const QuestionBankPage = () => {
         lastQuestionElementRef={lastQuestionElementRef}
         handleSurpriseMe={handleSurpriseMe}
         isAuthenticated={isAuthenticated}
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
+        onAddToCart={handleAddToCart}
+        isInCart={isInCart}
       />
-    </QwirlSelectionProvider>
+    </AdaptiveLayout>
   );
 };
 
@@ -138,8 +157,8 @@ interface QuestionBankContentProps {
   lastQuestionElementRef: (node: HTMLDivElement) => void;
   handleSurpriseMe: () => void;
   isAuthenticated: boolean;
-  isModalOpen: boolean;
-  setIsModalOpen: (open: boolean) => void;
+  onAddToCart: (question: Question) => void;
+  isInCart: (questionText: string) => boolean;
 }
 
 function QuestionBankContent({
@@ -153,39 +172,43 @@ function QuestionBankContent({
   lastQuestionElementRef,
   handleSurpriseMe,
   isAuthenticated,
-  isModalOpen,
-  setIsModalOpen,
+  onAddToCart,
+  isInCart,
 }: QuestionBankContentProps) {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <header className="text-center mb-8 relative">
-        <h1 className="text-4xl font-bold tracking-tight flex items-center justify-center gap-3">
-          Discover Questions
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Explore a universe of questions to define who you are. Find the
-          perfect ones for your next Qwirl.
-        </p>
-      </header>
+      {/* Header - Only show for non-authenticated users */}
+      {!isAuthenticated && (
+        <header className="text-center mb-8 relative">
+          <h1 className="text-4xl font-bold tracking-tight flex items-center justify-center gap-3">
+            Discover Questions
+          </h1>
+          <p className="mt-2 text-lg text-muted-foreground max-w-2xl mx-auto">
+            Explore a universe of questions to define who you are. Find the
+            perfect ones for your next Qwirl.
+          </p>
+        </header>
+      )}
 
       {/* Search and Filters */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-4 mb-8">
-        <div className="flex flex-col md:flex-row gap-4 items-center max-w-4xl mx-auto">
-          <div className="relative flex-grow w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <InputGroup className="flex-1 bg-input">
+            <InputGroupAddon>
+              <Search className="h-4 w-4" />
+            </InputGroupAddon>
+            <InputGroupInput
               placeholder="Search for questions about life, the universe, and everything..."
-              className="pl-10 h-12 text-base"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
-          <div className="flex gap-2 w-full md:w-auto">
+          </InputGroup>
+          <div className="flex gap-2">
             <Select
               value={selectedCategory}
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="h-12 text-base w-full md:w-64">
+              <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Filter by Category" />
               </SelectTrigger>
               <SelectContent>
@@ -197,19 +220,9 @@ function QuestionBankContent({
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-12"
-              onClick={handleSurpriseMe}
-            >
-              <Shuffle className="h-5 w-5" />
+            <Button variant="outline" size="icon" onClick={handleSurpriseMe}>
+              <Shuffle className="h-4 w-4" />
             </Button>
-            {isAuthenticated && (
-              <div className="">
-                <QwirlCartButton onClick={() => setIsModalOpen(true)} />
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -217,13 +230,25 @@ function QuestionBankContent({
       {/* Results */}
       <main>
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 ${
+              isAuthenticated
+                ? "lg:grid-cols-3"
+                : "lg:grid-cols-3 xl:grid-cols-4"
+            } gap-6`}
+          >
             {Array.from({ length: 8 }).map((_, i) => (
               <QuestionCardSkeleton key={i} />
             ))}
           </div>
         ) : questions.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 ${
+              isAuthenticated
+                ? "lg:grid-cols-3"
+                : "lg:grid-cols-3 xl:grid-cols-4"
+            } gap-6`}
+          >
             {questions.map((question, index) => {
               const isLastElement = questions.length === index + 1;
               return (
@@ -232,6 +257,8 @@ function QuestionBankContent({
                   key={`${question.id}-${index}`}
                   question={question}
                   showSelectButton={isAuthenticated}
+                  onSelect={onAddToCart}
+                  isSelected={isInCart(question.question_text)}
                 />
               );
             })}
@@ -249,18 +276,19 @@ function QuestionBankContent({
         )}
 
         {isFetchingNextPage && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 ${
+              isAuthenticated
+                ? "lg:grid-cols-3"
+                : "lg:grid-cols-3 xl:grid-cols-4"
+            } gap-6 mt-6`}
+          >
             {Array.from({ length: 4 }).map((_, i) => (
               <QuestionCardSkeleton key={i} />
             ))}
           </div>
         )}
       </main>
-
-      <QwirlSelectionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </div>
   );
 }

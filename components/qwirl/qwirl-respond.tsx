@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
-import { OtherUser } from "../profile/types";
 import { useQwirlLogic } from "@/hooks/qwirl-response/useQwirlLogic";
 import QwirlStateRenderer from "./qwirl-respond/qwirl-state-renderer";
 import QwirlInteractive from "./qwirl-respond/qwirl-interactive";
+import { components } from "@/lib/api/v1-client-side";
 
 interface QwirlRespondProps {
-  user: OtherUser | undefined;
+  user: components["schemas"]["UserProfileResponse"] | undefined;
 }
 
 const QwirlRespond: React.FC<QwirlRespondProps> = ({ user }) => {
@@ -31,6 +31,7 @@ const QwirlRespond: React.FC<QwirlRespondProps> = ({ user }) => {
     userAnswer,
     skippedIds,
     newCount,
+    unansweredCount,
     prevNavigable,
 
     // Comment state
@@ -69,6 +70,7 @@ const QwirlRespond: React.FC<QwirlRespondProps> = ({ user }) => {
       data={data}
       pollsLength={polls.length}
       newCount={newCount}
+      unansweredCount={unansweredCount}
       qwirlCoverData={qwirlCoverData}
       isLoading={isLoading}
       isCoverLoading={isCoverLoading}

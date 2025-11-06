@@ -12,8 +12,6 @@ import EditableQwirlCover from "@/components/qwirl/editable-qwirl-cover";
 import QwirlStatsSummaryCard from "@/components/qwirl/qwirl-stats-summary-card";
 import { authStore } from "@/stores/useAuthStore";
 
-const minPollsRequired = 15;
-
 type PrimaryQwirlSidebarRoute =
   | "/qwirls/primary/edit"
   | "/qwirls/primary/insights";
@@ -25,57 +23,57 @@ const sidebarConfig: Record<PrimaryQwirlSidebarRoute, string[]> = {
 
 const PrimaryQwirlRightSidebar = ({
   polls,
+  isLoading,
 }: {
   polls: QwirlItem[] | undefined;
+  isLoading: boolean;
 }) => {
   const { user } = authStore();
 
   const pollCount = polls?.length || 0;
-  const isMinimumMet = pollCount >= minPollsRequired;
-
   const pathname = usePathname();
   const cardsToShow = sidebarConfig[pathname as PrimaryQwirlSidebarRoute] || [];
 
   const componentMap: Record<string, React.ReactNode> = {
     QwirlStatusCard: (
       <QwirlStatusCard
+        key="QwirlStatusCard"
         pollCount={pollCount}
-        minPollsRequired={minPollsRequired}
+        isLoading={isLoading}
         qwirlUrl={`${process.env.NEXT_PUBLIC_BASE_URL}/qwirl/${user?.username}`}
       />
     ),
     EditableQwirlCover: (
-      <CollapsibleCard className="" defaultOpen={false} title="Qwirl Cover">
+      <CollapsibleCard
+        key="EditableQwirlCover"
+        className=""
+        defaultOpen={false}
+        title="Qwirl Cover"
+      >
         <EditableQwirlCover />
       </CollapsibleCard>
     ),
     PollProgressCard: (
-      <PollProgressCard
-        pollCount={pollCount}
-        minPollsRequired={minPollsRequired}
-      />
+      <PollProgressCard key="PollProgressCard" pollCount={pollCount} />
     ),
-    VisibilityToggleCard: (
-      <VisibilityToggleCard minPollsRequired={minPollsRequired} />
-    ),
+    VisibilityToggleCard: <VisibilityToggleCard key="VisibilityToggleCard" />,
     QuickActionsCard: (
       <QuickActionsCard
-        isMinimumMet={isMinimumMet}
-        minPollsRequired={minPollsRequired}
+        key="QuickActionsCard"
         qwirlUrl={`${process.env.NEXT_PUBLIC_BASE_URL}/qwirl/${user?.username}`}
       />
     ),
-    TipsGuideCard: <TipsGuideCard />,
+    TipsGuideCard: <TipsGuideCard key="TipsGuideCard" />,
     QwirlStatsSummaryCard: (
-      <CollapsibleCard title="Qwirl Summary">
-        <QwirlStatsSummaryCard showTitle={false} orientation="vertical" />
+      <CollapsibleCard key="QwirlStatsSummaryCard" title="Qwirl Summary">
+        <QwirlStatsSummaryCard />
       </CollapsibleCard>
     ),
   };
 
   return (
-    <div className="hidden lg:block  lg:top-1 lg:col-span-3 py-7">
-      <div className="col-span-full max-h-fit lg:col-span-4  lg:top-4 flex flex-col gap-6">
+    <div className="hidden lg:block  lg:top-1 lg:col-span-3 py-7 pr-4">
+      <div className="col-span-full max-h-fit lg:col-span-4 sticky top-4 flex flex-col gap-6">
         {cardsToShow.map((key) => componentMap[key])}
       </div>
     </div>

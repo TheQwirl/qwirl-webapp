@@ -1,12 +1,11 @@
 import React from "react";
-import { OtherUser } from "@/components/profile/types";
-import { Qwirl } from "@/components/qwirl/types";
 import { CONSTANTS } from "@/constants/qwirl-respond";
-import CompletedPanel from "@/components/qwirl/qwirl-respond/completed-panel";
+import QwirlCompletionCard from "@/components/qwirl/qwirl-respond/completed-panel";
 import QwirlCover, { QwirlCoverSkeleton } from "@/components/qwirl/qwirl-cover";
 import { authStore } from "@/stores/useAuthStore";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { UserAvatar } from "@/components/user-avatar";
+import { components } from "@/lib/api/v1-client-side";
 
 type QwirlCoverData = {
   id: number;
@@ -20,10 +19,11 @@ type QwirlCoverData = {
 
 interface QwirlStateRendererProps {
   // Data
-  user: OtherUser | undefined;
-  data: Qwirl | undefined;
+  user: components["schemas"]["UserProfileResponse"] | undefined;
+  data: components["schemas"]["QwirlWithSession"] | undefined;
   pollsLength: number;
   newCount: number;
+  unansweredCount: number;
   qwirlCoverData: QwirlCoverData | undefined;
   // States
   isLoading: boolean;
@@ -46,6 +46,7 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
   data,
   pollsLength,
   newCount,
+  unansweredCount,
   qwirlCoverData,
   isLoading,
   isCoverLoading,
@@ -63,7 +64,11 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
 
   // Loading state
   if (isLoading || isCoverLoading || !user) {
-    return <QwirlCoverSkeleton />;
+    return (
+      <div className="w-full max-w-md mx-auto">
+        <QwirlCoverSkeleton />
+      </div>
+    );
   }
 
   const getUserVariant = () => {
@@ -72,19 +77,43 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
     return "visitor";
   };
 
+  const variant = getUserVariant();
+
   const isIncompleteQwirl = Boolean(
-    currentUser && !isLoading && pollsLength < CONSTANTS.MIN_QWIRL_POLLS
+    !isLoading && pollsLength < CONSTANTS.MIN_QWIRL_POLLS
   );
 
-  if (!showInteractive || isIncompleteQwirl) {
+  // Check if there are new unanswered questions (user has completed but owner added more)
+  const hasNewUnansweredQuestions = unansweredCount > 0 && isCompleted;
+
+  // Calculate answered count (including skipped as they are "responded to")
+  const answeredCount = pollsLength - unansweredCount;
+
+  // Show QwirlCover when:
+  // 1. Qwirl is incomplete (less than minimum polls)
+  // 2. User hasn't started yet (!showInteractive) AND not completed AND not in review mode
+  // 3. There are new unanswered questions added by owner
+  const shouldShowCover =
+    isIncompleteQwirl ||
+    (!showInteractive && !isCompleted && !isReviewMode) ||
+    (hasNewUnansweredQuestions && !isReviewMode && !isAnsweringNew);
+
+  if (shouldShowCover) {
     return (
       <div className="w-full max-w-md mx-auto">
         <QwirlCover
           qwirlCoverData={{
             background_image: qwirlCoverData?.background_image,
             title: qwirlCoverData?.title,
-            description: qwirlCoverData?.description,
+            description: hasNewUnansweredQuestions
+              ? `${
+                  user.name || user.username
+                } has added ${unansweredCount} new question${
+                  unansweredCount !== 1 ? "s" : ""
+                } to their Qwirl! Come back and see what else you can discover about them.`
+              : qwirlCoverData?.description,
             totalPolls: pollsLength,
+            name: qwirlCoverData?.name,
           }}
           user={{
             name: user.name,
@@ -94,9 +123,20 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
           }}
           onButtonClick={handleShowInteractive}
           onNotifyMe={handleNotifyMe}
-          hasExistingSession={false} // TODO: Check if session exists based on proper session data
-          variant={getUserVariant()}
+          onReview={startReview}
+          variant={variant}
           isIncomplete={isIncompleteQwirl}
+          answeredCount={answeredCount}
+          totalQwirlQuestions={pollsLength}
+          hasNewQuestions={hasNewUnansweredQuestions}
+          previewOrReview={variant === "owner" ? "review" : "preview"}
+          answeringStatus={
+            data?.session_status === "in_progress"
+              ? "in_progress"
+              : data?.session_status === "completed"
+              ? "completed"
+              : undefined
+          }
         />
       </div>
     );
@@ -104,12 +144,17 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
 
   if (isCompleted && !isReviewMode && !isAnsweringNew) {
     return (
-      <div className="space-y-4">
-        <CompletedPanel
+      <div className="w-full max-w-md mx-auto">
+        <QwirlCompletionCard
           data={data}
           newCount={newCount}
           wavelength={user?.relationship?.wavelength ?? 0}
           userName={user?.name ?? null}
+          userAvatar={user?.avatar ?? null}
+          username={user?.username ?? ""}
+          userId={user?.id ?? 0}
+          categories={user?.categories ?? []}
+          backgroundImage={qwirlCoverData?.background_image}
           onStartReview={startReview}
           onStartAnsweringNew={startAnsweringNew}
         />

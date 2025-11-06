@@ -1,6 +1,5 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { toast } from "sonner";
-import { OtherUser } from "@/components/profile/types";
 import { CONSTANTS } from "@/constants/qwirl-respond";
 import { useQwirlSession } from "./useQwirlSession";
 import {
@@ -11,9 +10,10 @@ import {
 import { useSessionState } from "./useSessionState";
 import { useCommentState } from "./useCommentState";
 import $api from "@/lib/api/client";
+import { components } from "@/lib/api/v1-client-side";
 
 interface UseQwirlLogicProps {
-  user: OtherUser | undefined;
+  user: components["schemas"]["UserProfileResponse"] | undefined;
 }
 
 export function useQwirlLogic({ user }: UseQwirlLogicProps) {
@@ -345,6 +345,19 @@ export function useQwirlLogic({ user }: UseQwirlLogicProps) {
       : null
     : findPrevNavigablePosition(currentPosition);
 
+  // Calculate truly unanswered questions (not answered AND not skipped)
+  const unansweredCount = useMemo(() => {
+    return polls.filter((poll) => {
+      const hasResponse =
+        poll.user_response !== undefined && poll.user_response !== null;
+      const isSkipped =
+        hasResponse && poll.user_response!.selected_answer === null;
+      const isAnswered =
+        hasResponse && poll.user_response!.selected_answer !== null;
+      return !isAnswered && !isSkipped;
+    }).length;
+  }, [polls]);
+
   return {
     // Data
     data,
@@ -366,6 +379,7 @@ export function useQwirlLogic({ user }: UseQwirlLogicProps) {
     userAnswer,
     skippedIds,
     newCount,
+    unansweredCount,
     prevNavigable,
 
     // Comment state

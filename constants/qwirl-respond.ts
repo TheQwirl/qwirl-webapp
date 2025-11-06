@@ -1,7 +1,7 @@
 // Constants
 export const CONSTANTS = {
   MAX_SKIPS: 5,
-  MIN_QWIRL_POLLS: 10,
+  MIN_QWIRL_POLLS: 15,
   COMMENT_MAX_LENGTH: 500,
   ANIMATION_DURATION: 0.28,
 } as const;

@@ -1,15 +1,56 @@
 "use client";
-import React from "react";
 import { Card, CardContent } from "../ui/card";
 import { Plus } from "lucide-react";
-import { SortableList } from "../sortable-list/sortable-list";
-import QwirlEditorCard, { QwirlEdiorCardLoading } from "./qwirl-editor-card";
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableQwirlCard } from "./sortable-qwirl-card";
 
 const VerticalEditView = () => {
   const { polls, qwirlQuery, handleReorder, handleDelete, isDeleting } =
     useQwirlEditor();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = polls?.findIndex((item) => item.id === active.id) ?? -1;
+      const newIndex = polls?.findIndex((item) => item.id === over.id) ?? -1;
+
+      if (oldIndex !== -1 && newIndex !== -1 && polls) {
+        const reorderedItems = [...polls];
+        const [removed] = reorderedItems.splice(oldIndex, 1);
+        if (removed) {
+          reorderedItems.splice(newIndex, 0, removed);
+          handleReorder(reorderedItems);
+        }
+      }
+    }
+  };
 
   if (qwirlQuery.isLoading) {
     return (
@@ -21,7 +62,11 @@ const VerticalEditView = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
           >
-            <QwirlEdiorCardLoading />
+            <Card className="border-0 bg-white shadow-sm animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-32 bg-gray-200 rounded" />
+              </CardContent>
+            </Card>
           </motion.div>
         ))}
       </div>
@@ -54,33 +99,25 @@ const VerticalEditView = () => {
 
   return (
     <div className="space-y-4">
-      <AnimatePresence mode="popLayout">
-        <SortableList
-          items={polls || []}
-          onChange={(reorderedItems) => handleReorder(reorderedItems)}
-          className="space-y-4"
-          renderItem={(qwirlPoll) => (
-            <motion.div
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              transition={{
-                duration: 0.2,
-                ease: [0.25, 1, 0.5, 1],
-              }}
-              className="w-full"
-            >
-              <QwirlEditorCard
-                key={qwirlPoll.id}
-                handleDelete={() => handleDelete(qwirlPoll.id)}
-                poll={qwirlPoll}
-                isDeleting={isDeleting}
-              />
-            </motion.div>
-          )}
-        />
-      </AnimatePresence>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={polls?.map((item) => item.id) || []}
+          strategy={verticalListSortingStrategy}
+        >
+          {polls?.map((qwirlPoll) => (
+            <SortableQwirlCard
+              key={qwirlPoll.id}
+              poll={qwirlPoll}
+              onDelete={() => handleDelete(qwirlPoll.id)}
+              isDeleting={isDeleting}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };

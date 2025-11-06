@@ -2,7 +2,11 @@
 import React, { useState, useRef, useCallback } from "react";
 import $api from "@/lib/api/client";
 import { components } from "@/lib/api/v1-client-side";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   Select,
   SelectContent,
@@ -15,6 +19,7 @@ import { motion } from "framer-motion";
 import QwirlCover, { QwirlCoverSkeleton } from "@/components/qwirl/qwirl-cover";
 import Link from "next/link";
 import { authStore } from "@/stores/useAuthStore";
+import { AdaptiveLayout } from "@/components/layout/adaptive-layout";
 
 type QwirlCommunityResponse = components["schemas"]["QwirlCommunityResponse"];
 
@@ -66,23 +71,24 @@ const CommunityPage = () => {
   );
 
   const qwirls = data?.pages.flatMap((page) => page.qwirls) ?? [];
-  const { user } = authStore();
+  const { isAuthenticated } = authStore();
 
   return (
-    <div className="min-h-screen bg-background">
+    <AdaptiveLayout>
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-4xl font-bold mb-4">Discover Qwirls</h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Explore fascinating qwirls from people around the world. Find your
-            wavelength with others.
-          </p>
-        </motion.div>
+        {!isAuthenticated && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8"
+          >
+            <h1 className="text-4xl font-bold mb-4">Discover Qwirls</h1>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Explore fascinating qwirls from people around the world. Find your
+              wavelength with others.
+            </p>
+          </motion.div>
+        )}
 
         {/* Filters */}
         <motion.div
@@ -92,15 +98,16 @@ const CommunityPage = () => {
           className="mb-8 space-y-4"
         >
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
+            <InputGroup className="flex-1 bg-input">
+              <InputGroupAddon>
+                <Search className="h-4 w-4" />
+              </InputGroupAddon>
+              <InputGroupInput
                 placeholder="Search qwirls, creators, or tags..."
-                className="pl-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </div>
+            </InputGroup>
             <div className="flex gap-2">
               <Select value={selectedSort} onValueChange={setSelectedSort}>
                 <SelectTrigger className="w-[140px]">
@@ -134,13 +141,21 @@ const CommunityPage = () => {
           transition={{ delay: 0.2 }}
         >
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 ${
+                isAuthenticated ? "lg:grid-cols-3" : "lg:grid-cols-3"
+              } gap-6 auto-rows-fr`}
+            >
               {Array.from({ length: 8 }).map((_, index) => (
                 <QwirlCoverSkeleton key={index} />
               ))}
             </div>
           ) : qwirls.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 ${
+                isAuthenticated ? "lg:grid-cols-3" : "lg:grid-cols-3"
+              } gap-6 auto-rows-fr`}
+            >
               {qwirls.map((qwirl, index) => {
                 const isLast = index === qwirls.length - 1;
                 return (
@@ -149,34 +164,34 @@ const CommunityPage = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className="group flex"
+                    className="group flex h-full"
                   >
                     <Link
                       href={`/qwirl/${qwirl.user?.username}`}
-                      className="flex w-full"
+                      className="flex w-full h-full"
                     >
                       <QwirlCover
                         ref={isLast ? lastQwirlElementRef : null}
                         qwirlCoverData={{
-                          background_image: qwirl.background_image,
-                          description: qwirl.description,
-                          title: qwirl.title,
+                          ...qwirl?.cover,
                           totalPolls: qwirl.item_count,
                         }}
+                        showTotalPolls
                         user={{
                           name: qwirl.user?.name,
                           username: qwirl.user?.username ?? "",
                           avatar: qwirl.user?.avatar,
                           categories: qwirl.user?.categories || [],
                         }}
-                        style={{
-                          flex: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                        variant={
-                          qwirl.user_id === user?.id ? "owner" : undefined
+                        answeringStatus={
+                          qwirl?.session?.status === "in_progress"
+                            ? "in_progress"
+                            : qwirl?.session?.status === "completed"
+                            ? "completed"
+                            : undefined
                         }
+                        className="h-full"
+                        variant={"visitor"}
                       />
                     </Link>
                   </motion.div>
@@ -199,7 +214,11 @@ const CommunityPage = () => {
 
           {/* Loading indicator for infinite scroll */}
           {isFetchingNextPage && (
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div
+              className={`mt-8 grid grid-cols-1 sm:grid-cols-2 ${
+                isAuthenticated ? "lg:grid-cols-2" : "lg:grid-cols-3"
+              } gap-6`}
+            >
               {Array.from({ length: 4 }).map((_, index) => (
                 <QwirlCoverSkeleton key={index} />
               ))}
@@ -207,7 +226,7 @@ const CommunityPage = () => {
           )}
         </motion.div>
       </div>
-    </div>
+    </AdaptiveLayout>
   );
 };
 

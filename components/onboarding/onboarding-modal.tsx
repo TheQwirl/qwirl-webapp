@@ -22,7 +22,6 @@ import $api from "@/lib/api/client";
 import { toast } from "sonner";
 import { PersonalDetailsStep } from "./steps/personal-details-step";
 import { CategorySelectionStep } from "./steps/category-selection-step";
-import { QuestionSwipeStep } from "./steps/question-swipe-step";
 import { ScrollArea } from "../ui/scroll-area";
 
 interface OnboardingModalProps {
@@ -30,7 +29,7 @@ interface OnboardingModalProps {
   onClose: () => void;
 }
 
-type OnboardingStep = "personal-details" | "categories" | "questions";
+type OnboardingStep = "personal-details" | "categories";
 
 const personalDetailsSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -112,11 +111,6 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
       title: "Choose Interests",
       description: "Select up to 5 categories you're interested in",
     },
-    {
-      id: "questions",
-      title: "Build Your Qwirl",
-      description: "Swipe through questions to build your profile",
-    },
   ];
 
   const currentStepIndex = steps.findIndex((step) => step.id === currentStep);
@@ -146,20 +140,9 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
         break;
 
       case "categories":
-        // Update categories and move to questions
-        try {
-          await updateUserMutation.mutateAsync({
-            body: { categories: selectedCategories },
-          });
-          setCurrentStep("questions");
-        } catch {
-          // Error is handled by the mutation
-          return;
-        }
-        break;
-
-      case "questions":
-        // Complete onboarding
+        await updateUserMutation.mutateAsync({
+          body: { categories: selectedCategories },
+        });
         await completeOnboardingMutation.mutateAsync(
           {
             body: { has_seen_onboarding: true },
@@ -186,9 +169,6 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
       case "categories":
         setCurrentStep("personal-details");
         break;
-      case "questions":
-        setCurrentStep("categories");
-        break;
     }
   };
 
@@ -199,8 +179,6 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
         return formData.name.length >= 2 && formData.username.length >= 3;
       case "categories":
         return selectedCategories.length > 0;
-      case "questions":
-        return true; // Can always finish from questions step
     }
   }, [currentStep, form, selectedCategories]);
 
@@ -253,12 +231,6 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                       onCategoriesChange={setSelectedCategories}
                     />
                   )}
-
-                  {currentStep === "questions" && (
-                    <QuestionSwipeStep
-                      selectedCategories={selectedCategories}
-                    />
-                  )}
                 </motion.div>
               </AnimatePresence>
             </ScrollArea>
@@ -279,7 +251,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
             disabled={!canProceed() || isLoading}
             loading={isLoading}
           >
-            {currentStep === "questions" ? "Complete Setup" : "Next"}
+            {currentStep === "categories" ? "Finish" : "Next"}
           </Button>
         </DialogFooter>
       </DialogContent>

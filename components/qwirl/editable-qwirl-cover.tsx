@@ -7,14 +7,18 @@ import { z } from "zod";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Edit3, Camera, X, ImageIcon as ImageIconLucide } from "lucide-react";
+import {
+  Edit3,
+  Camera,
+  X,
+  ImageIcon as ImageIconLucide,
+  LinkIcon,
+} from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Form,
   FormControl,
@@ -23,22 +27,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { UserAvatar } from "@/components/user-avatar";
 import ImageUploadDialog from "@/components/image-upload-dialog";
 import { cn } from "@/lib/utils";
 import $api from "@/lib/api/client";
 import { authStore } from "@/stores/useAuthStore";
+import QwirlCover, { QwirlCoverSkeleton } from "./qwirl-cover";
+import Link from "next/link";
 
 // Zod schema for form validation
 const qwirlHeaderSchema = z.object({
-  title: z
+  name: z
     .string()
     .min(1, "Title is required")
     .max(60, "Title must be less than 60 characters"),
   description: z
     .string()
     .min(10, "Description must be at least 10 characters")
-    .max(200, "Description must be less than 200 characters"),
+    .max(100, "Description must be less than 100 characters"),
   background_image: z.string().nullable().optional(),
 });
 
@@ -89,12 +94,11 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
   );
 
   const qwirlCoverData = qwirlCoverQuery.data;
-  const qwirlData = qwirlQuery.data;
   const isLoading = qwirlCoverQuery.isLoading || qwirlQuery.isLoading;
 
   const getDefaultValues = useCallback(
     (): QwirlHeaderFormData => ({
-      title: qwirlCoverData?.title || "What kind of person am I?",
+      name: qwirlCoverData?.name || qwirlCoverData?.title || "Not specified",
       description:
         qwirlCoverData?.description ||
         "Take this Qwirl to see how well you know me and find out what we have in common. Let's see if we're a match!",
@@ -140,29 +144,11 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
     form.setValue("background_image", null);
   };
 
-  const handleCopyUrl = async () => {
-    if (!user?.username) return;
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/qwirl/${user.username}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success("URL copied to clipboard!");
-    } catch {
-      toast.error("Failed to copy URL");
-    }
-  };
-
   if (isLoading) {
     return (
-      <Card className={cn("max-w-2xl mx-auto overflow-hidden", className)}>
-        <CardContent className="p-8 flex flex-col items-center text-center">
-          <Skeleton className="w-full h-48 rounded-lg mb-6" />
-          <Skeleton className="h-24 w-24 rounded-full -mt-16 mb-4" />
-          <Skeleton className="h-8 w-3/4 mx-auto mb-2" />
-          <Skeleton className="h-4 w-32 mx-auto mb-4" />
-          <Skeleton className="h-16 w-full max-w-md mx-auto mb-6" />
-          <Skeleton className="h-12 w-40 rounded-full" />
-        </CardContent>
-      </Card>
+      <QwirlCoverSkeleton
+        className={cn("max-w-2xl mx-auto w-full", className)}
+      />
     );
   }
 
@@ -171,7 +157,7 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className={cn("max-w-2xl mx-auto", className)}
+        className={cn("max-w-2xl mx-auto w-full", className)}
       >
         <Card className="relative overflow-hidden border-2 border-primary/30">
           <CardContent className="p-6 md:p-8">
@@ -182,6 +168,17 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold">Edit Qwirl Cover</h3>
+                  <Link className="text-xs" href={"/settings"}>
+                    <Button
+                      variant="ghost"
+                      size={"xs"}
+                      icon={LinkIcon}
+                      iconPlacement="left"
+                      className="px-1"
+                    >
+                      Other Settings
+                    </Button>
+                  </Link>
                 </div>
 
                 <FormField
@@ -247,7 +244,7 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
 
                 <FormField
                   control={form.control}
-                  name="title"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Title</FormLabel>
@@ -270,12 +267,23 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea
-                          className="bg-input "
-                          placeholder="Take this Qwirl to see how well you know me..."
-                          {...field}
-                          rows={3}
-                        />
+                        <div className="relative">
+                          <Textarea
+                            className="bg-input resize-none no-scrollbar"
+                            placeholder="Take this Qwirl to see how well you know me..."
+                            {...field}
+                            rows={4}
+                            maxLength={100}
+                            onChange={(e) => {
+                              if (e.target.value.length <= 100) {
+                                field.onChange(e);
+                              }
+                            }}
+                          />
+                          <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
+                            {field.value?.length || 0}/100
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -314,74 +322,23 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={cn("max-w-2xl mx-auto", className)}
-    >
-      <Card className="bg-white shadow-lg rounded-lg text-center p-8 flex flex-col items-center">
-        {/* Background Image */}
-        <div className="relative w-full h-48 mb-6 rounded-lg overflow-hidden">
-          {qwirlCoverData?.background_image ? (
-            <>
-              <Image
-                src={qwirlCoverData.background_image}
-                alt="Qwirl Cover"
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-black/20" />
-            </>
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br  from-primary/20 via-primary/20 to-primary/50" />
-          )}
-        </div>
-
-        {/* Avatar overlapping the background */}
-        <div className="-mt-16 mb-4 z-10 relative">
-          <UserAvatar
-            image={user?.avatar ?? ""}
-            size="xl"
-            className="w-full h-full"
-            ringed
-            name={user?.name || user?.username || "User"}
-          />
-        </div>
-
-        {/* Title */}
-        <h2 className="text-xl font-bold text-gray-900">
-          {qwirlCoverData?.title}
-        </h2>
-
-        {/* Username */}
-        <p className="text-gray-600 mt-2 text-xs">
-          By @{user?.username || "user"}
-        </p>
-
-        {/* Description */}
-        <p className="text-gray-600 mt-4 max-w-md">
-          {qwirlCoverData?.description ||
-            "Take this Qwirl to see how well you know me and find out what we have in common. Let's see if we're a match!"}
-        </p>
-
-        {/* Categories */}
-        {user?.categories && user.categories.length > 0 && (
-          <div className="flex items-center justify-center flex-wrap gap-2 mt-4">
-            {user.categories.map((cat) => (
-              <Badge
-                key={cat}
-                variant="secondary"
-                className="font-normal text-xs px-3 py-1"
-              >
-                {cat}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3 mt-6">
+    <QwirlCover
+      qwirlCoverData={{
+        background_image: qwirlCoverData?.background_image,
+        title: qwirlCoverData?.title,
+        description: qwirlCoverData?.description,
+        name: qwirlCoverData?.name,
+      }}
+      user={{
+        name: user?.name,
+        username: user?.username || "",
+        avatar: user?.avatar,
+        categories: user?.categories,
+      }}
+      variant="owner"
+      className={className}
+      actions={
+        <div className="flex items-center gap-3">
           <Button
             onClick={handleEdit}
             icon={Edit3}
@@ -391,16 +348,8 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
             Customize Cover
           </Button>
         </div>
-      </Card>
-
-      <ImageUploadDialog
-        open={isImageDialogOpen}
-        onOpenChange={setIsImageDialogOpen}
-        title="Upload Background Image"
-        aspect={16 / 9}
-        onSave={handleImageSave}
-      />
-    </motion.div>
+      }
+    />
   );
 };
 

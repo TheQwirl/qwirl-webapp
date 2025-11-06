@@ -3,19 +3,16 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle, AlertCircle, BarChart3 } from "lucide-react";
 import CollapsibleCard from "@/components/collapsible-card";
 import React from "react";
+import { CONSTANTS } from "@/constants/qwirl-respond";
 
 interface PollProgressCardProps {
   pollCount: number;
-  minPollsRequired?: number;
 }
 
-const PollProgressCard: React.FC<PollProgressCardProps> = ({
-  pollCount,
-  minPollsRequired = 15,
-}) => {
-  const isMinimumMet = pollCount >= minPollsRequired;
+const PollProgressCard: React.FC<PollProgressCardProps> = ({ pollCount }) => {
+  const isMinimumMet = pollCount >= CONSTANTS.MIN_QWIRL_POLLS;
   const progressPercentage = Math.min(
-    (pollCount / minPollsRequired) * 100,
+    (pollCount / CONSTANTS.MIN_QWIRL_POLLS) * 100,
     100
   );
   return (
@@ -30,7 +27,7 @@ const PollProgressCard: React.FC<PollProgressCardProps> = ({
             variant={isMinimumMet ? "default" : "secondary"}
             className="font-semibold"
           >
-            {pollCount} / {minPollsRequired}
+            {pollCount} / {CONSTANTS.MIN_QWIRL_POLLS}
           </Badge>
         </div>
         <div className="space-y-2">
@@ -47,7 +44,8 @@ const PollProgressCard: React.FC<PollProgressCardProps> = ({
               <>
                 <AlertCircle className="h-4 w-4 text-amber-600" />
                 <span className="text-amber-700">
-                  Add {minPollsRequired - pollCount} more to enable responses
+                  Add {CONSTANTS.MIN_QWIRL_POLLS - pollCount} more to enable
+                  responses
                 </span>
               </>
             )}

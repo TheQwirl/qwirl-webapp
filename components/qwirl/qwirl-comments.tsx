@@ -10,7 +10,6 @@ import { formatDistanceToNow } from "date-fns";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
@@ -58,21 +57,19 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
       transition={{ duration: 0.3 }}
       className="flex space-x-3 p-4"
     >
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <UserAvatar
-              image={responder?.avatar ?? ""}
-              name={responder?.name ?? responder?.username ?? "User"}
-              size="sm"
-              className="flex-shrink-0 h-9 w-9"
-            />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{responder?.name ?? responder?.username ?? "User"}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <UserAvatar
+            image={responder?.avatar ?? ""}
+            name={responder?.name ?? responder?.username ?? "User"}
+            size="sm"
+            className="flex-shrink-0 h-9 w-9"
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{responder?.name ?? responder?.username ?? "User"}</p>
+        </TooltipContent>
+      </Tooltip>
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline space-x-2 mb-1">
           <span className="font-semibold text-sm text-foreground truncate">

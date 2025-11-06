@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PageLayout } from "@/components/layout/page-layout";
 import { BarChart3 } from "lucide-react";
 import PrimaryQwirlRightSidebar from "../../_components/primary-qwirl-right-sidebar";
@@ -12,11 +12,16 @@ import { authStore } from "@/stores/useAuthStore";
 import QwirlResponsesViewer from "@/components/qwirl/qwirl-response-viewer";
 import { components } from "@/lib/api/v1-client-side";
 
+type SortByOption = "wavelength" | "started_at";
+
 const PrimaryQwirlInsightsPage = () => {
   const { polls } = useQwirlEditor();
   const { user } = authStore();
   const searchParams = useSearchParams();
-  const responderIdRaw = searchParams.get("responder");
+
+  // Support both 'responder' and 'id' query parameters
+  const responderIdRaw =
+    searchParams.get("responder") || searchParams.get("id");
 
   const initialTab = responderIdRaw ? "details" : "overview";
   const [activeTab, setActiveTab] = useState<string>(initialTab);
@@ -29,8 +34,18 @@ const PrimaryQwirlInsightsPage = () => {
   );
 
   // Filter states
-  const [sortBy, setSortBy] = useState<string>("wavelength");
-  const [showInProgress, setShowInProgress] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<SortByOption>("started_at");
+
+  // Update selected responder and tab when query param changes
+  useEffect(() => {
+    if (responderIdRaw && /^\d+$/.test(responderIdRaw)) {
+      const responderId = Number(responderIdRaw);
+      setSelectedResponderId(responderId);
+      setActiveTab("details");
+    } else {
+      setSelectedResponderId(undefined);
+    }
+  }, [responderIdRaw]);
 
   const {
     data,
@@ -49,8 +64,7 @@ const PrimaryQwirlInsightsPage = () => {
           qwirl_id: user?.primary_qwirl_id ?? 0,
         },
         query: {
-          sort_by: sortBy as "wavelength" | "started_at",
-          status: showInProgress ? "in_progress" : "completed",
+          sort_by: sortBy as SortByOption,
           limit: 12,
           skip: 0,
         },
@@ -81,12 +95,8 @@ const PrimaryQwirlInsightsPage = () => {
     setActiveTab("details");
   };
 
-  const handleSortChange = (newSort: string) => {
+  const handleSortChange = (newSort: SortByOption) => {
     setSortBy(newSort);
-  };
-
-  const handleShowInProgressChange = (show: boolean) => {
-    setShowInProgress(show);
   };
 
   return (
@@ -123,8 +133,6 @@ const PrimaryQwirlInsightsPage = () => {
                   onResponderClick={handleResponderClick}
                   sortBy={sortBy}
                   onSortChange={handleSortChange}
-                  showInProgress={showInProgress}
-                  onShowInProgressChange={handleShowInProgressChange}
                 />
               </TabsContent>
               <TabsContent value="details" className="mt-6">

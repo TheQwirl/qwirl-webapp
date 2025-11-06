@@ -4,19 +4,16 @@ import React, { useCallback, useState, useMemo, memo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, Users } from "lucide-react";
 
-// Hooks
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 
-// API & State
 import $api from "@/lib/api/client";
 import { authStore } from "@/stores/useAuthStore";
 
-// UI Components
 import { Card, CardContent } from "../ui/card";
+import { Skeleton } from "../ui/skeleton";
 import UserBadge from "../user-badge";
 
-// Feature Components
 import ResponderSelector from "./qwirl-view/responder-selector";
 import PollNavigation from "./qwirl-view/poll-navigation";
 import PollQuestion from "./qwirl-view/poll-question";
@@ -25,13 +22,9 @@ import PollStats from "./qwirl-view/poll-stats";
 import QwirlComments from "./qwirl-comments";
 import { SingleCardNavigationDots } from "./single-card-navigation-dots";
 
-// Types
 import { QwirlResponder } from "@/types/qwirl";
 import SelectedResponderCard from "./qwirl-edit/selected-responder-card";
 
-/**
- * Type definitions for responder answer data
- */
 type ResponderAnswer = {
   user:
     | {
@@ -56,9 +49,6 @@ type ResponderAnswer = {
 
 type RespondersArray = ResponderAnswer[];
 
-/**
- * ResponderStatus component shows which users skipped or haven't answered yet
- */
 const ResponderStatus = memo(
   ({
     skippedResponders,
@@ -97,39 +87,63 @@ const ResponderStatus = memo(
 
 ResponderStatus.displayName = "ResponderStatus";
 
-/**
- * QwirlResponsesViewer Component
- *
- * A comprehensive viewer for analyzing qwirl poll responses and distributions.
- * Users can view overall answer statistics, select specific responders to compare
- * their answers, and read comments left on polls.
- *
- * @param {number | null} responder_id - Optional responder ID to pre-select from URL params
- *
- * Features:
- * - View poll response distributions and percentages
- * - Select multiple responders to see their individual answers
- * - Navigate between polls with keyboard shortcuts (Arrow keys)
- * - Reorder and delete polls
- * - View responder comments
- * - See which responders skipped or haven't answered yet
- */
+const ResponseViewerSkeleton = () => {
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-5 w-5" />
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-10 w-48" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-8">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-10 w-32" />
+              <div className="flex gap-2">
+                <Skeleton className="h-10 w-10" />
+                <Skeleton className="h-10 w-10" />
+                <Skeleton className="h-10 w-10" />
+              </div>
+            </div>
+
+            <Skeleton className="h-16 w-full" />
+
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+
+            <div className="flex gap-4">
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-8 w-32" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 interface QwirlResponsesViewerProps {
   responder_id?: number | null;
 }
 
 const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
-  // Hooks
   const { qwirlQuery, handleReorder, handleDelete } = useQwirlEditor();
   const { user } = authStore();
 
-  // Local state
   const [selectedResponders, setSelectedResponders] = useState<
     QwirlResponder[] | null
   >(null);
   const [currentPollId, setCurrentPollId] = useState<number | null>(null);
 
-  // Fetch all responders who completed this qwirl
   const qwirlRespondersQuery = $api.useQuery(
     "get",
     "/qwirl-responses/qwirls/{qwirl_id}/responders",
@@ -140,7 +154,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
         },
         query: {
           limit: 3,
-          status: "completed",
         },
       },
     },
@@ -149,7 +162,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     }
   );
 
-  // Auto-select responder from URL parameter if provided
   React.useEffect(() => {
     if (!responder_id) return;
 
@@ -165,7 +177,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     }
   }, [responder_id, qwirlRespondersQuery?.data?.responders]);
 
-  // Fetch detailed responses for selected responders
   const qwirlResponsesByUsersQuery = $api.useQuery(
     "get",
     "/qwirl-responses/responses/by-users",
@@ -187,7 +198,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     }
   );
 
-  // Compute responder answers for the current poll being viewed
   const responderAnswersForCurrentPoll = useMemo(
     () =>
       qwirlResponsesByUsersQuery?.data?.sessions?.map((s) => ({
@@ -199,7 +209,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     [qwirlResponsesByUsersQuery?.data?.sessions, currentPollId]
   );
 
-  // Categorize responders by their answer status
   const { skippedResponders, notAnsweredResponders, respondersWithAnswers } =
     useMemo(() => {
       const skipped = responderAnswersForCurrentPoll.filter(
@@ -221,7 +230,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
       };
     }, [responderAnswersForCurrentPoll]);
 
-  // Get sorted polls from qwirl data
   const polls = useMemo(
     () =>
       qwirlQuery?.data?.items
@@ -230,13 +238,11 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     [qwirlQuery?.data?.items]
   );
 
-  // Create a map for O(1) poll lookups
   const pollsById = useMemo(
     () => new Map(polls.map((poll) => [poll.id, poll])),
     [polls]
   );
 
-  // Get current poll data
   const currentIndex = useMemo(
     () =>
       currentPollId != null
@@ -247,7 +253,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
 
   const currentPoll = pollsById.get(currentPollId || 0) || null;
 
-  // Prepare poll options with responder data and statistics
   const optionsWithResponders = useMemo(
     () =>
       currentPoll?.options.map((option) => {
@@ -258,7 +263,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
         const total = currentPoll?.option_statistics?.total_responses ?? 0;
         const percentage = total > 0 && count > 0 ? (count / total) * 100 : 0;
 
-        // Transform responders to match expected format
         const formattedResponders = respondersForOption.map((r) => ({
           user: r.user
             ? {
@@ -285,14 +289,12 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     ]
   );
 
-  // Initialize with first poll when polls are loaded
   React.useEffect(() => {
     if (polls.length && currentPollId === null) {
       setCurrentPollId(polls?.[0]?.id || null);
     }
   }, [polls, currentPollId]);
 
-  // Navigation handlers
   const navigateToPoll = useCallback((pollId: number) => {
     setCurrentPollId(pollId);
   }, []);
@@ -324,7 +326,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     [handleNavigation]
   );
 
-  // Enable keyboard navigation (Arrow keys)
   useKeyboardNavigation(
     {
       ArrowLeft: goToPrevious,
@@ -333,7 +334,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     polls.length > 0
   );
 
-  // Poll management handlers
   const handlingDelete = useCallback(async () => {
     if (!currentPoll) return;
 
@@ -378,7 +378,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     }
   }, [currentIndex, polls, handleReorder]);
 
-  // Responder selection handlers
   const handleResponderToggle = useCallback(
     (responderId: number) => {
       setSelectedResponders((prev) => {
@@ -409,15 +408,20 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     );
   }, []);
 
-  // Empty state: No polls exist yet
+  if (qwirlQuery.isLoading) {
+    return <ResponseViewerSkeleton />;
+  }
+
   if (polls?.length === 0) {
     return (
-      <Card className="border-0 shadow-lg bg-white overflow-none">
+      <Card className="border shadow-sm">
         <CardContent className="p-12 text-center">
           <div className="text-gray-500">
             <ChevronLeft className="mx-auto h-12 w-12 mb-4 opacity-50" />
             <h3 className="text-lg font-medium mb-2">No polls yet</h3>
-            <p>Add your first poll to get started with your Qwirl!</p>
+            <p className="text-muted-foreground">
+              Add your first poll to get started with your Qwirl
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -426,11 +430,11 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
 
   return (
     <div className="space-y-4">
-      <Card className="">
+      <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Users className="h-5 w-5 text-gray-500" />
+              <Users className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">Show responses from:</span>
               <ResponderSelector
                 responders={qwirlRespondersQuery?.data?.responders || []}
@@ -438,23 +442,21 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
               />
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            {selectedResponders && selectedResponders.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                {selectedResponders.map((responder) => (
-                  <SelectedResponderCard
-                    key={responder.id}
-                    responder={responder}
-                    onClose={() => removeResponder(responder.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          {selectedResponders && selectedResponders.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t">
+              {selectedResponders.map((responder) => (
+                <SelectedResponderCard
+                  key={responder.id}
+                  responder={responder}
+                  onClose={() => removeResponder(responder.id)}
+                />
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <Card className="overflow-none">
+      <Card>
         <CardContent className="p-8">
           <div className="space-y-6">
             <PollNavigation
