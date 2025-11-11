@@ -9,7 +9,10 @@ import PageLoader from "@/components/page-loader";
 import { authStore } from "@/stores/useAuthStore";
 import { InfoAlertProvider } from "@/components/info-alert-provider";
 import { ConfirmationModal } from "@/components/confirmation-modal";
-import { OnboardingProvider } from "@/components/onboarding";
+import {
+  UserSetupProvider,
+  InteractiveOnboardingProvider,
+} from "@/components/onboarding";
 import { AuthenticatedCartWrapper } from "./_components/authenticated-cart-wrapper";
 import { FloatingCartButton } from "@/components/layout/cart-button";
 
@@ -29,43 +32,45 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <InfoAlertProvider>
-      <OnboardingProvider>
-        <FloatingCartButton />
-        <div className=" mx-auto relative">
-          {!isMobile ? (
-            <SidebarProvider
-              className="flex min-h-screen w-full"
-              style={
-                {
-                  "--sidebar-width": "300px",
-                  "--sidebar-width-collapsed": "0px",
-                } as React.CSSProperties
-              }
-            >
-              <AppSidebar
-                collapsible="none"
-                className="sticky top-0 h-screen"
-              />
-              {isLoading ? (
-                <PageLoader />
-              ) : (
-                <div className="flex-1">
-                  <main className="">{children || <ComingSoon />}</main>
+      <UserSetupProvider>
+        <InteractiveOnboardingProvider>
+          <FloatingCartButton />
+          <div className=" mx-auto relative">
+            {!isMobile ? (
+              <SidebarProvider
+                className="flex min-h-screen w-full"
+                style={
+                  {
+                    "--sidebar-width": "300px",
+                    "--sidebar-width-collapsed": "0px",
+                  } as React.CSSProperties
+                }
+              >
+                <AppSidebar
+                  collapsible="none"
+                  className="sticky top-0 h-screen"
+                />
+                {isLoading ? (
+                  <PageLoader />
+                ) : (
+                  <div className="flex-1">
+                    <main className="">{children || <ComingSoon />}</main>
+                  </div>
+                )}
+              </SidebarProvider>
+            ) : (
+              <>
+                <div className="min-h-screen pb-14">
+                  <main className="sm:p-4">{children || <ComingSoon />}</main>
                 </div>
-              )}
-            </SidebarProvider>
-          ) : (
-            <>
-              <div className="min-h-screen pb-14">
-                <main className="sm:p-4">{children || <ComingSoon />}</main>
-              </div>
-              <MobileNavBar />
-            </>
-          )}
-        </div>
-        <ConfirmationModal />
-        <AuthenticatedCartWrapper />
-      </OnboardingProvider>
+                <MobileNavBar />
+              </>
+            )}
+          </div>
+          <ConfirmationModal />
+          <AuthenticatedCartWrapper />
+        </InteractiveOnboardingProvider>
+      </UserSetupProvider>
     </InfoAlertProvider>
   );
 };

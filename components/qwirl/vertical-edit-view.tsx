@@ -108,12 +108,13 @@ const VerticalEditView = () => {
           items={polls?.map((item) => item.id) || []}
           strategy={verticalListSortingStrategy}
         >
-          {polls?.map((qwirlPoll) => (
+          {polls?.map((qwirlPoll, index) => (
             <SortableQwirlCard
               key={qwirlPoll.id}
               poll={qwirlPoll}
               onDelete={() => handleDelete(qwirlPoll.id)}
               isDeleting={isDeleting}
+              id={`qwirl-poll-card-${index}`}
             />
           ))}
         </SortableContext>

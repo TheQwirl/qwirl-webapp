@@ -6,6 +6,7 @@ import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
 import VerticalEditView from "@/components/qwirl/vertical-edit-view";
 import { EditIcon, PlusIcon, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AddPollDialog from "@/components/qwirl/add-poll-dialog";
 import EditableQwirlCover from "@/components/qwirl/editable-qwirl-cover";
 import EditableUserSocials from "@/components/qwirl/editable-user-socials";
@@ -86,7 +87,10 @@ const PrimaryQwirlEditPage = () => {
         }
         backNavigation={{
           title: (
-            <div className="text-base lg:text-lg whitespace-nowrap font-semibold flex items-center gap-2 ">
+            <div
+              id="onboarding-welcome"
+              className="text-base lg:text-lg whitespace-nowrap font-semibold flex items-center gap-2 "
+            >
               <EditIcon className="h-4 lg:h-5 w-4 lg:w-5" />
               Edit Mode
             </div>
@@ -94,6 +98,7 @@ const PrimaryQwirlEditPage = () => {
           rightContent: (
             <div className="flex items-center gap-2">
               <Button
+                id="add-from-library-button"
                 onClick={() => setShowLibrary(true)}
                 variant="secondary"
                 className="hidden sm:flex group rounded-full md:rounded shadow-none"
@@ -103,6 +108,7 @@ const PrimaryQwirlEditPage = () => {
                 Add from Library
               </Button>
               <Button
+                id="add-poll-button"
                 onClick={() => setShowAddDialog(true)}
                 className="group rounded-full md:rounded shadow-none"
                 icon={PlusIcon}
@@ -117,39 +123,36 @@ const PrimaryQwirlEditPage = () => {
         }}
       >
         <div className="relative grid grid-cols-12 gap-5 ">
-          <div className="overflow-hidden col-span-full lg:col-span-full px-4 pb-4 space-y-8">
-            {/* Qwirl Cover Section */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-4 text-gray-500 font-medium">
-                  Qwirl Profile
-                </span>
-              </div>
-            </div>
-
-            {/* Grid for Qwirl Cover and Social Links */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <EditableQwirlCover />
-              <EditableUserSocials />
-            </div>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-4 text-gray-500 font-medium">
+          <div className="overflow-hidden col-span-full px-4 pb-4">
+            <Tabs defaultValue="profile" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-2 gap-2 rounded-full bg-muted p-1">
+                <TabsTrigger
+                  value="profile"
+                  className="rounded-full text-sm font-semibold"
+                >
+                  Profile
+                </TabsTrigger>
+                <TabsTrigger
+                  value="polls"
+                  className="rounded-full text-sm font-semibold"
+                >
                   Polls
-                </span>
-              </div>
-            </div>
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Poll Cards */}
-            <VerticalEditView />
+              <TabsContent value="profile" className="space-y-8">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <EditableQwirlCover />
+                  <EditableUserSocials />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="polls" className="space-y-8">
+                <div id="qwirl-polls-container">
+                  <VerticalEditView />
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </PageLayout>

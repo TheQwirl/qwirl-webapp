@@ -12,6 +12,7 @@ interface SortableQwirlCardProps {
   poll: QwirlItem;
   onDelete: () => void;
   isDeleting: boolean;
+  id?: string;
 }
 
 interface Context {
@@ -37,6 +38,7 @@ export function SortableQwirlCard({
   poll,
   onDelete,
   isDeleting,
+  id,
 }: SortableQwirlCardProps) {
   const {
     attributes,
@@ -75,6 +77,7 @@ export function SortableQwirlCard({
         ref={setNodeRef}
         style={style}
         data-poll-card
+        id={id}
         className={cn(isDragging && "opacity-50")}
       >
         <QwirlEditorCard

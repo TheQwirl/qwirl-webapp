@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,13 +19,14 @@ import { Progress } from "@/components/ui/progress";
 import { Form } from "@/components/ui/form";
 import { authStore } from "@/stores/useAuthStore";
 import { useUserSync } from "@/hooks/useUserSync";
+import { useOnboardingStore } from "@/stores/useOnboardingStore";
 import $api from "@/lib/api/client";
 import { toast } from "sonner";
 import { PersonalDetailsStep } from "./steps/personal-details-step";
 import { CategorySelectionStep } from "./steps/category-selection-step";
 import { ScrollArea } from "../ui/scroll-area";
 
-interface OnboardingModalProps {
+interface UserSetupModalProps {
   open: boolean;
   onClose: () => void;
 }
@@ -41,9 +43,12 @@ const personalDetailsSchema = z.object({
     .optional(),
 });
 
-export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
+export function UserSetupModal({ open, onClose }: UserSetupModalProps) {
   const { user } = authStore();
   const { syncUser } = useUserSync();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { setShouldStartTour, startTour } = useOnboardingStore();
 
   const [currentStep, setCurrentStep] =
     useState<OnboardingStep>("personal-details");
@@ -85,10 +90,35 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
   const completeOnboardingMutation = $api.useMutation("patch", "/users/me", {
     onSuccess: async (response) => {
       if (response) {
-        syncUser(response);
+        // Sync user data first
+        await syncUser(response);
+        console.log("User setup complete, user data synced:", response);
       }
+
+      // Set flag to start tour
+      setShouldStartTour(true);
+      console.log("Set shouldStartTour to true");
+
       toast.success("Welcome to Qwirl! 🎉");
       onClose();
+
+      // Check if already on edit page
+      const isOnEditPage = pathname === "/qwirls/primary/edit";
+      console.log("Is already on edit page:", isOnEditPage);
+
+      if (isOnEditPage) {
+        // If already on edit page, start tour directly after a small delay
+        setTimeout(() => {
+          console.log("Already on edit page, starting tour directly...");
+          startTour();
+        }, 1500);
+      } else {
+        // Redirect to edit page to start interactive tour
+        setTimeout(() => {
+          console.log("Redirecting to edit page...");
+          router.push("/qwirls/primary/edit");
+        }, 800);
+      }
     },
     onError: (error) => {
       console.error("Error completing onboarding:", error);

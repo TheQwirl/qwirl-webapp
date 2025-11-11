@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { authStore } from "@/stores/useAuthStore";
-import { OnboardingModal } from "./onboarding-modal";
+import { UserSetupModal } from "./user-setup-modal";
 
-interface OnboardingProviderProps {
+interface UserSetupProviderProps {
   children: React.ReactNode;
 }
 
-export function OnboardingProvider({ children }: OnboardingProviderProps) {
+export function UserSetupProvider({ children }: UserSetupProviderProps) {
   const { user, isAuthenticated, isLoading } = authStore();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -28,7 +28,7 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   return (
     <>
       {children}
-      <OnboardingModal open={showOnboarding} onClose={handleCloseOnboarding} />
+      <UserSetupModal open={showOnboarding} onClose={handleCloseOnboarding} />
     </>
   );
 }
