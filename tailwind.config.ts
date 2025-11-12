@@ -188,7 +188,7 @@ export default {
       },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
-        rochester: ["Rochester", "cursive"],
+        permanentMarker: ["Permanent Marker", "cursive"],
       },
     },
   },

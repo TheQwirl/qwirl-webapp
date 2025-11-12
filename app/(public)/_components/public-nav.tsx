@@ -34,7 +34,7 @@ const PublicNav = () => {
   }
 
   return (
-    <div className=" fixed inset-x-0 ">
+    <div className="z-50 fixed inset-x-0 ">
       <div className="rounded-none z-50 flex items-center justify-between px-8 py-5 w-full ">
         <Button
           variant="default"

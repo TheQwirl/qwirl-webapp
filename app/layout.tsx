@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Rochester } from "next/font/google";
+import { Permanent_Marker, Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -12,8 +12,8 @@ const poppins = Poppins({
   subsets: ["latin", "latin-ext"],
 });
 
-const rochester = Rochester({
-  variable: "--font-rochester",
+const permanentMarker = Permanent_Marker({
+  variable: "--font-permanent-marker",
   weight: ["400"],
   subsets: ["latin"],
 });
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="">
       <body
-        className={` ${poppins.variable} ${rochester.variable} scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-background scrollbar-track-transparent overflow-y-auto overflow-x-hidden antialiased`}
+        className={` ${poppins.variable} ${permanentMarker.variable} scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-background scrollbar-track-transparent overflow-y-auto overflow-x-hidden antialiased`}
       >
         <ThemeProvider
           attribute="class"

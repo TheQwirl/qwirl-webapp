@@ -72,7 +72,11 @@ function Hero() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight"
               >
-                Find <span className="text-primary">your people</span>. Fast.
+                Find{" "}
+                <span className="text-primary font-permanentMarker text-7xl">
+                  your people
+                </span>
+                . Fast.
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
@@ -96,10 +100,7 @@ function Hero() {
                   className="rounded-full w-full sm:w-auto"
                   asChild
                 >
-                  <Link
-                    href="/question-library"
-                    className="flex items-center gap-2"
-                  >
+                  <Link href="/auth" className="flex items-center gap-2">
                     Build your Qwirl <Wand2 className="size-4" />
                   </Link>
                 </Button>

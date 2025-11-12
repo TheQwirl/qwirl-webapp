@@ -114,7 +114,7 @@ const PrimaryQwirlEditPage = () => {
                 icon={PlusIcon}
                 iconPlacement="left"
               >
-                Add Poll
+                Add Question
               </Button>
             </div>
           ),
@@ -136,7 +136,7 @@ const PrimaryQwirlEditPage = () => {
                   value="polls"
                   className="rounded-full text-sm font-semibold"
                 >
-                  Polls
+                  Qwirl Questions
                 </TabsTrigger>
               </TabsList>
 

@@ -37,7 +37,7 @@ const PublicLayout = async ({ children }: { children: React.ReactElement }) => {
           <main className="pt-0">{children}</main>
           {isAuthenticated && <FloatingCartButton />}
         </PublicLayoutWrapper>
-        <PublicCartWrapper />
+        <PublicCartWrapper isAuthenticated={isAuthenticated} />
       </InfoAlertProvider>
     </PublicUserProvider>
   );

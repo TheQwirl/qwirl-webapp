@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Twitter, Instagram, Github } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="bg-secondary text-secondary-foreground mt-6 rounded-t-[60px]">
+    <footer className="bg-primary text-primary-foreground mt-6 rounded-t-[60px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <motion.div
@@ -19,8 +20,13 @@ export default function Footer() {
             viewport={{ once: true }}
             className="space-y-4"
           >
-            <h3 className="text-2xl font-bold">Qwirl</h3>
-            <p className="text-secondary-foreground/70">
+            <Image
+              src="/logos/logo-primary-mark-light-transparent.svg"
+              alt="Qwirl Logo"
+              height={100}
+              width={100}
+            />
+            <p className="text-primary-foreground/70">
               Discover yourself through the eyes of others. Connect, share, and
               grow together.
             </p>
@@ -38,7 +44,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="#features"
-                  className="text-secondary-foreground/70 hover:text-secondary-foreground transition-colors"
+                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
                 >
                   Features
                 </Link>
@@ -46,7 +52,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="#pricing"
-                  className="text-secondary-foreground/70 hover:text-secondary-foreground transition-colors"
+                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
                 >
                   Pricing
                 </Link>
@@ -54,7 +60,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="#faq"
-                  className="text-secondary-foreground/70 hover:text-secondary-foreground transition-colors"
+                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
                 >
                   FAQ
                 </Link>
@@ -74,7 +80,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/about"
-                  className="text-secondary-foreground/70 hover:text-secondary-foreground transition-colors"
+                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
                 >
                   About
                 </Link>
@@ -82,7 +88,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/blog"
-                  className="text-secondary-foreground/70 hover:text-secondary-foreground transition-colors"
+                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
                 >
                   Blog
                 </Link>
@@ -90,7 +96,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/careers"
-                  className="text-secondary-foreground hover:text-secondary-foreground transition-colors"
+                  className="text-primary-foreground hover:text-primary-foreground transition-colors"
                 >
                   Careers
                 </Link>
@@ -106,12 +112,12 @@ export default function Footer() {
             className="space-y-4"
           >
             <h4 className="font-semibold">Stay Updated</h4>
-            <p className="text-secondary-foreground">
+            <p className="text-primary-foreground">
               Subscribe to our newsletter
             </p>
             <div className="flex gap-2">
               <Input placeholder="Enter your email" className=" bg-white" />
-              <Button className="bg-[#B4E7E6] text-black hover:bg-[#9CD5D4]">
+              <Button className="" variant={"ghost"}>
                 Subscribe
               </Button>
             </div>
@@ -121,27 +127,27 @@ export default function Footer() {
         <Separator className="bg-white/10 my-8" />
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-secondary-foreground text-sm">
+          <div className="text-primary-foreground text-sm">
             © {new Date().getFullYear()} Qwirl. All rights reserved.
           </div>
           <div className="flex items-center gap-6">
             <Link
               href="#"
-              className="text-secondary-foreground hover:text-secondary-foreground transition-colors"
+              className="text-primary-foreground hover:text-primary-foreground transition-colors"
             >
               <Twitter className="w-5 h-5" />
               <span className="sr-only">Twitter</span>
             </Link>
             <Link
               href="#"
-              className="text-secondary-foreground hover:text-secondary-foreground transition-colors"
+              className="text-primary-foreground hover:text-primary-foreground transition-colors"
             >
               <Instagram className="w-5 h-5" />
               <span className="sr-only">Instagram</span>
             </Link>
             <Link
               href="#"
-              className="text-secondary-foreground hover:text-secondary-foreground transition-colors"
+              className="text-primary-foreground hover:text-primary-foreground transition-colors"
             >
               <Github className="w-5 h-5" />
               <span className="sr-only">GitHub</span>

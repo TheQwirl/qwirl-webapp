@@ -23,6 +23,7 @@ import {
 import { useDebounce } from "@/hooks/useDebounce";
 import { authStore } from "@/stores/useAuthStore";
 import { AdaptiveLayout } from "@/components/layout/adaptive-layout";
+import { FloatingCartButton } from "@/components/layout/cart-button";
 import { useQuestionCart } from "@/hooks/useQuestionCart";
 import { toast } from "sonner";
 
@@ -126,21 +127,24 @@ const QuestionBankPage = () => {
 
   return (
     <AdaptiveLayout>
-      <QuestionBankContent
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        debouncedSearchQuery={debouncedSearchQuery}
-        questions={questions}
-        isLoading={isLoading}
-        isFetchingNextPage={isFetchingNextPage}
-        lastQuestionElementRef={lastQuestionElementRef}
-        handleSurpriseMe={handleSurpriseMe}
-        isAuthenticated={isAuthenticated}
-        onAddToCart={handleAddToCart}
-        isInCart={isInCart}
-      />
+      <>
+        <QuestionBankContent
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          debouncedSearchQuery={debouncedSearchQuery}
+          questions={questions}
+          isLoading={isLoading}
+          isFetchingNextPage={isFetchingNextPage}
+          lastQuestionElementRef={lastQuestionElementRef}
+          handleSurpriseMe={handleSurpriseMe}
+          isAuthenticated={isAuthenticated}
+          onAddToCart={handleAddToCart}
+          isInCart={isInCart}
+        />
+        {!isAuthenticated && <FloatingCartButton showWhenEmpty />}
+      </>
     </AdaptiveLayout>
   );
 };
@@ -256,7 +260,7 @@ function QuestionBankContent({
                   ref={isLastElement ? lastQuestionElementRef : null}
                   key={`${question.id}-${index}`}
                   question={question}
-                  showSelectButton={isAuthenticated}
+                  showSelectButton
                   onSelect={onAddToCart}
                   isSelected={isInCart(question.question_text)}
                 />
