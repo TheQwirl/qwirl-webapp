@@ -2,72 +2,87 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import $api from "@/lib/api/client";
 import { Qwirl, QwirlItem } from "@/components/qwirl/types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { QwirlPollData } from "@/components/qwirl/schema";
 import { useConfirmationModal } from "@/stores/useConfirmationModal";
-import { useSearchParams } from "next/navigation";
+import { authStore } from "@/stores/useAuthStore";
 
 export type ViewMode = "edit" | "view";
 
+const queryKey = ["get", "/qwirl/me", {}];
 export function useQwirlEditor() {
   const queryClient = useQueryClient();
-  const [viewMode, setViewMode] = useState<ViewMode>("edit");
-  const searchParams = useSearchParams();
+  const { isAuthenticated } = authStore();
 
-  useEffect(() => {
-    const tabParam = searchParams.get("tab");
-    if (tabParam === "edit" || tabParam === "view") {
-      setViewMode(tabParam);
-    } else if (tabParam !== null) {
-      console.warn(`Invalid tab param: "${tabParam}". Defaulting to "edit".`);
-      setViewMode("edit");
-    }
-  }, [searchParams]);
   const { show } = useConfirmationModal();
 
-  const queryKey = ["get", "/qwirl/me"];
   const [showAddDialog, setShowAddDialog] = useState(false);
 
   const addPollToQwirlMutation = $api.useMutation("post", "/qwirl/me/items");
 
-  const handleAddPoll = async (pollData: QwirlPollData) => {
+  const handleAddPoll = async (pollData: QwirlPollData): Promise<void> => {
     const ownerAnswer = pollData?.options?.[pollData?.owner_answer_index] ?? "";
+
     await addPollToQwirlMutation.mutateAsync(
       {
         body: {
-          options: pollData.options,
-          question_text: pollData.question_text,
-          owner_answer: ownerAnswer,
+          items: [
+            {
+              options: pollData.options,
+              question_text: pollData.question_text,
+              owner_answer: ownerAnswer,
+            },
+          ],
         },
       },
       {
         onSuccess: async () => {
-          toast.success("Poll added successfully!", {
-            id: "add-poll",
-          });
-          if (viewMode === "edit") {
-            window.scrollTo({
-              top: document.body.scrollHeight,
-              left: 0,
-              behavior: "smooth",
-            });
-          }
-          setShowAddDialog(false);
+          // Invalidate and refetch the query
           await queryClient.invalidateQueries({
             queryKey: ["get", "/qwirl/me"],
           });
-        },
-        onError: () => {
-          toast.error("An error occurred while creating the post", {
+
+          // Wait for the query to refetch and update
+          await queryClient.refetchQueries({
+            queryKey: ["get", "/qwirl/me"],
+          });
+
+          toast.success("Poll added successfully!", {
             id: "add-poll",
           });
-          console.error("Error creating post:", addPollToQwirlMutation.error);
+
+          setShowAddDialog(false);
+
+          // Scroll after a small delay to ensure DOM has updated
+          setTimeout(() => {
+            const allPollCards = document.querySelectorAll("[data-poll-card]");
+            const lastPollCard = allPollCards[allPollCards.length - 1];
+            if (lastPollCard) {
+              lastPollCard.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+              });
+            }
+          }, 150);
+        },
+        onError: () => {
+          toast.error("An error occurred while adding the poll.", {
+            id: "add-poll",
+          });
+          console.error("Error adding poll:", addPollToQwirlMutation.error);
         },
       }
     );
   };
 
-  const qwirlQuery = $api.useQuery("get", "/qwirl/me");
+  const qwirlQuery = $api.useQuery(
+    "get",
+    "/qwirl/me",
+    {},
+    {
+      enabled: isAuthenticated,
+    }
+  );
   const polls = qwirlQuery?.data?.items
     ? [...qwirlQuery.data.items].sort((a, b) => a.position - b.position)
     : [];
@@ -104,55 +119,51 @@ export function useQwirlEditor() {
     "patch",
     "/qwirl/me/items/reorder",
     {
-      onMutate: async (variables) => {
-        const reorderedPayload = variables.body;
-        await queryClient.cancelQueries({ queryKey });
-
-        const previousQwirlData = queryClient.getQueryData<Qwirl>(queryKey);
-        if (!previousQwirlData) return { previousQwirlData };
-
-        const updatedItems = previousQwirlData?.items?.map((item) => {
-          const newPos = reorderedPayload.find(
-            (r: { item_id: number; new_position: number }) =>
-              r.item_id === item.id
-          )?.new_position;
-
-          return newPos !== undefined ? { ...item, position: newPos } : item;
-        });
-
-        queryClient.setQueryData(queryKey, {
-          ...previousQwirlData,
-          items: updatedItems,
-        });
-
-        return { previousQwirlData };
-      },
-      onError: (err, variables, context) => {
+      onError: () => {
         toast.error(
           "Failed to reorder items. Reverting changes. Please try again.",
           {
             id: "reorder-items",
           }
         );
-        if ((context as { previousData: unknown })?.previousData) {
-          queryClient.setQueryData(
-            queryKey,
-            (context as { previousData: unknown }).previousData
-          );
-        }
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey });
       },
     }
   );
 
   const handleReorder = async (reorderedItems: QwirlItem[]) => {
+    await queryClient.cancelQueries({ queryKey });
+
+    const previousQwirlData = queryClient.getQueryData<Qwirl>(queryKey);
+
+    if (previousQwirlData) {
+      queryClient.setQueryData(queryKey, {
+        ...previousQwirlData,
+        items: reorderedItems.map((item, index) => ({
+          ...item,
+          position: index + 1,
+        })),
+      });
+    }
+
+    // Prepare payload for API
     const payload = reorderedItems.map((item, index) => ({
       item_id: item.id,
       new_position: index + 1,
     }));
-    await reorderQwirlMutation.mutateAsync({ body: payload });
+
+    // Fire the mutation (happens in background, UI already updated)
+    reorderQwirlMutation.mutate(
+      { body: payload },
+      {
+        onError: () => {
+          // Rollback on error
+          if (previousQwirlData) {
+            queryClient.setQueryData(queryKey, previousQwirlData);
+          }
+        },
+        // Don't refetch on success - we already have the correct data!
+      }
+    );
   };
 
   const handleDelete = (id: number) => {
@@ -212,7 +223,5 @@ export function useQwirlEditor() {
     showAddDialog,
     setShowAddDialog,
     handleAddPoll,
-    viewMode,
-    setViewMode,
   };
 }

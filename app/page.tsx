@@ -1,19 +1,19 @@
+import CallToAction from "@/components/landing-page/call-to-action";
+import { FAQ } from "@/components/landing-page/faq";
 import Footer from "@/components/landing-page/footer";
 import Hero from "@/components/landing-page/hero";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import SiteNav from "@/components/site-nav";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <main className="px-6">
-      <div className="pt-6 pb-10 md:px-10 px-6 flex justify-between items-center">
-        <div className="text-3xl font-bold uppercase">Qwirl</div>
-        <Link href="/auth">
-          <Button>Continue</Button>
-        </Link>
-      </div>
-      <Hero />
+    <div className="min-h-screen">
+      <SiteNav />
+      <main className="relative">
+        <Hero />
+      </main>
+      <CallToAction />
+      <FAQ />
       <Footer />
-    </main>
+    </div>
   );
 }

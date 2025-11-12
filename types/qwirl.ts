@@ -4,6 +4,8 @@ export type QwirlItem = components["schemas"]["QwirlItemDetail"];
 
 export type Qwirl = components["schemas"]["QwirlBase"];
 
+export type QwirlWithSession = components["schemas"]["QwirlWithSession"];
+
 export type QwirlItemOptionStatistics =
   components["schemas"]["OptionStatistics"];
 

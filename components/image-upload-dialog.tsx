@@ -19,15 +19,15 @@ interface ImageUploadDialogProps {
   cropShape?: "rect" | "round";
   accept?: string;
   maxSizeMB?: number;
-  onSave: (file: File | Blob) => Promise<void>;
+  onSave: (base64String: string) => Promise<void>;
   trigger?: React.ReactNode;
 }
 
 const ImageUploadDialog: React.FC<ImageUploadDialogProps> = ({
   open,
   onOpenChange,
-  title = "Upload Image",
-  aspect = 1,
+  title = "Upload Background Image",
+  aspect = 9 / 16, // Phone aspect ratio for vertical containers
   cropShape = "rect",
   accept = "image/jpeg,image/png,image/gif,image/webp",
   maxSizeMB = 5,
@@ -60,7 +60,7 @@ const ImageUploadDialog: React.FC<ImageUploadDialogProps> = ({
     setError(null);
   };
 
-  const getCroppedImage = async () => {
+  const getCroppedImage = async (): Promise<string> => {
     const image = await createImage(imageSrc!);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
@@ -68,8 +68,16 @@ const ImageUploadDialog: React.FC<ImageUploadDialogProps> = ({
     canvas.width = width;
     canvas.height = height;
     ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
-    return new Promise<Blob>((resolve) =>
-      canvas.toBlob((blob) => resolve(blob!), "image/webp")
+    return new Promise<string>((resolve) =>
+      canvas.toBlob(
+        (blob) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob!);
+        },
+        "image/webp",
+        0.8
+      )
     );
   };
 
@@ -77,8 +85,8 @@ const ImageUploadDialog: React.FC<ImageUploadDialogProps> = ({
     if (!croppedAreaPixels || !imageSrc) return;
     setIsUploading(true);
     try {
-      const blob = await getCroppedImage();
-      await onSave(blob);
+      const base64String = await getCroppedImage();
+      await onSave(base64String);
       onOpenChange(false);
       resetDialog();
     } catch {
@@ -122,9 +130,9 @@ const ImageUploadDialog: React.FC<ImageUploadDialogProps> = ({
             <div className="relative flex flex-col items-center justify-center gap-4 p-6 border-2 border-dashed rounded-lg min-h-[200px]">
               <Upload className="h-8 w-8 text-muted-foreground" />
               <div className="text-center">
-                <p className="text-sm font-medium">Tap to select an image</p>
+                <p className="text-sm font-medium">Choose background image</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Max size: {maxSizeMB}MB
+                  Max size: {maxSizeMB}MB • Optimized for vertical display
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Formats:{" "}
@@ -150,8 +158,11 @@ const ImageUploadDialog: React.FC<ImageUploadDialogProps> = ({
                   onCropChange={setCrop}
                   onCropComplete={onCropComplete}
                   onZoomChange={setZoom}
-                  showGrid={false}
-                  style={{ containerStyle: { width: "100%", height: "100%" } }}
+                  showGrid={true}
+                  style={{
+                    containerStyle: { width: "100%", height: "100%" },
+                    cropAreaStyle: { border: "2px solid hsl(var(--primary))" },
+                  }}
                 />
               </div>
               <div className="space-y-3">

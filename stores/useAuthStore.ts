@@ -8,6 +8,7 @@ interface AuthState {
   isLoading: boolean;
   checkSession: () => Promise<void>;
   logout: () => Promise<void>;
+  setUser: (user: MyUser | null) => void;
 }
 
 export const authStore = create<AuthState>((set, get) => ({
@@ -25,7 +26,6 @@ export const authStore = create<AuthState>((set, get) => ({
       if (response.ok) {
         const userData: { user: MyUser | null; isAuthenticated: boolean } =
           await response.json();
-        console.log(userData);
         if (userData?.user && userData?.user?.id) {
           // Check if user data is valid
           set({
@@ -72,5 +72,17 @@ export const authStore = create<AuthState>((set, get) => ({
         redirect("/auth?logged_out=true");
       }
     }
+  },
+
+  setUser: (user: MyUser | null) => {
+    console.log(
+      "AuthStore setUser called with:",
+      user ? { id: user.id, name: user.name } : null
+    );
+    set({
+      user,
+      isAuthenticated: !!user,
+      isLoading: false,
+    });
   },
 }));

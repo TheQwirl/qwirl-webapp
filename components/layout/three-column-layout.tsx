@@ -22,7 +22,12 @@ export const ThreeColumnLayout = ({
   const hasRightSidebar = !!rightSidebar;
 
   return (
-    <div className={clsx("grid grid-cols-12 gap-6 sm:mt-0", className)}>
+    <div
+      className={clsx(
+        "min-h-screen grid grid-cols-12 gap-6 sm:mt-0",
+        className
+      )}
+    >
       <div
         className={clsx(
           "col-span-full flex flex-col h-full",
@@ -33,7 +38,7 @@ export const ThreeColumnLayout = ({
         {backNavigation && <BackNavigation {...backNavigation} />}
         <div
           className={clsx(
-            "p-4 border-r border-l",
+            "p-2 sm:p-4 border-r border-l",
             backNavigation && "flex-1 overflow-auto "
           )}
         >

@@ -23,6 +23,9 @@ const playfulMessages = [
   "is channeling their inner perfectionist with this qwirl 🎨",
 ];
 
+/**
+ * @deprecated Qwirl Cover Component already does this
+ */
 const IncompleteQwirl = ({
   ownerName,
   pollCount = 0,

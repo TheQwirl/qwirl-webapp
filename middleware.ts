@@ -21,7 +21,8 @@ export const config = {
   ],
 };
 
-const PROTECTED_ROUTES = ["/feed", "/profile", "settings"];
+const PROTECTED_ROUTES = ["/settings"];
+const PUBLIC_ROUTES = ["/qwirl", "/question-library", "/discover"];
 const AUTH_PATH = "/auth";
 
 export async function middleware(request: NextRequest) {
@@ -35,8 +36,29 @@ export async function middleware(request: NextRequest) {
   let accessToken = requestCookieStore.get("access-token")?.value;
   const refreshToken = requestCookieStore.get("refresh-token")?.value;
 
-  const isApiPath = pathname.startsWith("/api/"); // Don't run full UI redirect logic for API routes
+  const isApiPath = pathname.startsWith("/api/");
+  const isPublicRoute = PUBLIC_ROUTES.some((path) => pathname.startsWith(path));
   const base = process.env.NEXT_PUBLIC_BASE_URL || request.url;
+
+  // For public routes, try to refresh token if available but don't redirect on failure
+  if (isPublicRoute && !accessToken && refreshToken) {
+    console.log(
+      `Middleware: Attempting token refresh for public route "${pathname}"`
+    );
+    const newTokens = await attemptTokenRefresh(refreshToken, response.cookies);
+    if (newTokens) {
+      accessToken = newTokens.access_token;
+      console.log(
+        `Middleware: Token refresh successful for public route "${pathname}"`
+      );
+    } else {
+      console.log(
+        `Middleware: Token refresh failed for public route "${pathname}", continuing as guest`
+      );
+      response.cookies.delete("access-token");
+      response.cookies.delete("refresh-token");
+    }
+  }
 
   // If trying to access a protected path
   if (PROTECTED_ROUTES.some((path) => pathname.startsWith(path)) || isApiPath) {

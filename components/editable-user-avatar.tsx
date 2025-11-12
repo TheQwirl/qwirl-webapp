@@ -25,6 +25,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cva, VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "./user-avatar";
+import { useUserSync } from "@/hooks/useUserSync";
+import { MyUser } from "@/components/profile/types";
 
 const avatarVariants = cva("relative w-full h-full rounded-lg group", {
   variants: {
@@ -95,6 +97,7 @@ export function EditableUserAvatar({
   const [error, setError] = useState("");
 
   const queryClient = useQueryClient();
+  const { updateUserField } = useUserSync();
 
   const validateImage = (file: File | undefined): string | null => {
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -146,6 +149,19 @@ export function EditableUserAvatar({
         queryKey: ["get", "/users/me", null],
         exact: true,
       });
+
+      // Refetch user data to get the updated avatar and sync with auth store
+      try {
+        const updatedUser = (await queryClient.fetchQuery({
+          queryKey: ["get", "/users/me", null],
+        })) as MyUser;
+        if (updatedUser?.avatar) {
+          updateUserField("avatar", updatedUser.avatar);
+        }
+      } catch (error) {
+        console.error("Failed to sync avatar with auth store:", error);
+      }
+
       setIsDialogOpen(false);
       setImageSrc(null);
       setZoom(1);

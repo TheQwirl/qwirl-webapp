@@ -1,14 +1,12 @@
-import { Qwirl, QwirlItem } from "@/types/qwirl";
-import { useMemo, useState } from "react";
+import { QwirlWithSession, QwirlItem } from "@/types/qwirl";
+import { useEffect, useMemo, useState } from "react";
 
 export const useSessionState = (
   polls: QwirlItem[],
-  data: Qwirl | undefined
+  data: QwirlWithSession | undefined
 ) => {
   const [currentPosition, setCurrentPosition] = useState<number>(1);
   const [initialized, setInitialized] = useState(false);
-  const [userAnswer, setUserAnswer] = useState<string | null>(null);
-  const [skippedIds, setSkippedIds] = useState<Set<number>>(new Set());
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [isAnsweringNew, setIsAnsweringNew] = useState<boolean>(false);
 
@@ -38,15 +36,45 @@ export const useSessionState = (
     [polls, currentPosition]
   );
 
+  // Derive skipped IDs from query data (polls with null selected_answer)
+  const skippedIds = useMemo(() => {
+    return new Set(
+      polls
+        .filter(
+          (poll) =>
+            poll.user_response !== undefined &&
+            poll.user_response !== null &&
+            poll.user_response.selected_answer === null
+        )
+        .map((poll) => poll.id)
+    );
+  }, [polls]);
+
+  // Initialize state from server data on mount or when polls change
+  useEffect(() => {
+    if (!initialized && polls.length > 0) {
+      // Find first unanswered/unskipped position
+      const firstUnanswered = polls.find(
+        (poll) =>
+          poll.user_response === undefined || poll.user_response === null
+      );
+
+      // If all answered, go to last position, otherwise go to first unanswered
+      const startPosition = firstUnanswered
+        ? firstUnanswered.position
+        : Math.min(lastRespondedPosition + 1, polls.length);
+
+      setCurrentPosition(startPosition);
+      setInitialized(true);
+    }
+  }, [polls, initialized, lastRespondedPosition]);
+
   return {
     currentPosition,
     setCurrentPosition,
     initialized,
     setInitialized,
-    userAnswer,
-    setUserAnswer,
     skippedIds,
-    setSkippedIds,
     isReviewMode,
     setIsReviewMode,
     isAnsweringNew,

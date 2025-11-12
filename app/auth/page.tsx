@@ -5,10 +5,10 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
-import { GalleryVerticalEnd } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AuthForm } from "@/components/external-login-buttons";
+import Image from "next/image";
 
 const Auth = () => {
   return (
@@ -19,23 +19,23 @@ const Auth = () => {
       />
       <div className="absolute blur-3xl opacity-20 bg-gradient-to-r bg-primary rounded-full w-full h-full transition-all duration-700 ease-in-out" />
 
-      <div className="flex w-full max-w-sm flex-col gap-6">
-        <Link
-          href="/"
-          className="flex items-center gap-2 self-center font-medium z-10"
-        >
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <GalleryVerticalEnd className="size-4" />
-          </div>
-          Qwirl
-        </Link>
-      </div>
-
       <div className={cn("flex flex-col gap-6 relative z-10")}>
         <Card className="backdrop-blur-sm bg-card/95 shadow-lg">
           <CardHeader className="text-center space-y-4">
             <CardTitle className="text-2xl font-bold text-card-foreground">
-              Welcome to Qwirl
+              <div className="flex w-full max-w-sm flex-col gap-6">
+                <Link
+                  href="/"
+                  className="flex items-center gap-2 self-center font-medium z-10"
+                >
+                  <Image
+                    src="/logos/logo-icon-dark-transparent.svg"
+                    alt="Qwirl Logo"
+                    width={60}
+                    height={60}
+                  />
+                </Link>
+              </div>
             </CardTitle>
             <CardDescription className="text-base">
               Login with your Apple or Google account
@@ -44,10 +44,10 @@ const Auth = () => {
           <CardContent className="space-y-6">
             <div className="p-6 bg-muted rounded-lg text-center space-y-2">
               <p className="font-medium text-sm text-card-foreground">
-                Join our growing community
+                Start Creating Your Qwirl by Siging In!
               </p>
               <p className="text-xs text-muted-foreground">
-                Experience seamless collaboration and creativity
+                Let others find out what makes you unique.
               </p>
             </div>
 

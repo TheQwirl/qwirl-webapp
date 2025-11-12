@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -105,21 +104,19 @@ const InfoWidget = React.forwardRef<HTMLDivElement, InfoWidgetProps>(
     }
 
     return (
-      <TooltipProvider delayDuration={100}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div ref={ref} className={widgetClasses} {...props}>
-              <Icon className={cn(iconSizeClass)} />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <div className="max-w-xs p-1">
-              <p className="font-semibold">{infoTitle}</p>
-              <p className="text-sm">{infoDescription}</p>
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip delayDuration={100}>
+        <TooltipTrigger asChild>
+          <div ref={ref} className={widgetClasses} {...props}>
+            <Icon className={cn(iconSizeClass)} />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <div className="max-w-xs p-1">
+            <p className="font-semibold">{infoTitle}</p>
+            <p className="text-sm">{infoDescription}</p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
     );
   }
 );

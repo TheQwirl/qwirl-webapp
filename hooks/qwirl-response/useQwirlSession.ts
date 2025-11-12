@@ -1,8 +1,12 @@
-import { OtherUser } from "@/components/profile/types";
 import $api from "@/lib/api/client";
+import { components } from "@/lib/api/v1-client-side";
+import { authStore } from "@/stores/useAuthStore";
 import { useMemo } from "react";
 
-export const useQwirlSession = (user: OtherUser | undefined) => {
+export const useQwirlSession = (
+  user: components["schemas"]["UserProfileResponse"] | undefined
+) => {
+  const { isAuthenticated } = authStore();
   const queryKey = useMemo(
     () => [
       "get",
@@ -11,16 +15,23 @@ export const useQwirlSession = (user: OtherUser | undefined) => {
         params: {
           path: { username: user?.username ?? "" },
         },
-        enabled: true,
+        enabled: isAuthenticated,
       },
     ],
-    [user?.username]
+    [user?.username, isAuthenticated]
   );
 
-  const userQwirlQuery = $api.useQuery("get", "/qwirl/users/{username}/qwirl", {
-    params: { path: { username: user?.username ?? "" } },
-    enabled: !!user?.id,
-  });
+  const userQwirlQuery = $api.useQuery(
+    "get",
+    "/qwirl/users/{username}/qwirl",
+    {
+      params: { path: { username: user?.username ?? "undefined" } },
+      enabled: isAuthenticated && !!user?.username,
+    },
+    {
+      enabled: isAuthenticated && !!user?.username,
+    }
+  );
 
   return { queryKey, userQwirlQuery };
 };

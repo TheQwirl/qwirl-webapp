@@ -2,31 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: Poppins, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Enhanced scroll snap styling */
+.snap-container {
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: 0;
+  scroll-behavior: smooth;
+}
+
+.snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 @layer base {
   :root {
-    /* base (pastel warm background) */
-    --background: 0 100% 95.8824%;
+    /* --background: 0 100% 95.8824%; */
+    --background: 15 100% 99%; /* white background */
     --foreground: 214.1379 18% 12%;
 
     /* surfaces */
-    --card: 0 0% 100%;
+    --card: 47 100% 98%;
     --card-foreground: var(--foreground);
     --popover: 0 100% 99%;
     --popover-foreground: var(--foreground);
 
-    /* main branding colors (from your palette) */
-    --primary: 192.8571 46% 47%; /* teal (use for avatar rings, primary CTAs) */
-    --primary-foreground: 0 0% 100%;
+    /* main branding colors (use for avatar rings, primary CTAs) */
+    --primary: 192.8571 46% 47%;
+    --primary-foreground: 0 0% 100%; /* white text on primary buttons */
 
-    --secondary: 22 80% 85%; /* pastel peach / apricot */
+    --secondary: 71 66% 77%;
     --secondary-foreground: 22 30% 25%;
 
     /* accent & supporting pinks */
-    --accent: 0 67.7419% 78%; /* warm pastel pink (microinteractions, highlights) */
+    --accent: 46 63% 95%;
     --accent-foreground: var(--foreground);
 
     /* subtle / muted */
@@ -40,9 +57,9 @@ body {
     /* borders & inputs */
     --border: 214.1379 18% 85%;
     --input: 0 100% 99%;
-    --ring: 192.8571 46% 65%;
+    --ring: 192.8571 46% 65%; /* lighter primary tint for focus rings */
 
-    /* charts (helpful palette for data viz) */
+    /* charts (helpful palette for small data viz) */
     --chart-1: var(--primary);
     --chart-2: 214.1379 40% 42%;
     --chart-3: 0 67.7419% 68%;
@@ -54,7 +71,7 @@ body {
     --sidebar-foreground: var(--foreground);
     --sidebar-primary: 192.8571 46% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 67.7419% 86%;
+    --sidebar-accent: 214.1379 10% 96%;
     --sidebar-accent-foreground: var(--foreground);
     --sidebar-border: 214.1379 18% 92%;
     --sidebar-ring: var(--sidebar-primary);
@@ -65,7 +82,7 @@ body {
     --font-mono: "Fira Code", ui-monospace, monospace;
     --radius: 0.75rem;
 
-    /* shadows using primary tint */
+    /* shadows using a subtle primary tint */
     --shadow-2xs: 3px 3px 0 0 hsl(192.8571 46% 47% / 0.12);
     --shadow-xs: 3px 3px 0 0 hsl(192.8571 46% 47% / 0.12);
     --shadow-sm: 3px 3px 0 0 hsl(192.8571 46% 47% / 0.14),
@@ -73,58 +90,6 @@ body {
     --shadow: var(--shadow-sm);
     --shadow-md: 3px 6px 18px -8px hsl(192.8571 46% 47% / 0.18);
     --shadow-lg: 3px 8px 24px -12px hsl(192.8571 46% 47% / 0.18);
-  }
-
-  .dark {
-    --background: 200.7692 44.8276% 11.3725%;
-    --foreground: 333.75 40% 92.1569%;
-    --card: 201.4286 33.3333% 16.4706%;
-    --card-foreground: 333.75 40% 92.1569%;
-    --popover: 201.4286 33.3333% 16.4706%;
-    --popover-foreground: 333.75 40% 92.1569%;
-    --primary: 42.1429 91.3043% 81.9608%;
-    --primary-foreground: 201.4286 43.75% 12.549%;
-    --secondary: 174.2857 41.8327% 50.7843%;
-    --secondary-foreground: 200.7692 44.8276% 11.3725%;
-    --muted: 202.2222 28.4211% 18.6275%;
-    --muted-foreground: 206 14.4231% 59.2157%;
-    --accent: 35.7303 100% 65.098%;
-    --accent-foreground: 200.7692 44.8276% 11.3725%;
-    --destructive: 328.4211 70.3704% 62.9412%;
-    --destructive-foreground: 201.4286 43.75% 12.549%;
-    --border: 206.1538 28.0576% 27.2549%;
-    --input: 200.6897 31.1828% 18.2353%;
-    --ring: 184.1176 41.129% 51.3725%;
-    --chart-1: 174.2857 41.8327% 50.7843%;
-    --chart-2: 35.7303 100% 65.098%;
-    --chart-3: 42.1429 91.3043% 81.9608%;
-    --chart-4: 346.3636 55% 76.4706%;
-    --chart-5: 338.4 39.6825% 62.9412%;
-    --sidebar: 202.5 42.8571% 10.9804%;
-    --sidebar-foreground: 220 14.2857% 95.8824%;
-    --sidebar-primary: 330.3659 81.1881% 60.3922%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 327.4074 87.0968% 81.7647%;
-    --sidebar-accent-foreground: 215 27.907% 16.8627%;
-    --sidebar-border: 216.9231 19.1176% 26.6667%;
-    --sidebar-ring: 330.3659 81.1881% 60.3922%;
-    --font-sans: Poppins, sans-serif;
-    --font-serif: Lora, serif;
-    --font-mono: Fira Code, monospace;
-    --radius: 1.25rem;
-    --shadow-2xs: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 0.5);
-    --shadow-xs: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 0.5);
-    --shadow-sm: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1),
-      3px 1px 2px -1px hsl(206.1538 28.0576% 27.2549% / 1);
-    --shadow: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1),
-      3px 1px 2px -1px hsl(206.1538 28.0576% 27.2549% / 1);
-    --shadow-md: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1),
-      3px 2px 4px -1px hsl(206.1538 28.0576% 27.2549% / 1);
-    --shadow-lg: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1),
-      3px 4px 6px -1px hsl(206.1538 28.0576% 27.2549% / 1);
-    --shadow-xl: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1),
-      3px 8px 10px -1px hsl(206.1538 28.0576% 27.2549% / 1);
-    --shadow-2xl: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 2.5);
   }
 }
 
@@ -221,7 +186,73 @@ body {
       transform: rotate3d(0, 0, 1, 0deg);
     }
   }
+
+  /* Wave animation for My Qwirl icon */
+  @-webkit-keyframes wave {
+    0% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    15% {
+      -webkit-transform: rotate(14deg);
+      transform: rotate(14deg);
+    }
+    30% {
+      -webkit-transform: rotate(-8deg);
+      transform: rotate(-8deg);
+    }
+    40% {
+      -webkit-transform: rotate(14deg);
+      transform: rotate(14deg);
+    }
+    50% {
+      -webkit-transform: rotate(-4deg);
+      transform: rotate(-4deg);
+    }
+    60% {
+      -webkit-transform: rotate(10deg);
+      transform: rotate(10deg);
+    }
+    100% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+  }
+  @keyframes wave {
+    0% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    15% {
+      -webkit-transform: rotate(14deg);
+      transform: rotate(14deg);
+    }
+    30% {
+      -webkit-transform: rotate(-8deg);
+      transform: rotate(-8deg);
+    }
+    40% {
+      -webkit-transform: rotate(14deg);
+      transform: rotate(14deg);
+    }
+    50% {
+      -webkit-transform: rotate(-4deg);
+      transform: rotate(-4deg);
+    }
+    60% {
+      -webkit-transform: rotate(10deg);
+      transform: rotate(10deg);
+    }
+    100% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+  }
+
   .glass-background {
-    @apply bg-white/10 rounded-[16px] shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-[4.2px] border border-white/20;
+    @apply bg-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-[4.2px] border border-white/20;
+  }
+  .gradient-background {
+    @apply bg-gradient-to-b from-[#ffffff10] via-[#ffffff10] to-[#ffffff10] rounded-[16px] shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-[4.2px] border border-white/20;
   }
 }

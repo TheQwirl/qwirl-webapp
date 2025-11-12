@@ -32,6 +32,7 @@ import { X } from "lucide-react";
 import $api from "@/lib/api/client";
 // import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useUserSync } from "@/hooks/useUserSync";
 
 // Define the zod schema
 const formSchema = z.object({
@@ -61,9 +62,15 @@ export function DialogUpdateUser({
   const userQuery = $api.useQuery("get", "/users/me");
   const user = userQuery?.data;
   const categoriesQuery = $api.useQuery("get", "/question-categories");
+  const { syncUser } = useUserSync();
 
   const updateUserMutation = $api.useMutation("patch", "/users/me", {
-    onSuccess: async () => {
+    onSuccess: async (response) => {
+      // Sync updated user data with auth store
+      if (response) {
+        syncUser(response);
+      }
+
       toast.success("Profile updated successfully");
       window.location.reload();
     },

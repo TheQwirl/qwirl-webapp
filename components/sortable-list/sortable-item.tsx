@@ -8,9 +8,13 @@ import type {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
+import clsx from "clsx";
+
 interface Props {
   id: UniqueIdentifier;
   className?: string;
+  isActive?: boolean;
+  isOver?: boolean;
 }
 
 interface Context {
@@ -18,19 +22,23 @@ interface Context {
   attributes: Record<string, any>;
   listeners: DraggableSyntheticListeners;
   ref(node: HTMLElement | null): void;
+  isDragging: boolean;
 }
 
 const SortableItemContext = createContext<Context>({
   attributes: {},
   listeners: undefined,
   ref() {},
+  isDragging: false,
 });
 
 export function SortableItem({
   children,
   id,
   className,
-}: PropsWithChildren<Props>) {
+}: // isActive,
+// isOver,
+PropsWithChildren<Props>) {
   const {
     attributes,
     isDragging,
@@ -39,41 +47,75 @@ export function SortableItem({
     setActivatorNodeRef,
     transform,
     transition,
-  } = useSortable({ id });
+  } = useSortable({
+    id,
+    transition: {
+      duration: 150, // Smooth transition duration
+      easing: "cubic-bezier(0.25, 1, 0.5, 1)", // Smooth easing
+    },
+  });
+
   const context = useMemo(
     () => ({
       attributes,
       listeners,
       ref: setActivatorNodeRef,
+      isDragging,
     }),
-    [attributes, listeners, setActivatorNodeRef]
+    [attributes, listeners, setActivatorNodeRef, isDragging]
   );
+
   const style: CSSProperties = {
-    opacity: isDragging ? 0.4 : undefined,
+    opacity: isDragging ? 0.4 : undefined, // Keep item visible but faded when dragging
     transform: CSS.Translate.toString(transform),
     transition,
   };
 
   return (
     <SortableItemContext.Provider value={context}>
-      <li className={className} ref={setNodeRef} style={style}>
+      <div
+        className={clsx(
+          "relative transition-all duration-150 ease-out",
+          {
+            "opacity-40": isDragging, // Fade out the original
+          },
+          className
+        )}
+        ref={setNodeRef}
+        style={style}
+      >
         {children}
-      </li>
+      </div>
     </SortableItemContext.Provider>
   );
 }
 
 export function DragHandle() {
-  const { attributes, listeners, ref } = useContext(SortableItemContext);
+  const { attributes, listeners, ref, isDragging } =
+    useContext(SortableItemContext);
 
   return (
     <button
-      className="group w-fit cursor-grab  active:cursor-grabbing hover:bg-gray-400 hover:text-white rounded py-1 transition-all duration-300"
+      className={clsx(
+        "group flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-none select-none",
+        "hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500",
+        "cursor-grab active:cursor-grabbing",
+        {
+          "opacity-50": isDragging,
+          "bg-gray-100": isDragging,
+        }
+      )}
       {...attributes}
       {...listeners}
       ref={ref}
+      aria-label="Drag to reorder"
     >
-      <GripVertical className="h-5 w-5" />
+      <GripVertical
+        className={clsx(
+          "h-5 w-5 text-gray-400 transition-colors duration-200",
+          "group-hover:text-gray-600 group-active:text-gray-700"
+        )}
+      />
     </button>
   );
 }

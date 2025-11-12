@@ -6,11 +6,11 @@ export default {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/onborda/dist/**/*.{js,ts,jsx,tsx}", // Add Onborda
   ],
   theme: {
     extend: {
       backgroundImage: {
-        // Gradients
         "apricot-sunrise":
           "linear-gradient(135deg, hsla(21, 100%, 85%, 1), hsla(12, 100%, 82%, 1))",
         "sunset-glow":
@@ -32,6 +32,9 @@ export default {
         shine: "shine 3s ease-out infinite",
         "gradient-flow":
           "gradientFlow 10s ease 0s infinite normal none running",
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        wave: "wave 0.6s ease-in-out",
       },
       keyframes: {
         blob: {
@@ -57,14 +60,65 @@ export default {
           },
         },
         shine: {
-          "0%": { backgroundPosition: "200% 0" },
-          "25%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "-200% 0" },
+          "0%": {
+            backgroundPosition: "200% 0",
+          },
+          "25%": {
+            backgroundPosition: "-200% 0",
+          },
+          "100%": {
+            backgroundPosition: "-200% 0",
+          },
         },
         gradientFlow: {
-          "0%": { "background-position": "0% 50%" },
-          "50%": { "background-position": "100% 50%" },
-          "100%": { "background-position": "0% 50%" },
+          "0%": {
+            "background-position": "0% 50%",
+          },
+          "50%": {
+            "background-position": "100% 50%",
+          },
+          "100%": {
+            "background-position": "0% 50%",
+          },
+        },
+        "accordion-down": {
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
+        },
+        "accordion-up": {
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
+        },
+        wave: {
+          "0%": {
+            transform: "rotate(0deg)",
+          },
+          "15%": {
+            transform: "rotate(14deg)",
+          },
+          "30%": {
+            transform: "rotate(-8deg)",
+          },
+          "40%": {
+            transform: "rotate(14deg)",
+          },
+          "50%": {
+            transform: "rotate(-4deg)",
+          },
+          "60%": {
+            transform: "rotate(10deg)",
+          },
+          "100%": {
+            transform: "rotate(0deg)",
+          },
         },
       },
       boxShadow: {
@@ -134,7 +188,7 @@ export default {
       },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
-        rochester: ["Rochester", "cursive"],
+        permanentMarker: ["Permanent Marker", "cursive"],
       },
     },
   },

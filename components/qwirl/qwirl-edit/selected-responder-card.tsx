@@ -36,9 +36,6 @@ const SelectedResponderCard: React.FC<SelectedResponderCardProps> = ({
           </span>
         </div>
         <div className="flex items-center divide-x text-muted-foreground text-[8px]">
-          <div className="pr-1">
-            {responder.status === "completed" ? "Complete" : "In progress"}
-          </div>
           <div className="pr-1">{responder.response_count} answered</div>
           {responder.started_at && (
             <div className="pl-1">{dayjs(responder.started_at).fromNow()}</div>

@@ -16,7 +16,6 @@ const ProfileHeader = () => {
               image={user?.avatar ?? ""}
               size={"lg"}
               className="object-cover text-xl"
-              linkTo={`/profile/${user?.id}`}
             />
             <div className="font-bold text-lg mt-3 truncate max-w-full">
               {user?.name}
