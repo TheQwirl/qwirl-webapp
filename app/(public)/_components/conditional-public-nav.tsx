@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import { authStore } from "@/stores/useAuthStore";
 import PublicNav from "./public-nav";
+import SiteNav from "@/components/site-nav";
 
 /**
  * Conditional navigation component that decides whether to show PublicNav
@@ -29,5 +30,5 @@ export const ConditionalPublicNav = () => {
   }
 
   // Show PublicNav for all other cases
-  return <PublicNav />;
+  return isAdaptiveRoute ? <SiteNav /> : <PublicNav />;
 };

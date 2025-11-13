@@ -104,20 +104,10 @@ function Hero() {
                     Build your Qwirl <Wand2 className="size-4" />
                   </Link>
                 </Button>
-                {/* <Button
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full w-full sm:w-auto"
-                  asChild
-                >
-                  <Link href="#demo" className="flex items-center gap-2">
-                    Try the demo <MousePointerClick className="size-4" />
-                  </Link>
-                </Button> */}
               </motion.div>
 
               <motion.div
-                className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-muted-foreground"
+                className="mt-10 max-w-full flex items-center justify-center md:justify-start flex-wrap gap-4 text-sm text-muted-foreground"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
@@ -142,8 +132,7 @@ function Hero() {
                     key={f.label}
                     className="flex items-center whitespace-nowrap gap-2 bg-muted/40 border border-border/50 rounded-full px-3 py-2 justify-center sm:justify-start"
                   >
-                    {f.icon}
-                    <span className="hidden sm:inline">{f.label}</span>
+                    <span className="inline">{f.label}</span>
                   </div>
                 ))}
               </motion.div>

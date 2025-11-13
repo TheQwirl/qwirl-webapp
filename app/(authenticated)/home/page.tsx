@@ -7,7 +7,6 @@ import $api from "@/lib/api/client";
 import { PageLayout } from "@/components/layout/page-layout";
 import { QwirlOverviewSection } from "./_components/qwirl-overview-section";
 import { EmptyQwirlState } from "./_components/empty-qwirl-state";
-import { DiscoverQwirlsSection } from "./_components/discover-qwirls-section";
 
 const HomePage = () => {
   const { user } = authStore();
@@ -22,7 +21,7 @@ const HomePage = () => {
     }
   );
 
-  const { data: qwirlStats } = $api.useQuery(
+  const { data: qwirlStats, isLoading: isLoadingStats } = $api.useQuery(
     "get",
     "/qwirl-responses/qwirls/{qwirl_id}/stats",
     {
@@ -52,17 +51,6 @@ const HomePage = () => {
       enabled: !!user?.id,
     }
   );
-
-  const { data: communityQwirls, isLoading: isLoadingCommunity } =
-    $api.useQuery("get", "/qwirl/community", {
-      params: {
-        query: {
-          limit: 6,
-          page: 1,
-          sort_by: "trending",
-        },
-      },
-    });
 
   const hasQwirl = !!user?.primary_qwirl_id;
 
@@ -102,10 +90,10 @@ const HomePage = () => {
         {hasQwirl ? (
           <QwirlOverviewSection
             qwirlCover={qwirlCover}
-            totalPolls={qwirlStats?.total_items ?? 0}
-            visibility={qwirlCover?.visibility ?? false}
+            qwirlStats={qwirlStats}
             user={user}
             isLoadingCover={isLoadingCover}
+            isLoadingStats={isLoadingStats}
             recentActivities={recentActivity?.activities}
             isLoadingActivity={isLoadingActivity}
             topMatches={topWavelengths?.users}
@@ -120,12 +108,6 @@ const HomePage = () => {
             <EmptyQwirlState />
           </motion.div>
         )}
-
-        {/* Discover Qwirls Section */}
-        <DiscoverQwirlsSection
-          qwirls={communityQwirls?.qwirls}
-          isLoading={isLoadingCommunity}
-        />
       </div>
     </PageLayout>
   );

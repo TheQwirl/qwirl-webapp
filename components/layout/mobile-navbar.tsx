@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MENU_ITEMS } from "@/constants/data-sidebar";
 import { cn } from "@/lib/utils";
+import { LogOut } from "lucide-react";
+import { authStore } from "@/stores/useAuthStore";
 
 // Flatten the menu structure to include all items (parents and children)
 const flattenMenuItems = () => {
@@ -38,6 +40,7 @@ const flattenMenuItems = () => {
 export function MobileNavBar() {
   const pathname = usePathname();
   const navItems = flattenMenuItems();
+  const { logout } = authStore();
 
   // Limit to 5 items for the bottom bar (like Twitter)
   const visibleItems = navItems.slice(0, 5);
@@ -53,16 +56,30 @@ export function MobileNavBar() {
             <Link
               key={item.title}
               href={item.url}
-              className={cn(
-                "flex items-center justify-center w-full h-full",
-                isActive ? "text-primary" : "text-foreground"
-              )}
+              className={cn("flex items-center justify-center w-full h-full")}
               aria-label={item.title}
             >
-              <Icon className="h-6 w-6" />
+              <div
+                className={cn(
+                  "p-2 rounded-md",
+                  isActive
+                    ? "text-primary-foreground bg-primary/70"
+                    : "text-foreground"
+                )}
+              >
+                <Icon className="h-6 w-6" />
+              </div>
             </Link>
           );
         })}
+        {/* add logout item */}
+        <div
+          onClick={() => logout()}
+          className="flex items-center justify-center w-full h-full text-foreground cursor-pointer"
+          aria-label="Logout"
+        >
+          <LogOut className="h-6 w-6" />
+        </div>
       </div>
     </div>
   );

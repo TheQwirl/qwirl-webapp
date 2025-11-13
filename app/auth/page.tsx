@@ -44,7 +44,7 @@ const Auth = () => {
           <CardContent className="space-y-6">
             <div className="p-6 bg-muted rounded-lg text-center space-y-2">
               <p className="font-medium text-sm text-card-foreground">
-                Start Creating Your Qwirl by Siging In!
+                Start Creating Your Qwirl!
               </p>
               <p className="text-xs text-muted-foreground">
                 Let others find out what makes you unique.

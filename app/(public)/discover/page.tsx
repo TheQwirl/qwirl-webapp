@@ -20,6 +20,7 @@ import QwirlCover, { QwirlCoverSkeleton } from "@/components/qwirl/qwirl-cover";
 import Link from "next/link";
 import { authStore } from "@/stores/useAuthStore";
 import { AdaptiveLayout } from "@/components/layout/adaptive-layout";
+import clsx from "clsx";
 
 type QwirlCommunityResponse = components["schemas"]["QwirlCommunityResponse"];
 
@@ -75,19 +76,21 @@ const CommunityPage = () => {
 
   return (
     <AdaptiveLayout>
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div
+        className={clsx("px-4 sm:px-6 lg:px-8 pb-8  ", {
+          "pt-16 sm:pt-32": !isAuthenticated,
+        })}
+      >
         {!isAuthenticated && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
-          >
-            <h1 className="text-4xl font-bold mb-4">Discover Qwirls</h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <header className="text-center mb-8 relative">
+            <h1 className="text-4xl md:text-5xl font-permanentMarker text-primary">
+              Discover Qwirls
+            </h1>
+            <p className="mt-2 text-gray-500 max-w-2xl mx-auto">
               Explore fascinating qwirls from people around the world. Find your
               wavelength with others.
             </p>
-          </motion.div>
+          </header>
         )}
 
         {/* Filters */}
