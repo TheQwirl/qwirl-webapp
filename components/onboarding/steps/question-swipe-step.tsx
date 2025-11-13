@@ -1,25 +1,31 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, X, Sparkles, CheckCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  CompactQuestionCardEditable,
-  CompactQuestionCardEditableRef,
-} from "@/components/qwirl/compact-question-card-editable";
+import { CompactQuestionCardEditable } from "@/components/qwirl/compact-question-card-editable";
+import { QwirlPollData, QwirlPollSchema } from "@/components/qwirl/schema";
 import $api from "@/lib/api/client";
 import { toast } from "sonner";
 import { components } from "@/lib/api/v1-client-side";
 import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type Question = components["schemas"]["QuestionSearchResponse"];
 
 interface QuestionSwipeStepProps {
   selectedCategories: string[];
 }
+
+const createDefaultPollValues = (): QwirlPollData => ({
+  question_text: "",
+  options: ["Option 1", "Option 2"],
+  owner_answer_index: 0,
+});
 
 export function QuestionSwipeStep({
   selectedCategories,
@@ -30,17 +36,17 @@ export function QuestionSwipeStep({
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(
     null
   );
-  const [currentQuestionData, setCurrentQuestionData] = useState<{
-    question: string;
-    answers: string[];
-    selectedAnswer: string;
-  } | null>(null);
   const constraintsRef = useRef(null);
-  const questionCardRef = useRef<CompactQuestionCardEditableRef>(null);
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-30, 30]);
   const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
+
+  const methods = useForm<QwirlPollData>({
+    resolver: zodResolver(QwirlPollSchema),
+    defaultValues: createDefaultPollValues(),
+    mode: "onChange",
+  });
 
   // Fetch questions based on selected categories
   const { data: questionsData, isLoading } = $api.useQuery(
@@ -77,16 +83,23 @@ export function QuestionSwipeStep({
   const currentQuestion = questions[currentQuestionIndex];
   const hasMoreQuestions = currentQuestionIndex < questions.length - 1;
 
-  // Initialize current question data when question changes
   React.useEffect(() => {
-    if (currentQuestion) {
-      setCurrentQuestionData({
-        question: currentQuestion.question_text,
-        answers: [...currentQuestion.options],
-        selectedAnswer: currentQuestion.options[0] || "",
-      });
+    if (!currentQuestion) {
+      methods.reset(createDefaultPollValues());
+      return;
     }
-  }, [currentQuestion]);
+
+    const sanitizedOptions =
+      currentQuestion.options && currentQuestion.options.length >= 2
+        ? [...currentQuestion.options]
+        : ["Option 1", "Option 2"];
+
+    methods.reset({
+      question_text: currentQuestion.question_text,
+      options: sanitizedOptions,
+      owner_answer_index: 0,
+    });
+  }, [currentQuestion, methods]);
 
   const handleSwipe = useCallback(
     async (direction: "left" | "right") => {
@@ -95,9 +108,20 @@ export function QuestionSwipeStep({
       setSwipeDirection(direction);
 
       if (direction === "right") {
-        // Get the current data from the card ref
-        const data = await questionCardRef.current?.submit();
-        if (!data) return;
+        const isValid = await methods.trigger(undefined, {
+          shouldFocus: true,
+        });
+
+        if (!isValid) {
+          toast.error(
+            "Please fix the question before adding it to your Qwirl."
+          );
+          setSwipeDirection(null);
+          x.set(0);
+          return;
+        }
+
+        const data = methods.getValues();
 
         // Add question to Qwirl using edited data
         try {
@@ -123,6 +147,8 @@ export function QuestionSwipeStep({
           ]);
         } catch {
           // Error handled by mutation
+          setSwipeDirection(null);
+          x.set(0);
           return;
         }
       }
@@ -131,11 +157,10 @@ export function QuestionSwipeStep({
       setTimeout(() => {
         setCurrentQuestionIndex((prev) => prev + 1);
         setSwipeDirection(null);
-        setCurrentQuestionData(null);
         x.set(0);
       }, 300);
     },
-    [currentQuestion, addPollMutation, x]
+    [currentQuestion, addPollMutation, x, methods]
   );
 
   const handleDragEnd = (
@@ -318,16 +343,12 @@ export function QuestionSwipeStep({
           >
             <div className="relative">
               {getSwipeIndicator()}
-              {currentQuestionData && (
+              <FormProvider {...methods}>
                 <CompactQuestionCardEditable
-                  ref={questionCardRef}
-                  question={currentQuestionData.question}
-                  answers={currentQuestionData.answers}
-                  selectedAnswer={currentQuestionData.selectedAnswer}
                   category={currentQuestion.category_name}
                   tags={currentQuestion.tags}
                 />
-              )}
+              </FormProvider>
             </div>
           </motion.div>
         )}

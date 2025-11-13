@@ -107,7 +107,8 @@ const FeedPostsList = ({}: FeedPostsListProps) => {
       updatePostInCache(postId, (post) => ({
         ...post,
         is_liked: true,
-        likes_count: post.likes_count + (post.is_liked ? 0 : 1),
+        likes_count: 0,
+        // likes_count: post.likes_count + (post.is_liked ? 0 : 1),
       }));
 
       return { previousData, postId };
@@ -138,7 +139,8 @@ const FeedPostsList = ({}: FeedPostsListProps) => {
       updatePostInCache(postId, (post) => ({
         ...post,
         is_liked: false,
-        likes_count: post.likes_count - (post.is_liked ? 1 : 0),
+        likes_count: 0,
+        // likes_count: post.likes_count - (post.is_liked ? 1 : 0),
       }));
 
       return { previousData, postId };
@@ -246,7 +248,13 @@ const FeedPostsList = ({}: FeedPostsListProps) => {
             key={post.id}
             ref={index === posts.length - 1 ? lastPostRef : undefined}
             user={post.userdata}
-            post={post}
+            post={{
+              ...post,
+              likes_count: 0,
+              comments_count: 0,
+              shares_count: 0,
+              is_liked: false,
+            }}
             onLike={handleLike}
             onOptionSelect={handleVote}
           />
