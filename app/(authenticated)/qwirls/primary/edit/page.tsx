@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import PrimaryQwirlRightSidebar from "../../_components/primary-qwirl-right-sidebar";
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
 import VerticalEditView from "@/components/qwirl/vertical-edit-view";
-import { EditIcon, PlusIcon, Library } from "lucide-react";
+import { PlusIcon, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AddPollDialog from "@/components/qwirl/add-poll-dialog";
@@ -86,15 +86,9 @@ const PrimaryQwirlEditPage = () => {
           />
         }
         backNavigation={{
-          title: (
-            <div
-              id="onboarding-welcome"
-              className="text-base lg:text-lg whitespace-nowrap font-semibold flex items-center gap-2 "
-            >
-              <EditIcon className="h-4 lg:h-5 w-4 lg:w-5" />
-              Edit Mode
-            </div>
-          ),
+          title: "Edit Mode",
+          subtitle: "Modify your primary qwirl",
+          hideBackButton: true,
           rightContent: (
             <div className="flex items-center gap-2">
               <Button
@@ -118,8 +112,6 @@ const PrimaryQwirlEditPage = () => {
               </Button>
             </div>
           ),
-          subtitle: "Modify your primary qwirl",
-          hideBackButton: true,
         }}
       >
         <div className="relative grid grid-cols-12 gap-5 ">

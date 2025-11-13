@@ -2,7 +2,7 @@ import { serverFetchClient } from "@/lib/api/server";
 import { cookies, headers } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
-const FRONTEND_SUCCESS_ROUTE = "/feed";
+const FRONTEND_SUCCESS_ROUTE = "/home";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { PageLayout } from "@/components/layout/page-layout";
-import { BarChart3 } from "lucide-react";
 import PrimaryQwirlRightSidebar from "../../_components/primary-qwirl-right-sidebar";
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
 import { useSearchParams } from "next/navigation";
@@ -106,12 +105,7 @@ const PrimaryQwirlInsightsPage = () => {
           <PrimaryQwirlRightSidebar isLoading={isLoading} polls={polls} />
         }
         backNavigation={{
-          title: (
-            <div className="text-base lg:text-lg whitespace-nowrap font-semibold flex items-center gap-2 ">
-              <BarChart3 className="h-4 lg:h-5 w-4 lg:w-5" />
-              Insights
-            </div>
-          ),
+          title: "Insights",
           subtitle: "View insights for my qwirl",
           hideBackButton: true,
         }}

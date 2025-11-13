@@ -48,6 +48,7 @@ const ExternalLoginButtons = ({ apiUrl }: ExternalLoginButtonsProps) => {
       <Button
         // Assuming you have an 'icon' prop on your Button component
         icon={FaApple}
+        disabled
         iconPlacement="left"
         variant="outline"
         className="w-full hover:bg-muted transition-colors duration-200"

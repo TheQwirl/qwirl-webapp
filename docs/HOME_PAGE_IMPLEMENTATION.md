@@ -1,190 +1,65 @@
-# Home/Dashboard Page Implementation Summary
+# Home / Dashboard Essentials Implementation
 
 ## Overview
 
-Created a comprehensive "Wavelength Hub" (Home Page) that serves as the central emotional anchor for users to see their progress, connections, and discover new Qwirls.
+The authenticated home experience now follows an essentials-first ethos. Rather than presenting multiple dense columns and discovery surfaces, the page concentrates on three core signals that every owner cares about immediately after sign-in: the health of their primary Qwirl, the latest engagement moments, and the single strongest wavelength matchup. Everything else has been removed or deferred to deeper sections to preserve attention and reduce noise.
 
-## ✅ Features Implemented
+## Core Sections
 
-### 1. **Top Section: Greeting & Your Qwirl Card**
+### 1. Hero "Qwirl Pulse" Card
 
-- Personalized greeting with user's name
-- Animated Sparkles icon
-- **Your Qwirl Preview Card** featuring:
-  - Full Qwirl cover display
-  - Visibility badge (Public/Private)
-  - Total poll count
-  - **Quick Stats Grid:**
-    - Total Responses (with user icon)
-    - Completed Responses (with trending icon)
-    - Completion Rate % (with zap icon)
-  - **Action Buttons:**
-    - View Responses (navigates to insights)
-    - Edit Qwirl
-    - Share Qwirl
+- Greets the owner by name, shows the Qwirl title/description, and mirrors the cover art as a soft background when available.
+- Displays either onboarding progress (poll count vs. minimum requirement) or a compact stat strip (total responses, completion rate, unique responders).
+- Adapts actions by state: incomplete flows surface "Complete Qwirl" and "Preview", while complete flows elevate "Share", "View insights", and "Preview".
+- Implements share via `navigator.share` with clipboard fallback and toast feedback, so the CTA always feels native and trustworthy.
 
-### 2. **Middle Section: Connections & Activity**
+### 2. Latest Responses Timeline
 
-Two-column layout with:
+- Three-item activity digest spanning both incoming (people answering me) and outgoing (I answered someone) events.
+- Each row includes avatar, descriptive headline, relative timestamp, and contextual badges (status + wavelength when available).
+- Entire rows deep-link to the correct follow-up surface (`/qwirls/primary/insights` with responder filter or the responder's public Qwirl).
+- Custom skeletons preserve card rhythm during loading; empty states coach users to share their Qwirl.
 
-#### **Left: Your Top Matches**
+### 3. Top Match Spotlight
 
-- Displays top 5 wavelength matches
-- Each card shows:
-  - User avatar
-  - Name and username
-  - Animated wavelength badge with gradient
-  - Pulsing animation on wavelength badge
-- Clicking navigates to user profile
-- "View All" link to wavelengths page
+- Highlights only the strongest wavelength match to keep the list digestible.
+- Shows avatar, username, wavelength badge, and a direct route to that profile, with a lightweight "View all matches" link for exploration.
+- Empty state nudges owners to share when there are no matches yet.
 
-#### **Right: Recent Activity**
+### 4. Contextual Action Footer
 
-- Shows last 5 people who answered user's Qwirl
-- Displays:
-  - User avatar
-  - Name and completion status
-  - Wavelength badge for completed responses
-  - Progress indicator for in-progress
-- Clicking navigates to user profile
-- "View All" link to insights page
+- Renders only when the system has a clear next best action.
+- Incomplete Qwirls display "Add polls" and "Preview" shortcuts.
+- Quiet engagement windows suggest "Share" and "Explore feed"; missing matches encourage "Find matches".
+- Disappears entirely when no additional guidance is needed, keeping the page calm.
 
-### 3. **Bottom Section: Discover Qwirls**
+## Interactions & States
 
-- Featured 3 community Qwirls (trending)
-- Full Qwirl cover cards
-- "Explore More" button to discover page
-- Responsive grid layout
+- **Animations:** Section wrapper uses Framer Motion for a gentle fade-and-rise entrance; individual cards rely on subtle hover transitions only.
+- **Loading:** Hero, responses, and spotlight each include bespoke skeletons to avoid layout shift.
+- **Empty data:** `EmptyState` helper communicates next steps with iconography and soft copy.
+- **Share handling:** All share attempts are wrapped in try/catch with abort handling and Sonner toasts for user feedback.
+- **Accessibility:** Buttons stay keyboard-focusable, text has AA contrast, and status badges always pair iconography with text.
 
-### 4. **Empty States**
+## Data Sources
 
-Created 4 contextual empty states:
+- `GET /qwirl/me/cover` → cover art, title, description, visibility.
+- `GET /qwirl-responses/qwirls/{qwirl_id}/stats` → poll count, responses, completion rate, unique responders.
+- `GET /activities/me/recent-activity` → blended activity feed powering the timeline.
+- `GET /users/{user_id}/top-wavelengths-simple` → ranked wavelength matches (first entry powers the spotlight).
 
-- **No Qwirl Created:** Large CTA to create first Qwirl
-- **No Wavelength Matches:** Encourages sharing Qwirl
-- **No Recent Activity:** Prompts to share for responses
-- **No Community Qwirls:** "Check back soon" message
+## Implementation Notes
 
-### 5. **Design Elements**
+- All new presentation logic lives inside `app/(authenticated)/home/_components/qwirl-overview-section.tsx`, which now exports the essentials layout plus inline subcomponents (`HeroPulseCard`, `RecentResponsesList`, `TopMatchSpotlight`, `HomeActionFooter`, `EmptyState`).
+- `app/(authenticated)/home/page.tsx` now forwards the entire stats payload and related loading flags; legacy props such as `totalPolls`/`visibility` were removed.
+- Former home cards (`QwirlHeader`, `QuickStatsCard`, `RecentActivityCard`, `TopMatchesCard`, `DiscoverQwirlSection`) are no longer referenced; they can be deleted in a later cleanup once the new flow is fully adopted.
+- Numbers are formatted with a shared `Intl.NumberFormat` instance for locale awareness.
+- Activity entries cast `extra_data` into a light `SessionMetadata` helper to access responder status and wavelength without introducing new backend changes.
 
-- **Animations:** Framer Motion for smooth entry animations, hover effects, scale transitions
-- **Gradients:** Color-coded based on wavelength scores
-  - 80%+: Primary → Destructive → Accent
-  - 60-79%: Primary → Purple → Pink
-  - 40-59%: Blue → Cyan → Teal
-  - <40%: Gray scale
-- **Pulsing Wavelength Badges:** Animated badges with Zap icon
-- **Responsive Layout:** Mobile-first design with breakpoints
-- **Loading States:** Skeleton loaders for all data sections
+## Future Enhancements
 
-## 🔌 API Endpoints Used
-
-### ✅ Available & Used:
-
-1. `GET /qwirl/me/cover` - User's Qwirl cover data
-2. `GET /qwirl-responses/qwirls/{qwirl_id}/stats` - Qwirl statistics
-3. `GET /users/{user_id}/top-wavelengths-simple` - Top wavelength matches
-4. `GET /qwirl-responses/qwirls/{qwirl_id}/responders` - Recent responders
-5. `GET /qwirl/community` - Featured community Qwirls
-
-### ⚠️ Missing Endpoints (Backend Implementation Needed):
-
-**Endpoint:** `GET /users/me/recent-activity`
-
-**Purpose:** Get comprehensive activity feed showing both incoming and outgoing interactions
-
-**Required Response Schema:**
-
-```typescript
-interface RecentActivityResponse {
-  activities: Activity[];
-  total_count: number;
-  has_more: boolean;
-}
-
-interface Activity {
-  id: number;
-  type: "qwirl_answered" | "user_answered_my_qwirl";
-  timestamp: string; // ISO 8601
-
-  // For "qwirl_answered" - Qwirls I answered
-  qwirl?: {
-    id: number;
-    title: string;
-    background_image: string | null;
-    owner: {
-      id: number;
-      username: string;
-      name: string | null;
-      avatar: string | null;
-    };
-  };
-
-  // For "user_answered_my_qwirl" - People who answered mine
-  responder?: {
-    id: number;
-    username: string;
-    name: string | null;
-    avatar: string | null;
-    session_status: "completed" | "in_progress";
-    wavelength?: number; // Only if completed
-    response_count: number;
-  };
-}
-```
-
-**Query Parameters:**
-
-- `limit?: number` (default: 10, max: 50)
-- `skip?: number` (default: 0)
-- `type?: "qwirl_answered" | "user_answered_my_qwirl" | "all"` (default: "all")
-
-**Usage:**
-Replace the "Recent Activity" section to show:
-
-- "Sarah completed your Qwirl" (2 hours ago)
-- "You answered John's Qwirl" (5 hours ago)
-- "Mike started your Qwirl (3/15)" (1 day ago)
-
-This provides a unified activity timeline mixing both types of interactions.
-
-## 📁 Files Created/Modified
-
-### Created:
-
-- `app/(authenticated)/home/page.tsx` - Main home page component
-
-### Dependencies Used:
-
-- `@/lib/api/client` - API client
-- `@/stores/useAuthStore` - User authentication state
-- `@/components/user-avatar` - User avatar component
-- `@/components/qwirl/qwirl-cover` - Qwirl cover display
-- `@/components/ui/*` - shadcn/ui components (Card, Button, Badge, Skeleton)
-- `framer-motion` - Animations
-- `lucide-react` - Icons
-
-## 🎨 UX Philosophy
-
-- **Clean & Personable:** Focus on people over stats
-- **Data-Light:** Just enough numbers to show progress
-- **Energy & Alignment:** Wavelength badges with pulsing animations
-- **Actionable:** Clear CTAs for every state
-- **Progressive Discovery:** Featured content leads to exploration
-
-## 🚀 Next Steps
-
-1. **Implement Backend Endpoint:** Create `/users/me/recent-activity` endpoint
-2. **Update Activity Section:** Once endpoint is ready, replace current implementation
-3. **Add Real-time Updates:** Consider WebSocket for live wavelength updates
-4. **A/B Test:** Test different wavelength badge styles
-5. **Add Notifications:** Bell icon for new responses/wavelengths
-
-## 🔄 Future Enhancements
-
-- Activity timeline with mixed interaction types
-- "Qwirl of the Day" featured card
-- Trending wavelength badge (if user is rising in matches)
-- Weekly recap widget showing stats from past week
-- Share stats to social media
-- Quick polls in feed (micro-interactions)
+1. **API hardening:** Formalize the `/activities/me/recent-activity` contract so consumers no longer need to cast `extra_data`.
+2. **Real-time updates:** Add websocket/pusher events to refresh stats and activity without requiring manual refreshes.
+3. **Delight states:** Layer in micro-celebrations when completion rate crosses thresholds or when a new top match appears.
+4. **Cleanup:** Remove the deprecated home components once we are confident in the new experience.
+5. **Product analytics:** Instrument share, insight view, and action-footer clicks to validate the streamlined flow.

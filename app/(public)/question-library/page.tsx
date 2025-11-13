@@ -26,6 +26,7 @@ import { AdaptiveLayout } from "@/components/layout/adaptive-layout";
 import { FloatingCartButton } from "@/components/layout/cart-button";
 import { useQuestionCart } from "@/hooks/useQuestionCart";
 import { toast } from "sonner";
+import clsx from "clsx";
 
 type Question = components["schemas"]["QuestionSearchResponse"];
 
@@ -180,16 +181,20 @@ function QuestionBankContent({
   isInCart,
 }: QuestionBankContentProps) {
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div
+      className={clsx("px-4 sm:px-6 lg:px-8 pb-8  ", {
+        "pt-16 sm:pt-32": !isAuthenticated,
+      })}
+    >
       {/* Header - Only show for non-authenticated users */}
       {!isAuthenticated && (
         <header className="text-center mb-8 relative">
-          <h1 className="text-4xl font-bold tracking-tight flex items-center justify-center gap-3">
-            Discover Questions
+          <h1 className="text-4xl md:text-5xl font-permanentMarker text-primary">
+            Questions Library
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-2 text-gray-500 max-w-2xl mx-auto">
             Explore a universe of questions to define who you are. Find the
-            perfect ones for your next Qwirl.
+            perfect ones for your Qwirl.
           </p>
         </header>
       )}
