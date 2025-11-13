@@ -4,7 +4,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -97,14 +97,43 @@ const inputGroupButtonVariants = cva(
   }
 );
 
+type InputGroupButtonProps = Omit<ButtonProps, "size"> &
+  VariantProps<typeof inputGroupButtonVariants> &
+  (
+    | {
+        icon: React.ElementType;
+        iconPlacement?: "left" | "right";
+      }
+    | {
+        icon?: undefined;
+        iconPlacement?: undefined;
+      }
+  );
+
 function InputGroupButton({
   className,
   type = "button",
   variant = "ghost",
   size = "xs",
+  icon,
+  iconPlacement,
   ...props
-}: Omit<React.ComponentProps<typeof Button>, "size"> &
-  VariantProps<typeof inputGroupButtonVariants>) {
+}: InputGroupButtonProps) {
+  if (icon) {
+    const resolvedIconPlacement = iconPlacement ?? "left";
+    return (
+      <Button
+        type={type}
+        data-size={size}
+        variant={variant}
+        className={cn(inputGroupButtonVariants({ size }), className)}
+        {...props}
+        icon={icon}
+        iconPlacement={resolvedIconPlacement}
+      />
+    );
+  }
+
   return (
     <Button
       type={type}

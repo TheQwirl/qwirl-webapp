@@ -61,7 +61,11 @@ export const UserList = ({
   user,
 }: {
   endpointKey: keyof typeof tabToEndpoints;
-  user: MyUser | OtherUser | undefined;
+  user:
+    | MyUser
+    | OtherUser
+    | components["schemas"]["UserProfileResponse"]
+    | undefined;
 }) => {
   const observer = useRef<IntersectionObserver | null>(null);
   const endpoint = tabToEndpoints[endpointKey];

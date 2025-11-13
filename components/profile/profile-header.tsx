@@ -21,6 +21,7 @@ import { DialogUpdateUser } from "./dialog-update-user";
 import { MyUser, OtherUser } from "./types";
 import clsx from "clsx";
 import { Skeleton } from "../ui/skeleton";
+import { components } from "@/lib/api/v1-client-side";
 
 interface ProfileHeaderBaseProps {
   isLoading: boolean;
@@ -33,7 +34,10 @@ interface ProfileHeaderSelfProps extends ProfileHeaderBaseProps {
 }
 
 interface ProfileHeaderOtherProps extends ProfileHeaderBaseProps {
-  initialUser: OtherUser | undefined;
+  initialUser:
+    | OtherUser
+    | components["schemas"]["UserProfileResponse"]
+    | undefined;
   profileOf: "other";
 }
 

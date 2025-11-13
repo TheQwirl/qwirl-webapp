@@ -102,7 +102,9 @@ const PrimaryQwirlInsightsPage = () => {
   return (
     <>
       <PageLayout
-        rightSidebar={<PrimaryQwirlRightSidebar polls={polls} />}
+        rightSidebar={
+          <PrimaryQwirlRightSidebar isLoading={isLoading} polls={polls} />
+        }
         backNavigation={{
           title: (
             <div className="text-base lg:text-lg whitespace-nowrap font-semibold flex items-center gap-2 ">

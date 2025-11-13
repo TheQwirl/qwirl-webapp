@@ -19,13 +19,9 @@ interface CommentsSectionProps {
 
 const CommentsSection = ({
   existingComment,
-  showCommentBox,
-  isEditingComment,
   commentDraft,
   isReviewMode,
   saveMutationPending,
-  onOpenCommentBox,
-  onCancelComment,
   onSaveComment,
   onCommentDraftChange,
 }: CommentsSectionProps) => (

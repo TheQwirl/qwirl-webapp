@@ -8,7 +8,7 @@ import { PublicLayoutWrapper } from "./_components/public-layout-wrapper";
 import { PublicCartWrapper } from "./_components/public-cart-wrapper";
 import { FloatingCartButton } from "@/components/layout/cart-button";
 
-const PublicLayout = async ({ children }: { children: React.ReactElement }) => {
+const PublicLayout = async ({ children }: { children: React.ReactNode }) => {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access-token")?.value;
 

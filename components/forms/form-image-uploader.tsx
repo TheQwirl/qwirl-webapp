@@ -6,6 +6,7 @@ import { Upload, Trash2, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadImage } from "@/utils/uploadImage";
 import clsx from "clsx";
+import Image from "next/image";
 
 interface FormImageUploaderProps {
   className?: string;
@@ -84,7 +85,7 @@ export function FormImageUploader({
           </label>
         ) : (
           <>
-            <img
+            <Image
               src={displayUrl}
               style={{
                 maxWidth: "100%",

@@ -10,11 +10,11 @@ export const onboardingSteps = [
         content: (
           <div className="space-y-2">
             <p>
-              Let's get you started with building your Qwirl! A Qwirl is a
+              Let&apos;s get you started with building your Qwirl! A Qwirl is a
               collection of polls that help others discover who you are.
             </p>
             <p className="text-sm text-muted-foreground">
-              We'll show you how to add and manage questions.
+              We&apos;ll show you how to add and manage questions.
             </p>
           </div>
         ),
@@ -30,8 +30,8 @@ export const onboardingSteps = [
         content: (
           <div className="space-y-2">
             <p>
-              Click the <strong>"Add Poll"</strong> button to create a custom
-              question or browse from our question bank.
+              Click the <strong>&quot;Add Poll&quot;</strong> button to create a
+              custom question or browse from our question bank.
             </p>
             <p className="text-sm text-muted-foreground">
               Try creating a custom question first!
@@ -50,8 +50,8 @@ export const onboardingSteps = [
         content: (
           <div className="space-y-2">
             <p>
-              The <strong>"Add from Library"</strong> button gives you access to
-              thousands of pre-made questions.
+              The <strong>&quot;Add from Library&quot;</strong> button gives you
+              access to thousands of pre-made questions.
             </p>
             <p className="text-sm text-muted-foreground">
               This is the fastest way to build your Qwirl!
@@ -70,8 +70,8 @@ export const onboardingSteps = [
         content: (
           <div className="space-y-2">
             <p>
-              Once you add questions, they'll appear here in your Qwirl. You can
-              reorder, edit, or delete them anytime.
+              Once you add questions, they&apos;ll appear here in your Qwirl.
+              You can reorder, edit, or delete them anytime.
             </p>
             <p className="text-sm text-muted-foreground">
               Go ahead and add at least one question to continue!
