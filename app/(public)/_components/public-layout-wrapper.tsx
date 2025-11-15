@@ -5,6 +5,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { MobileNavBar } from "@/components/layout/mobile-navbar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import PageLoader from "@/components/page-loader";
 
 interface PublicLayoutWrapperProps {
   children: ReactNode;
@@ -30,27 +31,43 @@ export const PublicLayoutWrapper = ({
 
   // If authenticated and on an adaptive route, use authenticated layout structure
   if (isAuthenticated && isAdaptiveRoute) {
+    const desktopLayout = (
+      <SidebarProvider
+        className="flex min-h-screen w-full"
+        style={
+          {
+            "--sidebar-width": "300px",
+            "--sidebar-width-collapsed": "0px",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar collapsible="none" className="sticky top-0 h-screen" />
+        <div className="flex-1">{children}</div>
+      </SidebarProvider>
+    );
+
+    const mobileLayout = (
+      <>
+        <div className="flex min-h-screen flex-col pb-[calc(3.75rem+env(safe-area-inset-bottom))]">
+          <div className="flex-1">{children}</div>
+        </div>
+        <MobileNavBar />
+      </>
+    );
+
+    const loadingFallback = (
+      <div className="flex min-h-screen items-center justify-center">
+        <PageLoader />
+      </div>
+    );
+
     return (
-      <div className=" mx-auto relative">
-        {!isMobile ? (
-          <SidebarProvider
-            className="flex min-h-screen w-full"
-            style={
-              {
-                "--sidebar-width": "300px",
-                "--sidebar-width-collapsed": "0px",
-              } as React.CSSProperties
-            }
-          >
-            <AppSidebar collapsible="none" className="sticky top-0 h-screen" />
-            <div className="flex-1">{children}</div>
-          </SidebarProvider>
-        ) : (
-          <>
-            <div className="min-h-screen pb-14">{children}</div>
-            <MobileNavBar />
-          </>
-        )}
+      <div className="relative mx-auto">
+        {typeof isMobile === "boolean"
+          ? isMobile
+            ? mobileLayout
+            : desktopLayout
+          : loadingFallback}
       </div>
     );
   }
