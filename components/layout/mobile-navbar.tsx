@@ -43,7 +43,7 @@ export function MobileNavBar() {
   const { logout } = authStore();
 
   // Limit to 5 items for the bottom bar (like Twitter)
-  const visibleItems = navItems.slice(0, 5);
+  const visibleItems = navItems.slice(0, 6);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/60 border-t border-white md:hidden">
@@ -78,7 +78,7 @@ export function MobileNavBar() {
           className="flex items-center justify-center w-full h-full text-foreground cursor-pointer"
           aria-label="Logout"
         >
-          <LogOut className="h-6 w-6" />
+          <LogOut className="h-5 w-5" />
         </div>
       </div>
     </div>

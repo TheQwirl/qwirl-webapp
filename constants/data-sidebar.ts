@@ -6,6 +6,7 @@ import {
   Library,
   CircleHelp,
   Home,
+  Waves,
 } from "lucide-react";
 
 export interface MenuItem {
@@ -52,6 +53,12 @@ export const MENU_SECTIONS: MenuSection[] = [
             icon: BarChart3,
           },
         ],
+      },
+      {
+        title: "Wavelengths",
+        icon: Waves,
+        url: "/wavelengths",
+        type: "single",
       },
     ],
   },

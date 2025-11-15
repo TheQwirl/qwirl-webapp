@@ -13,6 +13,10 @@ interface SortableQwirlCardProps {
   onDelete: () => void;
   isDeleting: boolean;
   id?: string;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  disableMoveUp?: boolean;
+  disableMoveDown?: boolean;
 }
 
 interface Context {
@@ -23,12 +27,7 @@ interface Context {
   isDragging: boolean;
 }
 
-const SortableItemContext = createContext<Context>({
-  attributes: {},
-  listeners: undefined,
-  ref() {},
-  isDragging: false,
-});
+const SortableItemContext = createContext<Context | null>(null);
 
 export function useSortableItemContext() {
   return useContext(SortableItemContext);
@@ -39,6 +38,10 @@ export function SortableQwirlCard({
   onDelete,
   isDeleting,
   id,
+  onMoveUp,
+  onMoveDown,
+  disableMoveUp,
+  disableMoveDown,
 }: SortableQwirlCardProps) {
   const {
     attributes,
@@ -77,6 +80,7 @@ export function SortableQwirlCard({
         ref={setNodeRef}
         style={style}
         data-poll-card
+        data-poll-card-id={poll.id}
         id={id}
         className={cn(isDragging && "opacity-50")}
       >
@@ -84,6 +88,10 @@ export function SortableQwirlCard({
           poll={poll}
           handleDelete={onDelete}
           isDeleting={isDeleting}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+          disableMoveUp={disableMoveUp}
+          disableMoveDown={disableMoveDown}
         />
       </div>
     </SortableItemContext.Provider>

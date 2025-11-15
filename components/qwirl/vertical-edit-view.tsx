@@ -1,56 +1,70 @@
 "use client";
 import { Card, CardContent } from "../ui/card";
-import { Plus } from "lucide-react";
+import { Button } from "../ui/button";
+import { Library, Plus } from "lucide-react";
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { SortableQwirlCard } from "./sortable-qwirl-card";
+import QwirlEditorCard from "./qwirl-editor-card";
 
-const VerticalEditView = () => {
+type VerticalEditViewProps = {
+  onAddQuestion?: () => void;
+  onOpenLibrary?: () => void;
+};
+
+const VerticalEditView = ({
+  onAddQuestion,
+  onOpenLibrary,
+}: VerticalEditViewProps) => {
   const { polls, qwirlQuery, handleReorder, handleDelete, isDeleting } =
     useQwirlEditor();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const pollCount = polls?.length ?? 0;
+  const lastMovedPollIdRef = useRef<string | number | null>(null);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const movePoll = (pollId: string | number, direction: "up" | "down") => {
+    if (!polls || pollCount === 0) return;
 
-    if (over && active.id !== over.id) {
-      const oldIndex = polls?.findIndex((item) => item.id === active.id) ?? -1;
-      const newIndex = polls?.findIndex((item) => item.id === over.id) ?? -1;
+    const currentIndex = polls.findIndex((item) => item.id === pollId);
+    if (currentIndex === -1) return;
 
-      if (oldIndex !== -1 && newIndex !== -1 && polls) {
-        const reorderedItems = [...polls];
-        const [removed] = reorderedItems.splice(oldIndex, 1);
-        if (removed) {
-          reorderedItems.splice(newIndex, 0, removed);
-          handleReorder(reorderedItems);
-        }
-      }
-    }
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    if (targetIndex < 0 || targetIndex >= pollCount) return;
+
+    const reorderedItems = [...polls];
+    const [movedPoll] = reorderedItems.splice(currentIndex, 1);
+    if (!movedPoll) return;
+
+    reorderedItems.splice(targetIndex, 0, movedPoll);
+    handleReorder(reorderedItems);
+    lastMovedPollIdRef.current = pollId;
   };
+
+  useEffect(() => {
+    if (!lastMovedPollIdRef.current) return;
+
+    const selector = `[data-poll-card-id="${lastMovedPollIdRef.current}"]`;
+    const element = document.querySelector(selector) as HTMLElement | null;
+
+    if (element) {
+      window.requestAnimationFrame(() => {
+        const elementRect = element.getBoundingClientRect();
+        const elementCenter = elementRect.top + elementRect.height / 2;
+        const viewportCenter = window.innerHeight / 2;
+        const scrollOffset = elementCenter - viewportCenter;
+        const targetScroll = window.scrollY + scrollOffset;
+
+        window.scrollTo({
+          top: Math.max(targetScroll, 0),
+          behavior: "smooth",
+        });
+      });
+    }
+
+    lastMovedPollIdRef.current = null;
+  }, [polls]);
 
   if (qwirlQuery.isLoading) {
     return (
@@ -90,6 +104,27 @@ const VerticalEditView = () => {
               <p className="text-gray-600">
                 Add your first poll to get started with your Qwirl!
               </p>
+              <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                <Button
+                  onClick={onAddQuestion}
+                  disabled={!onAddQuestion}
+                  icon={Plus}
+                  iconPlacement="left"
+                  className="w-full rounded-full md:w-auto"
+                >
+                  Add Question
+                </Button>
+                <Button
+                  onClick={onOpenLibrary}
+                  disabled={!onOpenLibrary}
+                  variant="secondary"
+                  icon={Library}
+                  iconPlacement="left"
+                  className="w-full rounded-full md:w-auto"
+                >
+                  Add from Library
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -99,26 +134,24 @@ const VerticalEditView = () => {
 
   return (
     <div className="space-y-4">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={polls?.map((item) => item.id) || []}
-          strategy={verticalListSortingStrategy}
+      {polls?.map((qwirlPoll, index) => (
+        <div
+          key={qwirlPoll.id}
+          data-poll-card
+          data-poll-card-id={qwirlPoll.id}
+          id={`qwirl-poll-card-${index}`}
         >
-          {polls?.map((qwirlPoll, index) => (
-            <SortableQwirlCard
-              key={qwirlPoll.id}
-              poll={qwirlPoll}
-              onDelete={() => handleDelete(qwirlPoll.id)}
-              isDeleting={isDeleting}
-              id={`qwirl-poll-card-${index}`}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+          <QwirlEditorCard
+            poll={qwirlPoll}
+            handleDelete={() => handleDelete(qwirlPoll.id)}
+            isDeleting={isDeleting}
+            onMoveUp={() => movePoll(qwirlPoll.id, "up")}
+            onMoveDown={() => movePoll(qwirlPoll.id, "down")}
+            disableMoveUp={index === 0}
+            disableMoveDown={index === pollCount - 1}
+          />
+        </div>
+      ))}
     </div>
   );
 };
