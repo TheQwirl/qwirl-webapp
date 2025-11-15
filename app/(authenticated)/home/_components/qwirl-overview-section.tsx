@@ -70,7 +70,7 @@ export function QwirlOverviewSection({
 
   const pollsCount = qwirlStats?.total_items ?? 0;
   const isIncomplete = pollsCount < CONSTANTS.MIN_QWIRL_POLLS;
-  const totalResponses = qwirlStats?.total_responses ?? 0;
+  const totalResponses = qwirlStats?.unique_responders ?? 0;
   const uniqueResponders = qwirlStats?.unique_responders ?? 0;
   const completionRate = qwirlStats?.average_completion_rate ?? 0;
   const visibility = qwirlCover?.visibility ?? false;

@@ -4,7 +4,16 @@ import React, { useState, useEffect, useMemo } from "react";
 import PrimaryQwirlRightSidebar from "../../_components/primary-qwirl-right-sidebar";
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
 import VerticalEditView from "@/components/qwirl/vertical-edit-view";
-import { PlusIcon, Library, ArrowRight } from "lucide-react";
+import {
+  PlusIcon,
+  Library,
+  ArrowRight,
+  CheckCircle2,
+  Clock3,
+  Loader2,
+  Circle,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddPollDialog from "@/components/qwirl/add-poll-dialog";
 import EditableQwirlCover from "@/components/qwirl/editable-qwirl-cover";
@@ -22,6 +31,56 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import $api from "@/lib/api/client";
+import { authStore } from "@/stores/useAuthStore";
+
+type StepStatusType =
+  | "complete"
+  | "in-progress"
+  | "not-started"
+  | "optional"
+  | "loading";
+
+type StatusVisualConfig = {
+  icon: React.ComponentType<{ className?: string }>;
+  badgeClass: string;
+  iconClass: string;
+  spin?: boolean;
+};
+
+const STATUS_CONFIG: Record<StepStatusType, StatusVisualConfig> = {
+  complete: {
+    icon: CheckCircle2,
+    badgeClass:
+      "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-600/60 dark:bg-emerald-500/10 dark:text-emerald-300",
+    iconClass: "text-emerald-500 dark:text-emerald-300",
+  },
+  "in-progress": {
+    icon: Clock3,
+    badgeClass:
+      "border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/60 dark:bg-amber-500/10 dark:text-amber-200",
+    iconClass: "text-amber-500 dark:text-amber-200",
+  },
+  "not-started": {
+    icon: Circle,
+    badgeClass:
+      "border border-border/50 bg-muted/10 text-muted-foreground dark:border-border/40 dark:bg-muted/20",
+    iconClass: "text-muted-foreground",
+  },
+  optional: {
+    icon: Sparkles,
+    badgeClass:
+      "border border-primary/30 bg-primary/5 text-primary dark:border-primary/40 dark:bg-primary/10",
+    iconClass: "text-primary",
+  },
+  loading: {
+    icon: Loader2,
+    badgeClass:
+      "border border-border/40 bg-muted/20 text-muted-foreground dark:border-border/30 dark:bg-muted/30",
+    iconClass: "text-muted-foreground",
+    spin: true,
+  },
+};
 
 const PrimaryQwirlEditPage = () => {
   const {
@@ -32,6 +91,23 @@ const PrimaryQwirlEditPage = () => {
     handleAddPoll,
     showAddDialog,
   } = useQwirlEditor();
+
+  const user = authStore((state) => state.user);
+
+  const qwirlCoverQuery = $api.useQuery(
+    "get",
+    "/qwirl/{qwirl_id}/cover",
+    {
+      params: {
+        path: {
+          qwirl_id: user?.primary_qwirl_id ?? 0,
+        },
+      },
+    },
+    { enabled: !!user?.primary_qwirl_id }
+  );
+
+  const socialsQuery = $api.useQuery("get", "/users/me/socials");
 
   const [showLibrary, setShowLibrary] = useState(false);
   const [lastLibraryAdd, setLastLibraryAdd] = useState<string | null>(null);
@@ -46,6 +122,149 @@ const PrimaryQwirlEditPage = () => {
   const pollCountLabel = hasReachedTarget
     ? `${pollCount} questions`
     : `${pollCount} / ${POLL_TARGET} questions`;
+
+  const coverData = qwirlCoverQuery.data;
+  const socials = socialsQuery.data?.data?.socials ?? [];
+  const savedSocialsCount = socials.filter((social) =>
+    social?.url?.trim()
+  ).length;
+  const visibleSocialsCount = socials.filter(
+    (social) => social?.is_visible && social?.url?.trim()
+  ).length;
+
+  const coverStatus: StepStatusType = useMemo(() => {
+    if (qwirlCoverQuery.isLoading || qwirlQuery.isLoading) {
+      return "loading";
+    }
+    const name = coverData?.name ?? coverData?.title ?? "";
+    const description = coverData?.description ?? "";
+    const hasBackground = Boolean(coverData?.background_image);
+
+    if (name.trim() && description.trim()) {
+      return "complete";
+    }
+
+    if (name.trim() || description.trim() || hasBackground) {
+      return "in-progress";
+    }
+
+    return "not-started";
+  }, [coverData, qwirlCoverQuery.isLoading, qwirlQuery.isLoading]);
+
+  const socialsStatus: StepStatusType = useMemo(() => {
+    if (socialsQuery.isLoading) {
+      return "loading";
+    }
+
+    if (savedSocialsCount > 0) {
+      return "complete";
+    }
+
+    return "optional";
+  }, [socialsQuery.isLoading, savedSocialsCount]);
+
+  const questionsStatus: StepStatusType = useMemo(() => {
+    if (qwirlQuery.isLoading) {
+      return "loading";
+    }
+
+    if (hasReachedTarget) {
+      return "complete";
+    }
+
+    if (pollCount > 0) {
+      return "in-progress";
+    }
+
+    return "not-started";
+  }, [hasReachedTarget, pollCount, qwirlQuery.isLoading]);
+
+  const stepCards = useMemo(
+    () => [
+      {
+        id: "qwirl-cover",
+        href: "#qwirl-cover",
+        step: "Step 1",
+        title: "Set up your cover",
+        description:
+          "Pair a photo with a short intro that sounds like you.",
+        statusType: coverStatus,
+        statusLabel:
+          coverStatus === "complete"
+            ? "Completed"
+            : coverStatus === "in-progress"
+            ? "In progress"
+            : coverStatus === "loading"
+            ? "Loading…"
+            : "Not started",
+        statusDetail:
+          coverStatus === "complete"
+            ? "Cover is ready to share."
+            : coverStatus === "in-progress"
+            ? "Finish your intro to help people connect."
+            : coverStatus === "loading"
+            ? "Checking your cover details…"
+            : "Add a title and intro to kick things off.",
+      },
+      {
+        id: "qwirl-socials",
+        href: "#qwirl-socials",
+        step: "Step 2",
+        title: "Add extras (optional)",
+        description:
+          "Share a couple links or details friends usually ask for.",
+        statusType: socialsStatus,
+        statusLabel:
+          socialsStatus === "complete"
+            ? `${savedSocialsCount} link${savedSocialsCount === 1 ? "" : "s"} saved`
+            : socialsStatus === "loading"
+            ? "Loading…"
+            : "Optional",
+        statusDetail:
+          socialsStatus === "complete"
+            ? visibleSocialsCount > 0
+              ? `${visibleSocialsCount} visible on your Qwirl.`
+              : "Links saved and hidden for now."
+            : socialsStatus === "loading"
+            ? "Checking your social links…"
+            : "Add socials when you're ready.",
+      },
+      {
+        id: "qwirl-questions",
+        href: "#qwirl-questions",
+        step: "Step 3",
+        title: "Build your question set",
+        description: `Aim for ${POLL_TARGET} questions to unlock sharing.`,
+        statusType: questionsStatus,
+        statusLabel:
+          questionsStatus === "complete"
+            ? "Completed"
+            : questionsStatus === "in-progress"
+            ? `${remainingPolls} left`
+            : questionsStatus === "loading"
+            ? "Loading…"
+            : "Not started",
+        statusDetail:
+          questionsStatus === "complete"
+            ? `${pollCount} questions ready to go.`
+            : questionsStatus === "in-progress"
+            ? `Add ${remainingPolls} more to unlock sharing.`
+            : questionsStatus === "loading"
+            ? "Checking your question stack…"
+            : "Add your first question to get rolling.",
+      },
+    ],
+    [
+      coverStatus,
+      socialsStatus,
+      questionsStatus,
+      savedSocialsCount,
+      visibleSocialsCount,
+      POLL_TARGET,
+      remainingPolls,
+      pollCount,
+    ]
+  );
 
   const questionGuidance = useMemo(() => {
     if (pollCount === 0) {
@@ -185,69 +404,46 @@ const PrimaryQwirlEditPage = () => {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                   <div className="grid gap-4 sm:grid-cols-3">
-                    <a
-                      href="#qwirl-cover"
-                      className="group relative flex h-full flex-col rounded-xl border bg-background p-4 shadow-sm transition hover:border-primary/50 hover:shadow-md hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] cursor-pointer"
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="mb-2 rounded-full w-fit"
-                      >
-                        Step 1
-                      </Badge>
-                      <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
-                        Set up your cover
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Pair a photo with a short intro that sounds like you.
-                      </p>
-                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:translate-x-0.5">
-                        Jump to section
-                        <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-                      </span>
-                    </a>
-                    <a
-                      href="#qwirl-socials"
-                      className="group relative flex h-full flex-col rounded-xl border bg-background p-4 shadow-sm transition hover:border-primary/50 hover:shadow-md hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] cursor-pointer"
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="mb-2 rounded-full w-fit"
-                      >
-                        Step 2
-                      </Badge>
-                      <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
-                        Add extras (optional)
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Share a couple links or details friends usually ask for.
-                      </p>
-                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:translate-x-0.5">
-                        Jump to section
-                        <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-                      </span>
-                    </a>
-                    <a
-                      href="#qwirl-questions"
-                      className="group relative flex h-full flex-col rounded-xl border bg-background p-4 shadow-sm transition hover:border-primary/50 hover:shadow-md hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] cursor-pointer"
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="mb-2 rounded-full w-fit"
-                      >
-                        Step 3
-                      </Badge>
-                      <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
-                        Build your question set
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Aim for {POLL_TARGET} questions to unlock sharing.
-                      </p>
-                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:translate-x-0.5">
-                        Jump to section
-                        <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-                      </span>
-                    </a>
+                    {stepCards.map((step) => {
+                      const statusVisual = STATUS_CONFIG[step.statusType];
+                      const StatusIcon = statusVisual.icon;
+                      const statusBadgeClass = `inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition ${statusVisual.badgeClass}`;
+                      const statusIconClass = `h-3.5 w-3.5 ${statusVisual.iconClass} ${statusVisual.spin ? "animate-spin" : ""}`;
+
+                      return (
+                        <a
+                          key={step.id}
+                          href={step.href}
+                          className="group relative flex h-full flex-col rounded-xl border bg-background p-4 shadow-sm transition hover:border-primary/50 hover:shadow-md hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] cursor-pointer"
+                        >
+                          <div className="mb-2 flex items-start justify-between gap-2">
+                            <Badge
+                              variant="secondary"
+                              className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                            >
+                              {step.step}
+                            </Badge>
+                            <span className={statusBadgeClass}>
+                              <StatusIcon className={statusIconClass} />
+                              {step.statusLabel}
+                            </span>
+                          </div>
+                          <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
+                            {step.title}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {step.description}
+                          </p>
+                          <p className="mt-3 text-xs text-muted-foreground">
+                            {step.statusDetail}
+                          </p>
+                          <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:translate-x-0.5">
+                            Jump to section
+                            <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                          </span>
+                        </a>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>

@@ -7,6 +7,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, RefreshCcw, Check } from "lucide-react";
+import { Search, RefreshCcw, Check, X } from "lucide-react";
 import $api from "@/lib/api/client";
 import { components } from "@/lib/api/v1-client-side";
 import { QuestionCardSkeleton } from "@/components/question-bank/question-card";
@@ -304,7 +305,6 @@ export function LibrarySlideOver({
           onClose();
         }
       }}
-      modal={true}
     >
       <SheetContent
         side="right"
@@ -338,6 +338,17 @@ export function LibrarySlideOver({
               >
                 <RefreshCcw className="h-4 w-4" />
               </Button>
+              <SheetClose asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Close question library"
+                  className="h-9 w-9 rounded-full border border-border/60 text-muted-foreground transition hover:border-primary/40 hover:text-primary"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </SheetClose>
             </div>
           </SheetHeader>
 

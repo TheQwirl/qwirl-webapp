@@ -58,7 +58,7 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
-  const { user } = authStore();
+  const user = authStore((state) => state.user);
 
   const qwirlQuery = $api.useQuery("get", "/qwirl/me", {
     enabled: !!user?.primary_qwirl_id,
@@ -99,9 +99,7 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
   const getDefaultValues = useCallback(
     (): QwirlHeaderFormData => ({
       name: qwirlCoverData?.name || qwirlCoverData?.title || "Not specified",
-      description:
-        qwirlCoverData?.description ||
-        "Take this Qwirl to see how well you know me and find out what we have in common. Let's see if we're a match!",
+      description: qwirlCoverData?.description ?? "",
       background_image: qwirlCoverData?.background_image || null,
     }),
     [qwirlCoverData]
@@ -113,10 +111,10 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
   });
 
   React.useEffect(() => {
-    if (qwirlCoverData || user) {
+    if (!isEditing && (qwirlCoverData || user)) {
       form.reset(getDefaultValues());
     }
-  }, [qwirlCoverData, user, form, getDefaultValues]);
+  }, [isEditing, qwirlCoverData, user, form, getDefaultValues]);
 
   const handleSave = async (data: QwirlHeaderFormData) => {
     if (!user?.primary_qwirl_id) return;
@@ -252,6 +250,7 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
                         <Input
                           placeholder="What kind of person am I?"
                           {...field}
+                          maxLength={60}
                           className="text-lg"
                         />
                       </FormControl>
