@@ -38,6 +38,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { components } from "@/lib/api/v1";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type SocialPlatform =
   | "instagram"
@@ -118,6 +119,7 @@ const SOCIAL_PLATFORMS: Array<{
 
 const EditableUserSocials: React.FC = () => {
   const { data, isLoading } = $api.useQuery("get", "/users/me/socials");
+  const isMobile = useIsMobile();
   const [validationErrors, setValidationErrors] = useState<
     Record<string, boolean>
   >({});
@@ -148,7 +150,8 @@ const EditableUserSocials: React.FC = () => {
 
   const socials = useWatch({ control, name: "socials" });
 
-  const VISIBLE_ICONS_COUNT = 5;
+  const MAX_VISIBLE_SOCIALS = 5;
+  const VISIBLE_BUTTON_COUNT = isMobile ? 4 : 5;
 
   useEffect(() => {
     if (data?.data?.socials && data.data.socials.length > 0) {
@@ -169,16 +172,16 @@ const EditableUserSocials: React.FC = () => {
     [socials]
   );
 
-  const canSelectMore = visibleSocials.length < 5;
+  const canSelectMore = visibleSocials.length < MAX_VISIBLE_SOCIALS;
 
   const visiblePlatforms = useMemo(
-    () => SOCIAL_PLATFORMS.slice(0, VISIBLE_ICONS_COUNT),
-    []
+    () => SOCIAL_PLATFORMS.slice(0, VISIBLE_BUTTON_COUNT),
+    [VISIBLE_BUTTON_COUNT]
   );
 
   const overflowPlatforms = useMemo(
-    () => SOCIAL_PLATFORMS.slice(VISIBLE_ICONS_COUNT),
-    []
+    () => SOCIAL_PLATFORMS.slice(VISIBLE_BUTTON_COUNT),
+    [VISIBLE_BUTTON_COUNT]
   );
 
   const handleToggleVisibility = (platform: SocialPlatform) => {
@@ -197,7 +200,7 @@ const EditableUserSocials: React.FC = () => {
         shouldDirty: true,
       });
     } else {
-      toast.error("Maximum 5 socials", {
+      toast.error(`Maximum ${MAX_VISIBLE_SOCIALS} socials`, {
         description: "Hide one social to add another",
       });
     }
@@ -250,7 +253,8 @@ const EditableUserSocials: React.FC = () => {
       <CardHeader>
         <CardTitle className="text-lg">Social Links</CardTitle>
         <CardDescription className="text-xs">
-          Share your socials with people who complete your Qwirl. Select up to 5
+          Share your socials with people who complete your Qwirl. Select up to{" "}
+          {MAX_VISIBLE_SOCIALS}
           platforms to display. Links are saved even when hidden.
         </CardDescription>
       </CardHeader>
@@ -262,7 +266,7 @@ const EditableUserSocials: React.FC = () => {
               Visible Platforms
             </label>
             <span className="text-xs text-muted-foreground">
-              {visibleSocials.length}/5 selected
+              {visibleSocials.length}/{MAX_VISIBLE_SOCIALS} selected
             </span>
           </div>
 

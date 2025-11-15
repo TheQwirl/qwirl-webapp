@@ -1,14 +1,14 @@
 "use client";
 import PollProgressCard from "./poll-progress-card";
-import VisibilityToggleCard from "./visibility-toggle-card";
 import QuickActionsCard from "./quick-actions-card";
 import TipsGuideCard from "./tips-guide-card";
 import QwirlStatusCard from "./qwirl-status-card";
+import SidebarCoverPreviewCard from "./sidebar-cover-preview-card";
+import QuestionMomentumCard from "./question-momentum-card";
 import { QwirlItem } from "@/types/qwirl";
 import React from "react";
 import CollapsibleCard from "@/components/collapsible-card";
 import { usePathname } from "next/navigation";
-import EditableQwirlCover from "@/components/qwirl/editable-qwirl-cover";
 import QwirlStatsSummaryCard from "@/components/qwirl/qwirl-stats-summary-card";
 import { authStore } from "@/stores/useAuthStore";
 
@@ -43,20 +43,12 @@ const PrimaryQwirlRightSidebar = ({
         qwirlUrl={`${process.env.NEXT_PUBLIC_BASE_URL}/qwirl/${user?.username}`}
       />
     ),
-    EditableQwirlCover: (
-      <CollapsibleCard
-        key="EditableQwirlCover"
-        className=""
-        defaultOpen={false}
-        title="Qwirl Cover"
-      >
-        <EditableQwirlCover />
-      </CollapsibleCard>
+    SidebarCoverPreviewCard: (
+      <SidebarCoverPreviewCard key="SidebarCoverPreviewCard" />
     ),
     PollProgressCard: (
       <PollProgressCard key="PollProgressCard" pollCount={pollCount} />
     ),
-    VisibilityToggleCard: <VisibilityToggleCard key="VisibilityToggleCard" />,
     QuickActionsCard: (
       <QuickActionsCard
         key="QuickActionsCard"
@@ -64,6 +56,9 @@ const PrimaryQwirlRightSidebar = ({
       />
     ),
     TipsGuideCard: <TipsGuideCard key="TipsGuideCard" />,
+    QuestionMomentumCard: (
+      <QuestionMomentumCard key="QuestionMomentumCard" polls={polls} />
+    ),
     QwirlStatsSummaryCard: (
       <CollapsibleCard key="QwirlStatsSummaryCard" title="Qwirl Summary">
         <QwirlStatsSummaryCard />

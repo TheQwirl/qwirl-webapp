@@ -1,12 +1,11 @@
 "use client";
 import { PageLayout } from "@/components/layout/page-layout";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import PrimaryQwirlRightSidebar from "../../_components/primary-qwirl-right-sidebar";
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
 import VerticalEditView from "@/components/qwirl/vertical-edit-view";
-import { PlusIcon, Library } from "lucide-react";
+import { PlusIcon, Library, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AddPollDialog from "@/components/qwirl/add-poll-dialog";
 import EditableQwirlCover from "@/components/qwirl/editable-qwirl-cover";
 import EditableUserSocials from "@/components/qwirl/editable-user-socials";
@@ -14,6 +13,15 @@ import { LibrarySlideOver } from "@/components/question-bank/library-slide-over"
 import { useCartUIStore } from "@/stores/useCartUIStore";
 import { useQuestionCart } from "@/hooks/useQuestionCart";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 const PrimaryQwirlEditPage = () => {
   const {
@@ -26,8 +34,55 @@ const PrimaryQwirlEditPage = () => {
   } = useQwirlEditor();
 
   const [showLibrary, setShowLibrary] = useState(false);
+  const [lastLibraryAdd, setLastLibraryAdd] = useState<string | null>(null);
   const { closeCart } = useCartUIStore();
   const { items: cartItems, clearCart } = useQuestionCart();
+
+  const pollCount = polls?.length ?? 0;
+  const POLL_TARGET = 15;
+  const hasReachedTarget = pollCount >= POLL_TARGET;
+  const progressValue = Math.min((pollCount / POLL_TARGET) * 100, 100);
+  const remainingPolls = Math.max(POLL_TARGET - pollCount, 0);
+  const pollCountLabel = hasReachedTarget
+    ? `${pollCount} questions`
+    : `${pollCount} / ${POLL_TARGET} questions`;
+
+  const questionGuidance = useMemo(() => {
+    if (pollCount === 0) {
+      return {
+        badge: "Start here",
+        title: "Kick things off with an easy opener",
+        tips: [
+          "Begin with the question you ask when you first meet someone.",
+          "Follow with something light so people feel comfortable answering.",
+        ],
+      } as const;
+    }
+
+    if (pollCount > 0 && pollCount < 5) {
+      return {
+        badge: "Build your core",
+        title: "Build a mix of starters",
+        tips: [
+          "Mix thoughtful, playful, and everyday prompts.",
+          "Borrow from the library, then tweak the wording to sound like you.",
+        ],
+      } as const;
+    }
+
+    if (!hasReachedTarget) {
+      return {
+        badge: "Almost there",
+        title: "Layer in depth and surprises",
+        tips: [
+          "Add one curveball about what lights you up outside of work.",
+          "Try a values question to spark meaningful replies.",
+        ],
+      } as const;
+    }
+
+    return null;
+  }, [pollCount, hasReachedTarget]);
 
   useEffect(() => {
     const handleAddAllFromCart = async (event: Event) => {
@@ -65,14 +120,22 @@ const PrimaryQwirlEditPage = () => {
     };
   }, [cartItems, handleAddPoll, clearCart, closeCart]);
 
+  useEffect(() => {
+    if (!lastLibraryAdd) return;
+    const timeout = window.setTimeout(() => setLastLibraryAdd(null), 6000);
+    return () => window.clearTimeout(timeout);
+  }, [lastLibraryAdd]);
+
   const handleAddPollFromLibrary = async (pollData: {
     question_text: string;
     options: string[];
     owner_answer_index: number;
   }) => {
     await handleAddPoll(pollData);
-    toast.success("Poll added to Qwirl", {
-      description: pollData.question_text.substring(0, 50) + "...",
+    setLastLibraryAdd(pollData.question_text);
+    toast.success("Added to your Qwirl", {
+      description: "Jump back to edit or personalize it.",
+      id: "library-add-success",
     });
   };
 
@@ -87,64 +150,344 @@ const PrimaryQwirlEditPage = () => {
         }
         backNavigation={{
           title: "Edit Mode",
-          subtitle: "Modify your primary qwirl",
+          subtitle: "Shape the qwirl that feels most like you",
           hideBackButton: true,
           rightContent: (
-            <div className="flex items-center gap-2">
-              <Button
-                id="add-from-library-button"
-                onClick={() => setShowLibrary(true)}
-                variant="secondary"
-                className="hidden sm:flex group rounded-full md:rounded shadow-none"
-                icon={Library}
-                iconPlacement="left"
-              >
-                Add from Library
-              </Button>
-              <Button
-                id="add-poll-button"
-                onClick={() => setShowAddDialog(true)}
-                className="group rounded-full md:rounded shadow-none"
-                icon={PlusIcon}
-                iconPlacement="left"
-              >
-                Add Question
-              </Button>
-            </div>
+            <Badge
+              variant="outline"
+              className="rounded-full px-3 py-1 text-xs font-medium"
+            >
+              {pollCountLabel}
+            </Badge>
           ),
         }}
       >
-        <div className="relative grid grid-cols-12 gap-5 ">
-          <div className="overflow-hidden col-span-full px-4 pb-4">
-            <Tabs defaultValue="profile" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 gap-2 rounded-full bg-muted p-1">
-                <TabsTrigger
-                  value="profile"
-                  className="rounded-full text-sm font-semibold"
-                >
-                  Profile
-                </TabsTrigger>
-                <TabsTrigger
-                  value="polls"
-                  className="rounded-full text-sm font-semibold"
-                >
-                  Qwirl Questions
-                </TabsTrigger>
-              </TabsList>
+        <div className="relative grid grid-cols-12 gap-5">
+          <div className="col-span-full px-4 pb-24 space-y-12">
+            <section aria-labelledby="qwirl-editor-intro" className="pt-2">
+              <Card className="border-muted/50 bg-gradient-to-br from-primary/10 via-background to-background shadow-sm">
+                <CardHeader className="gap-3">
+                  <div className="inline-flex items-center gap-2 text-primary">
+                    <span className="text-xs font-semibold uppercase tracking-wide">
+                      Primary qwirl
+                    </span>
+                  </div>
+                  <CardTitle
+                    id="qwirl-editor-intro"
+                    className="text-2xl font-semibold"
+                  >
+                    Build a qwirl for people on your wavelength
+                  </CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground">
+                    Set up your cover, share a few helpful details, then pick
+                    the questions that help someone get to know you.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <a
+                      href="#qwirl-cover"
+                      className="group relative flex h-full flex-col rounded-xl border bg-background p-4 shadow-sm transition hover:border-primary/50 hover:shadow-md hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] cursor-pointer"
+                    >
+                      <Badge
+                        variant="secondary"
+                        className="mb-2 rounded-full w-fit"
+                      >
+                        Step 1
+                      </Badge>
+                      <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
+                        Set up your cover
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Pair a photo with a short intro that sounds like you.
+                      </p>
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:translate-x-0.5">
+                        Jump to section
+                        <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                      </span>
+                    </a>
+                    <a
+                      href="#qwirl-socials"
+                      className="group relative flex h-full flex-col rounded-xl border bg-background p-4 shadow-sm transition hover:border-primary/50 hover:shadow-md hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] cursor-pointer"
+                    >
+                      <Badge
+                        variant="secondary"
+                        className="mb-2 rounded-full w-fit"
+                      >
+                        Step 2
+                      </Badge>
+                      <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
+                        Add extras (optional)
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Share a couple links or details friends usually ask for.
+                      </p>
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:translate-x-0.5">
+                        Jump to section
+                        <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                      </span>
+                    </a>
+                    <a
+                      href="#qwirl-questions"
+                      className="group relative flex h-full flex-col rounded-xl border bg-background p-4 shadow-sm transition hover:border-primary/50 hover:shadow-md hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] cursor-pointer"
+                    >
+                      <Badge
+                        variant="secondary"
+                        className="mb-2 rounded-full w-fit"
+                      >
+                        Step 3
+                      </Badge>
+                      <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
+                        Build your question set
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Aim for {POLL_TARGET} questions to unlock sharing.
+                      </p>
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:translate-x-0.5">
+                        Jump to section
+                        <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                      </span>
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
 
-              <TabsContent value="profile" className="space-y-8">
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                  <EditableQwirlCover />
+            <section
+              id="qwirl-cover"
+              aria-labelledby="qwirl-cover-heading"
+              className="space-y-5 scroll-mt-24"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <Badge
+                    variant="outline"
+                    className="rounded-full px-3 py-1 text-xs font-medium"
+                  >
+                    Step 1
+                  </Badge>
+                  <h2
+                    id="qwirl-cover-heading"
+                    className="mt-3 text-xl font-semibold"
+                  >
+                    Set up your Qwirl cover
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Choose a photo or gradient and a short intro that feels like
+                    the start of a real conversation.
+                  </p>
+                </div>
+              </div>
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                <EditableQwirlCover className="w-full" />
+                <div className="grid gap-3 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-1">
+                  <div className="rounded-lg border border-dashed border-muted/60 bg-muted/20 p-3">
+                    <p className="font-semibold text-foreground">
+                      Title & tagline
+                    </p>
+                    <p>Start with how you usually introduce yourself.</p>
+                  </div>
+                  <div className="rounded-lg border border-dashed border-muted/60 bg-muted/20 p-3">
+                    <p className="font-semibold text-foreground">
+                      Visual anchor
+                    </p>
+                    <p>Pick a cover image or color that matches your vibe.</p>
+                  </div>
+                  <div className="rounded-lg border border-dashed border-muted/60 bg-muted/20 p-3">
+                    <p className="font-semibold text-foreground">
+                      What to expect
+                    </p>
+                    <p>Let people know what they&apos;ll learn by answering.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section
+              id="qwirl-socials"
+              aria-labelledby="qwirl-socials-heading"
+              className="space-y-5 scroll-mt-24"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <Badge
+                    variant="outline"
+                    className="rounded-full px-3 py-1 text-xs font-medium"
+                  >
+                    Step 2 • Optional
+                  </Badge>
+                  <h2
+                    id="qwirl-socials-heading"
+                    className="mt-3 text-xl font-semibold"
+                  >
+                    Add ways for people to follow up
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Share a couple links, handles, or notes so people know how
+                    to stay in touch.
+                  </p>
+                </div>
+              </div>
+              <Card className="border-muted/70">
+                <CardContent className="p-0">
                   <EditableUserSocials />
-                </div>
-              </TabsContent>
+                </CardContent>
+              </Card>
+            </section>
 
-              <TabsContent value="polls" className="space-y-8">
-                <div id="qwirl-polls-container">
-                  <VerticalEditView />
+            <section
+              id="qwirl-questions"
+              aria-labelledby="qwirl-questions-heading"
+              className="space-y-6 scroll-mt-24"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <Badge
+                    variant="outline"
+                    className="rounded-full px-3 py-1 text-xs font-medium"
+                  >
+                    Step 3
+                  </Badge>
+                  <h2
+                    id="qwirl-questions-heading"
+                    className="mt-3 text-xl font-semibold"
+                  >
+                    Choose the questions that feel most like you
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Mix grounding questions with a few surprises. Aim for{" "}
+                    {POLL_TARGET} to unlock sharing.
+                  </p>
                 </div>
-              </TabsContent>
-            </Tabs>
+              </div>
+
+              {questionGuidance ? (
+                <Card className="border border-dashed border-primary/30 bg-primary/5">
+                  <CardContent className="space-y-3 p-4">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                      <Badge
+                        variant="secondary"
+                        className="rounded-full bg-primary/10 text-primary"
+                      >
+                        {questionGuidance.badge}
+                      </Badge>
+                      <span>{questionGuidance.title}</span>
+                    </div>
+                    <ul className="ml-5 list-disc space-y-1 text-xs text-muted-foreground">
+                      {questionGuidance.tips.map((tip) => (
+                        <li key={tip}>{tip}</li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              ) : null}
+
+              <div className="space-y-5">
+                <div className="sticky top-0 z-30 space-y-3">
+                  <div className="rounded-2xl border border-border/60 bg-background/95 px-3 py-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-5 sm:py-5">
+                    <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                      <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-4">
+                        <div className="relative flex h-14 w-14 items-center justify-center sm:h-16 sm:w-16">
+                          <div
+                            aria-hidden="true"
+                            className="absolute inset-0 rounded-full"
+                            style={{
+                              background: `conic-gradient(hsl(var(--primary)) ${
+                                progressValue * 3.6
+                              }deg, hsl(var(--muted)) ${
+                                progressValue * 3.6
+                              }deg)`,
+                            }}
+                          />
+                          <div className="absolute inset-[5px] rounded-full border border-muted/40 bg-background" />
+                          <span className="relative text-xs font-semibold text-foreground">
+                            {hasReachedTarget
+                              ? "Ready"
+                              : `${pollCount}/${POLL_TARGET}`}
+                          </span>
+                        </div>
+                        <div className="flex w-full max-w-[420px] flex-col items-center gap-2 text-center sm:max-w-none sm:items-start sm:text-left">
+                          <div className="flex flex-wrap items-center justify-center gap-2 text-xs uppercase tracking-wide text-muted-foreground sm:justify-start">
+                            <span className="rounded-full bg-primary/10 px-2 py-1 font-semibold text-primary">
+                              Step 3 of 3
+                            </span>
+                            <span className="font-medium">Question stack</span>
+                          </div>
+                          <p className="text-sm font-semibold text-foreground sm:text-base">
+                            Make the flow feel natural for someone getting to
+                            know you.
+                          </p>
+                          {hasReachedTarget ? (
+                            <p className="text-xs text-muted-foreground">
+                              You&apos;ve got {pollCount} questions lined up.
+                              Tidy wording or reorder them if you want things to
+                              land better.
+                            </p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              You&apos;re {remainingPolls} away from the
+                              suggested {POLL_TARGET}. Mix in something light
+                              and something unexpected.
+                            </p>
+                          )}
+                          <Progress value={progressValue} className="h-2" />
+                        </div>
+                      </div>
+                      <div className="flex w-full flex-col gap-2 md:w-auto md:items-end md:gap-3">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                          <Button
+                            id="primary-add-question"
+                            onClick={() => setShowAddDialog(true)}
+                            className="h-11 w-full rounded-full px-4 text-sm font-semibold shadow-none sm:h-10 sm:w-auto md:h-11 md:px-5"
+                            icon={PlusIcon}
+                            iconPlacement="left"
+                          >
+                            Add Question
+                          </Button>
+                          <Button
+                            id="primary-add-from-library"
+                            onClick={() => setShowLibrary(true)}
+                            variant="outline"
+                            className="h-11 w-full rounded-full px-4 text-sm font-semibold shadow-none sm:h-10 sm:w-auto md:h-11 md:px-5"
+                            icon={Library}
+                            iconPlacement="left"
+                          >
+                            Add from Library
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {lastLibraryAdd ? (
+                    <div className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-xs text-primary">
+                      <div className="flex items-center gap-2">
+                        <span>
+                          Added{" "}
+                          <span className="font-semibold">
+                            &quot;{lastLibraryAdd}&quot;
+                          </span>{" "}
+                          to your qwirl.
+                        </span>
+                      </div>
+                      <Button
+                        onClick={() => setLastLibraryAdd(null)}
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-primary hover:text-primary"
+                      >
+                        Dismiss
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+                <div id="qwirl-polls-container">
+                  <VerticalEditView
+                    onAddQuestion={() => setShowAddDialog(true)}
+                    onOpenLibrary={() => setShowLibrary(true)}
+                  />
+                </div>
+              </div>
+            </section>
           </div>
         </div>
       </PageLayout>

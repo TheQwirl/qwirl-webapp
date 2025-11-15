@@ -3,7 +3,13 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { QwirlItem } from "./types";
 import { Card, CardContent } from "../ui/card";
-import { ImageIcon, Trash2, GripVertical } from "lucide-react";
+import {
+  ImageIcon,
+  Trash2,
+  GripVertical,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import { Button } from "../ui/button";
 import clsx from "clsx";
 import { Skeleton } from "../ui/skeleton";
@@ -15,6 +21,10 @@ type Props = {
   className?: string;
   handleDelete: () => void;
   isDeleting: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  disableMoveUp?: boolean;
+  disableMoveDown?: boolean;
 };
 
 function DragHandle() {
@@ -57,6 +67,11 @@ const QwirlEditorCard: React.FC<Props> = ({
   poll,
   className,
   handleDelete,
+  isDeleting,
+  onMoveUp,
+  onMoveDown,
+  disableMoveUp,
+  disableMoveDown,
 }) => {
   return (
     <Card
@@ -112,17 +127,43 @@ const QwirlEditorCard: React.FC<Props> = ({
               })}
             </div>
 
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               <Badge variant="outline" className="text-xs">
                 #{poll.position}
               </Badge>
-              <span className="text-xs">{poll.options.length} options</span>
+              <span>{poll.options.length} options</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onMoveUp}
+                  disabled={disableMoveUp || !onMoveUp || isDeleting}
+                  className="h-8 w-8 p-0 text-gray-400 hover:text-primary hover:bg-primary/10 transition-all duration-200 disabled:opacity-40 disabled:hover:bg-transparent"
+                  title="Move question up"
+                  aria-label="Move question up"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onMoveDown}
+                  disabled={disableMoveDown || !onMoveDown || isDeleting}
+                  className="h-8 w-8 p-0 text-gray-400 hover:text-primary hover:bg-primary/10 transition-all duration-200 disabled:opacity-40 disabled:hover:bg-transparent"
+                  title="Move question down"
+                  aria-label="Move question down"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+              </div>
               <div className="flex-shrink-0 block lg:hidden">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleDelete}
-                  className="h-8 w-8 p-0 text-gray-400 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 hover:scale-105"
+                  disabled={isDeleting}
+                  className="h-8 w-8 p-0 text-gray-400 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 hover:scale-105 disabled:opacity-40"
+                  aria-label="Delete question"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -135,7 +176,9 @@ const QwirlEditorCard: React.FC<Props> = ({
               variant="ghost"
               size="sm"
               onClick={handleDelete}
-              className="h-8 w-8 p-0 text-gray-400 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 hover:scale-105"
+              disabled={isDeleting}
+              className="h-8 w-8 p-0 text-gray-400 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 hover:scale-105 disabled:opacity-40"
+              aria-label="Delete question"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
