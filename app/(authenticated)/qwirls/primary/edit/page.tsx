@@ -12,7 +12,8 @@ import {
   Clock3,
   Loader2,
   Circle,
-  Sparkles,
+  BadgeInfo,
+  Shuffle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddPollDialog from "@/components/qwirl/add-poll-dialog";
@@ -68,7 +69,7 @@ const STATUS_CONFIG: Record<StepStatusType, StatusVisualConfig> = {
     iconClass: "text-muted-foreground",
   },
   optional: {
-    icon: Sparkles,
+    icon: BadgeInfo,
     badgeClass:
       "border border-primary/30 bg-primary/5 text-primary dark:border-primary/40 dark:bg-primary/10",
     iconClass: "text-primary",
@@ -89,6 +90,7 @@ const PrimaryQwirlEditPage = () => {
     setShowAddDialog,
     addPollToQwirlMutation,
     handleAddPoll,
+    handleReorder,
     showAddDialog,
   } = useQwirlEditor();
 
@@ -111,6 +113,7 @@ const PrimaryQwirlEditPage = () => {
 
   const [showLibrary, setShowLibrary] = useState(false);
   const [lastLibraryAdd, setLastLibraryAdd] = useState<string | null>(null);
+  const [isShuffling, setIsShuffling] = useState(false);
   const { closeCart } = useCartUIStore();
   const { items: cartItems, clearCart } = useQuestionCart();
 
@@ -131,6 +134,36 @@ const PrimaryQwirlEditPage = () => {
   const visibleSocialsCount = socials.filter(
     (social) => social?.is_visible && social?.url?.trim()
   ).length;
+
+  const handleRandomizeQuestions = async () => {
+    if (!polls || polls.length < 2 || isShuffling) {
+      return;
+    }
+
+    setIsShuffling(true);
+    try {
+      const shuffledPolls = [...polls];
+      for (let i = shuffledPolls.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = shuffledPolls[i];
+        const swapItem = shuffledPolls[j];
+        if (temp !== undefined && swapItem !== undefined) {
+          shuffledPolls[i] = swapItem;
+          shuffledPolls[j] = temp;
+        }
+      }
+
+      await handleReorder(shuffledPolls);
+      toast.success("Question order randomized", {
+        id: "shuffle-qwirl",
+      });
+    } catch (error) {
+      console.error("Failed to randomize questions", error);
+      toast.error("Couldn't shuffle questions. Try again.");
+    } finally {
+      setIsShuffling(false);
+    }
+  };
 
   const coverStatus: StepStatusType = useMemo(() => {
     if (qwirlCoverQuery.isLoading || qwirlQuery.isLoading) {
@@ -186,8 +219,7 @@ const PrimaryQwirlEditPage = () => {
         href: "#qwirl-cover",
         step: "Step 1",
         title: "Set up your cover",
-        description:
-          "Pair a photo with a short intro that sounds like you.",
+        description: "Pair a photo with a short intro that sounds like you.",
         statusType: coverStatus,
         statusLabel:
           coverStatus === "complete"
@@ -211,12 +243,13 @@ const PrimaryQwirlEditPage = () => {
         href: "#qwirl-socials",
         step: "Step 2",
         title: "Add extras (optional)",
-        description:
-          "Share a couple links or details friends usually ask for.",
+        description: "Share a couple links or details friends usually ask for.",
         statusType: socialsStatus,
         statusLabel:
           socialsStatus === "complete"
-            ? `${savedSocialsCount} link${savedSocialsCount === 1 ? "" : "s"} saved`
+            ? `${savedSocialsCount} link${
+                savedSocialsCount === 1 ? "" : "s"
+              } saved`
             : socialsStatus === "loading"
             ? "Loading…"
             : "Optional",
@@ -408,7 +441,9 @@ const PrimaryQwirlEditPage = () => {
                       const statusVisual = STATUS_CONFIG[step.statusType];
                       const StatusIcon = statusVisual.icon;
                       const statusBadgeClass = `inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition ${statusVisual.badgeClass}`;
-                      const statusIconClass = `h-3.5 w-3.5 ${statusVisual.iconClass} ${statusVisual.spin ? "animate-spin" : ""}`;
+                      const statusIconClass = `h-3.5 w-3.5 ${
+                        statusVisual.iconClass
+                      } ${statusVisual.spin ? "animate-spin" : ""}`;
 
                       return (
                         <a
@@ -631,6 +666,18 @@ const PrimaryQwirlEditPage = () => {
                       </div>
                       <div className="flex w-full flex-col gap-2 md:w-auto md:items-end md:gap-3">
                         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                          <Button
+                            id="primary-shuffle-questions"
+                            onClick={handleRandomizeQuestions}
+                            variant="secondary"
+                            className="h-11 w-full rounded-full px-4 text-sm font-semibold shadow-none sm:h-10 sm:w-auto md:h-11 md:px-5"
+                            icon={Shuffle}
+                            iconPlacement="left"
+                            disabled={isShuffling || pollCount < 2}
+                            loading={isShuffling}
+                          >
+                            Randomize order
+                          </Button>
                           <Button
                             id="primary-add-question"
                             onClick={() => setShowAddDialog(true)}

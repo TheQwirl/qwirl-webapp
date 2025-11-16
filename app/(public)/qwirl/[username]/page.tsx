@@ -27,7 +27,7 @@ const PrimaryQwirlPage = async ({
   );
 
   return (
-    <div className="h-screen w-full bg-primary text-primary-foreground flex items-center justify-center px-5 md:px-20">
+    <div className="min-h-screen w-full bg-primary text-primary-foreground flex items-center justify-center px-5 md:px-20">
       <QwirlRespond user={userResponse.data} />
     </div>
   );

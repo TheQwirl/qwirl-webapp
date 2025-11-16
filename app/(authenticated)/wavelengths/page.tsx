@@ -4,12 +4,13 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Sparkles,
   RefreshCcw,
   Users as UsersIcon,
   Compass,
   ArrowRight,
   ArrowUpRight,
+  TrendingUp,
+  CircleHelp,
 } from "lucide-react";
 
 import { PageLayout } from "@/components/layout/page-layout";
@@ -510,7 +511,7 @@ const WavelengthEmptyState = () => {
               size="sm"
               variant="outline"
               className="rounded-full px-4 py-1"
-              icon={Sparkles}
+              icon={TrendingUp}
               iconPlacement="left"
             >
               <Link href="/qwirls/primary/edit">Polish my Qwirl</Link>
@@ -541,7 +542,7 @@ const GrowthPlaybook = () => {
       title: "Create a secondary Qwirl",
       description:
         "Spin up themed Qwirls for hobbies, trips, or group chats. Shared answers there stack onto the primary wavelength.",
-      icon: Sparkles,
+      icon: CircleHelp,
     },
     {
       title: "Share your link often",
