@@ -31,7 +31,7 @@ const OptionsList = ({
   onVote,
   isReviewMode,
   // isAnsweredCurrent,
-  // isSkippedCurrent,
+  isSkippedCurrent,
   userName,
 }: OptionsListProps) => {
   return (
@@ -42,17 +42,22 @@ const OptionsList = ({
         const count = optionStatistics?.counts?.[option] ?? 0;
         const total = responseCount ?? 0;
         const percentage = total > 0 && count > 0 ? (count / total) * 100 : 0;
+
+        const shouldRenderResults = Boolean(userAnswer);
+        const shouldRenderDisplay = isSkippedCurrent && !shouldRenderResults;
+        const shouldRenderInteractive =
+          !shouldRenderResults && !shouldRenderDisplay;
         return (
           <motion.div
             key={`${option}-${index}`}
-            whileHover={!isReviewMode && !userAnswer ? { scale: 1.02 } : {}}
-            whileTap={!isReviewMode && !userAnswer ? { scale: 0.98 } : {}}
+            whileHover={shouldRenderInteractive ? { scale: 1.02 } : {}}
+            whileTap={shouldRenderInteractive ? { scale: 0.98 } : {}}
             className="flex items-center gap-4 relative z-10"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.2, delay: index * 0.05 }}
           >
-            {userAnswer ? (
+            {shouldRenderResults ? (
               <PollOption
                 option={option}
                 optionNumber={index + 1}
@@ -62,6 +67,14 @@ const OptionsList = ({
                 responders={[]}
                 percentage={percentage}
                 userName={getFirstName(userName) ?? userName ?? undefined}
+                className="w-full"
+              />
+            ) : shouldRenderDisplay ? (
+              <PollOption
+                option={option}
+                optionNumber={index + 1}
+                variant="display"
+                isMyChoice={isOwnerChoice}
                 className="w-full"
               />
             ) : (

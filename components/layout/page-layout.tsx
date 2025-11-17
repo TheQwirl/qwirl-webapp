@@ -9,6 +9,7 @@ interface PageLayoutProps {
   middleColumnClassName?: string;
   rightColumnClassName?: string;
   backNavigation?: BackNavigationConfig;
+  parentDivClassName?: string;
 }
 
 export const PageLayout = (props: PageLayoutProps) => {

@@ -84,8 +84,9 @@ const HomePage = () => {
         subtitle: `Welcome back, ${user?.name || user?.username}`,
         hideBackButton: true,
       }}
+      parentDivClassName="!p-0"
     >
-      <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 pb-4">
+      <div className="space-y-4 sm:space-y-6 pb-4">
         {/* Main Content - Qwirl Overview or Empty State */}
         {hasQwirl ? (
           <QwirlOverviewSection

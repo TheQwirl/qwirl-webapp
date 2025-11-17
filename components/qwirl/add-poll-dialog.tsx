@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -9,10 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useForm, FormProvider } from "react-hook-form";
+import type { FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QwirlPollData, QwirlPollSchema } from "./schema";
 import PollComposerForm from "./poll-composer-form";
-import { X } from "lucide-react";
+import { Lightbulb, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Props {
@@ -43,10 +44,13 @@ const AddPollDialog: React.FC<Props> = ({
     reset,
     clearErrors,
     setError,
-    formState: { isValid, isSubmitting: formIsSubmitting },
+    setFocus,
+    formState: { isValid, isSubmitting: formIsSubmitting, errors, submitCount },
   } = methods;
 
   const isBusy = isSubmitting || formIsSubmitting;
+  const [showTips, setShowTips] = useState(false);
+  const rootErrorMessage = errors.root?.message;
 
   // Reset form when dialog closes
   useEffect(() => {
@@ -56,8 +60,30 @@ const AddPollDialog: React.FC<Props> = ({
         options: ["Option 1", "Option 2"],
         owner_answer_index: 0,
       });
+      setShowTips(false);
+      clearErrors();
     }
-  }, [isModalOpen, reset]);
+  }, [isModalOpen, reset, clearErrors]);
+
+  useEffect(() => {
+    if (!isModalOpen || submitCount === 0) return;
+    if (errors.question_text) {
+      setFocus("question_text");
+      return;
+    }
+
+    if (Array.isArray(errors.options)) {
+      const firstOptionWithError = errors.options.findIndex(Boolean);
+      if (firstOptionWithError >= 0) {
+        setFocus(`options.${firstOptionWithError}` as FieldPath<QwirlPollData>);
+        return;
+      }
+    }
+
+    if (errors.options && !Array.isArray(errors.options)) {
+      setFocus("options.0" as FieldPath<QwirlPollData>);
+    }
+  }, [errors, isModalOpen, setFocus, submitCount]);
 
   const handleOpenChange = (open: boolean) => {
     setIsModalOpen(open);
@@ -81,13 +107,21 @@ const AddPollDialog: React.FC<Props> = ({
       <DialogContent className="w-full max-w-lg overflow-hidden rounded-2xl border bg-background p-0 shadow-xl sm:max-h-[88vh]">
         <div className="flex h-full max-h-[100vh] flex-col">
           <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 px-5 py-4 backdrop-blur">
-            <div>
+            <div className="flex items-center gap-3">
               <DialogTitle className="text-base font-semibold">
                 Craft a custom question
               </DialogTitle>
-              <p className="text-xs text-muted-foreground">
-                Personalize the poll your audience will see
-              </p>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={() => setShowTips(!showTips)}
+                icon={Lightbulb}
+                iconPlacement="left"
+              >
+                {showTips ? "Hide tips" : "Show tips"}
+              </Button>
             </div>
             <DialogClose asChild>
               <Button
@@ -103,14 +137,14 @@ const AddPollDialog: React.FC<Props> = ({
 
           <FormProvider {...methods}>
             <form onSubmit={onSubmit} className="flex h-full flex-col">
-              <ScrollArea className="flex-1 px-3 md:px-5 py-5">
-                <div className="space-y-5 md:pr-2 h-[500px]">
-                  <PollComposerForm />
-                  {methods.formState.errors.root?.message && (
+              <ScrollArea className="flex-1 px-4 py-5 sm:px-5">
+                <div className="space-y-5 pb-2">
+                  <PollComposerForm showTips={showTips} />
+                  {rootErrorMessage ? (
                     <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                      {methods.formState.errors.root.message}
+                      {rootErrorMessage}
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </ScrollArea>
 

@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { formatDistanceToNowStrict } from "date-fns";
 import { toast } from "sonner";
 import {
-  ArrowRight,
   ArrowUpRight,
   BarChart3,
   Compass,
@@ -18,6 +17,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/user-avatar";
@@ -25,6 +31,7 @@ import WavelengthIndicator from "@/components/wavelength-indicator";
 import { components } from "@/lib/api/v1-client-side";
 import { MyUser } from "@/components/profile/types";
 import { CONSTANTS } from "@/constants/qwirl-respond";
+import { ArrowRight } from "lucide-react";
 
 type ActivityResponse = components["schemas"]["ActivityResponse"];
 type WavelengthUserResponse = components["schemas"]["WavelengthUserResponse"];
@@ -124,7 +131,7 @@ export function QwirlOverviewSection({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="space-y-6"
+      className="space-y-4"
     >
       <HeroPulseCard
         user={user}
@@ -140,26 +147,28 @@ export function QwirlOverviewSection({
         shareDisabled={!shareUrl || isIncomplete}
       />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <RecentResponsesList
-          activities={recentActivities}
-          isLoading={isLoadingActivity}
-        />
-        <TopMatchSpotlight
-          match={topMatch}
-          totalCount={topMatchesCount}
-          isLoading={isLoadingMatches}
+      <div className="px-2 sm:px-4 space-y-4">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <RecentResponsesList
+            activities={recentActivities}
+            isLoading={isLoadingActivity}
+          />
+          <TopMatchSpotlight
+            match={topMatch}
+            totalCount={topMatchesCount}
+            isLoading={isLoadingMatches}
+          />
+        </div>
+
+        <HomeActionFooter
+          isIncomplete={isIncomplete}
+          hasRecentActivity={hasRecentActivity}
+          hasMatches={hasMatches}
+          onShare={handleShare}
+          shareDisabled={!shareUrl}
+          username={user?.username}
         />
       </div>
-
-      <HomeActionFooter
-        isIncomplete={isIncomplete}
-        hasRecentActivity={hasRecentActivity}
-        hasMatches={hasMatches}
-        onShare={handleShare}
-        shareDisabled={!shareUrl}
-        username={user?.username}
-      />
     </motion.div>
   );
 }
@@ -191,7 +200,6 @@ function HeroPulseCard({
   onShare,
   shareDisabled,
 }: HeroPulseCardProps) {
-  const displayName = user?.name?.trim() || user?.username;
   const heroTitle = cover?.name || cover?.title || "Your Qwirl";
   const heroDescription = cover?.description?.trim()?.length
     ? cover.description
@@ -223,7 +231,7 @@ function HeroPulseCard({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-border/40 px-6 py-8 sm:px-10 sm:py-12",
+        "relative overflow-hidden  px-6 py-8 ",
         hasBackground
           ? "bg-black text-white"
           : "bg-gradient-to-br from-primary/10 via-background to-background"
@@ -243,8 +251,8 @@ function HeroPulseCard({
         </>
       )}
 
-      <div className="relative z-10 flex flex-col gap-6">
-        <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground/80 dark:text-muted-foreground/70">
+      <div className="relative z-10 flex flex-col gap-3">
+        <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/80 dark:text-muted-foreground/70">
           <span>Your Qwirl pulse</span>
         </div>
 
@@ -261,17 +269,6 @@ function HeroPulseCard({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Badge
-            variant="secondary"
-            className={cn(
-              "flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium",
-              hasBackground
-                ? "bg-white/10 text-white border-white/20"
-                : "bg-primary/10 text-primary"
-            )}
-          >
-            Welcome back, {displayName}
-          </Badge>
           <Badge
             variant="outline"
             className={cn(
@@ -295,7 +292,7 @@ function HeroPulseCard({
         ) : isIncomplete ? (
           <div
             className={cn(
-              "rounded-2xl border px-5 py-4 shadow-sm",
+              "",
               hasBackground
                 ? "border-white/15 bg-white/5"
                 : "border-border/40 bg-background/80"
@@ -336,20 +333,24 @@ function HeroPulseCard({
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mt-3">
           {isIncomplete ? (
             <>
-              <Button
-                asChild
-                icon={ArrowRight}
-                iconPlacement="right"
-                variant={hasBackground ? "secondary" : "default"}
-              >
-                <Link href="/qwirls/primary/edit">Complete Qwirl</Link>
-              </Button>
-              <Button asChild variant={hasBackground ? "ghost" : "outline"}>
-                <Link href={previewHref}>Preview</Link>
-              </Button>
+              <Link href="/qwirls/primary/edit">
+                <Button
+                  asChild
+                  icon={ArrowRight}
+                  iconPlacement="right"
+                  variant={hasBackground ? "secondary" : "default"}
+                >
+                  Complete Qwirl
+                </Button>
+              </Link>
+              <Link href={previewHref}>
+                <Button asChild variant={hasBackground ? "ghost" : "outline"}>
+                  Preview
+                </Button>
+              </Link>
             </>
           ) : (
             <>
@@ -360,19 +361,28 @@ function HeroPulseCard({
                 variant={hasBackground ? "secondary" : "default"}
                 disabled={shareDisabled}
               >
-                Share your Qwirl
+                Share Qwirl
               </Button>
-              <Button
-                asChild
-                variant={hasBackground ? "ghost" : "outline"}
-                icon={BarChart3}
-                iconPlacement="left"
-              >
-                <Link href="/qwirls/primary/insights">View insights</Link>
-              </Button>
-              <Button asChild variant={hasBackground ? "ghost" : "outline"}>
-                <Link href={previewHref}>Preview</Link>
-              </Button>
+              <Link href="/qwirls/primary/insights">
+                <Button
+                  asChild
+                  variant={hasBackground ? "ghost" : "outline"}
+                  icon={BarChart3}
+                  iconPlacement="left"
+                >
+                  Insights
+                </Button>
+              </Link>
+              <Link href={previewHref}>
+                <Button
+                  icon={ArrowRight}
+                  iconPlacement="right"
+                  asChild
+                  variant={hasBackground ? "ghost" : "outline"}
+                >
+                  Preview
+                </Button>
+              </Link>
             </>
           )}
         </div>
@@ -454,42 +464,46 @@ function RecentResponsesList({
   const items = activities?.slice(0, 3) ?? [];
 
   return (
-    <section className="space-y-4 rounded-3xl border border-border/40 bg-background/70 p-4 sm:p-6 backdrop-blur-sm">
-      <div className="flex items-center justify-between gap-2">
+    <Card className="rounded-3xl backdrop-blur-sm">
+      <CardHeader className="flex flex-col gap-2 space-y-0 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
-          <h2 className="text-sm font-semibold">Latest responses</h2>
-          <p className="text-xs text-muted-foreground">
+          <CardTitle className="text-sm font-semibold">
+            Latest responses
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
             Stay in sync with what&apos;s happening.
-          </p>
+          </CardDescription>
         </div>
         <Link
           href="/qwirls/primary/insights"
-          className="text-xs font-medium text-primary hover:text-primary/80"
+          className="text-xs font-medium text-primary hover:text-primary/80 self-start sm:self-auto"
         >
           See all
         </Link>
-      </div>
+      </CardHeader>
 
-      {isLoading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-16 rounded-2xl" />
-          <Skeleton className="h-16 rounded-2xl" />
-          <Skeleton className="h-16 rounded-2xl" />
-        </div>
-      ) : items.length > 0 ? (
-        <div className="space-y-3">
-          {items.map((activity) => (
-            <ActivityRow key={activity.id} activity={activity} />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          icon={Users}
-          title="No activity yet"
-          description="Share your Qwirl to invite your first responses."
-        />
-      )}
-    </section>
+      <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
+        {isLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-16 rounded-2xl" />
+            <Skeleton className="h-16 rounded-2xl" />
+            <Skeleton className="h-16 rounded-2xl" />
+          </div>
+        ) : items.length > 0 ? (
+          <div className="space-y-3">
+            {items.map((activity) => (
+              <ActivityRow key={activity.id} activity={activity} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={Users}
+            title="No activity yet"
+            description="Share your Qwirl to invite your first responses."
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -636,73 +650,75 @@ function TopMatchSpotlight({
   isLoading,
 }: TopMatchSpotlightProps) {
   return (
-    <section className="space-y-4 rounded-3xl border border-border/40 bg-background/70 p-4 sm:p-6">
-      <div className="flex items-center justify-between gap-2">
+    <Card className="rounded-3xl backdrop-blur-sm">
+      <CardHeader className="flex flex-col gap-2 space-y-0 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
-          <h2 className="text-sm font-semibold">Top match</h2>
-          <p className="text-xs text-muted-foreground">
+          <CardTitle className="text-sm font-semibold">Top match</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
             Your strongest wavelength right now.
-          </p>
+          </CardDescription>
         </div>
         {totalCount > 1 && (
           <Badge variant="outline" className="rounded-full text-[10px]">
             {totalCount} matches
           </Badge>
         )}
-      </div>
+      </CardHeader>
 
-      {isLoading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-20 rounded-2xl" />
-          <Skeleton className="h-9 w-32 rounded-full" />
-        </div>
-      ) : match ? (
-        <div className="space-y-4">
-          <Link
-            href={`/qwirl/${match.username}`}
-            className="block rounded-2xl border border-border/40 bg-primary/5 p-4 transition-all hover:border-primary/50 hover:bg-primary/10"
-          >
-            <div className="flex items-start gap-3">
-              <UserAvatar
-                name={match.name ?? match.username}
-                image={match.avatar ?? undefined}
-                size="sm"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold">
-                  {match.name ?? match.username}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  @{match.username}
-                </p>
+      <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
+        {isLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-20 rounded-2xl" />
+            <Skeleton className="h-9 w-32 rounded-full" />
+          </div>
+        ) : match ? (
+          <div className="space-y-4">
+            <Link
+              href={`/qwirl/${match.username}`}
+              className="block rounded-2xl border border-border/40 bg-primary/5 p-4 transition-all hover:border-primary/50 hover:bg-primary/10"
+            >
+              <div className="flex items-start gap-3">
+                <UserAvatar
+                  name={match.name ?? match.username}
+                  image={match.avatar ?? undefined}
+                  size="sm"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">
+                    {match.name ?? match.username}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    @{match.username}
+                  </p>
+                </div>
+                <ArrowUpRight className="h-4 w-4 text-primary" />
               </div>
-              <ArrowUpRight className="h-4 w-4 text-primary" />
-            </div>
-            <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-              <span>Wavelength score</span>
-              <WavelengthIndicator
-                variant="badge"
-                wavelength={match.wavelength_score}
-                userName={match.username}
-              />
-            </div>
-          </Link>
-          <Link
-            href="/wavelengths"
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80"
-          >
-            View all matches
-            <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
-      ) : (
-        <EmptyState
-          icon={Users}
-          title="No matches yet"
-          description="Share your Qwirl to discover your wavelength crew."
-        />
-      )}
-    </section>
+              <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                <span>Wavelength score</span>
+                <WavelengthIndicator
+                  variant="badge"
+                  wavelength={match.wavelength_score}
+                  userName={match.username}
+                />
+              </div>
+            </Link>
+            <Link
+              href="/wavelengths"
+              className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80"
+            >
+              View all matches
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+        ) : (
+          <EmptyState
+            icon={Users}
+            title="No matches yet"
+            description="Share your Qwirl to discover your wavelength crew."
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

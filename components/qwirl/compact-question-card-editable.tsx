@@ -280,7 +280,7 @@ export const CompactQuestionCardEditable: React.FC<
             iconPlacement="left"
             onClick={handleAddOption}
             type="button"
-            className="w-full !py-6 border-2 border-dashed !bg-transparent shadow-none text-foreground"
+            className="w-full !py-4 border-2 border-dashed !bg-transparent shadow-none text-foreground"
           >
             Add Option
           </Button>

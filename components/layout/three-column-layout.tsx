@@ -9,6 +9,7 @@ interface ThreeColumnLayoutProps {
   className?: string;
   middleColumnClassName?: string;
   rightColumnClassName?: string;
+  parentDivClassName?: string;
 }
 
 export const ThreeColumnLayout = ({
@@ -18,6 +19,7 @@ export const ThreeColumnLayout = ({
   className,
   middleColumnClassName,
   rightColumnClassName,
+  parentDivClassName,
 }: ThreeColumnLayoutProps) => {
   const hasRightSidebar = !!rightSidebar;
 
@@ -39,7 +41,8 @@ export const ThreeColumnLayout = ({
         <div
           className={clsx(
             "p-2 sm:p-4 border-r border-l",
-            backNavigation && "flex-1 overflow-auto "
+            backNavigation && "flex-1 overflow-auto ",
+            parentDivClassName
           )}
         >
           {children}
