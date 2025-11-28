@@ -74,7 +74,6 @@ const OptionsList = ({
                 option={option}
                 optionNumber={index + 1}
                 variant="display"
-                isMyChoice={isOwnerChoice}
                 className="w-full"
               />
             ) : (
@@ -82,11 +81,7 @@ const OptionsList = ({
                 option={option}
                 optionNumber={index + 1}
                 variant="interactive"
-                isSelected={isSelected}
-                isOwnerChoice={isOwnerChoice}
                 onSelect={() => onVote(option)}
-                percentage={percentage}
-                showPercentage={false}
                 userName={getFirstName(userName) ?? userName ?? undefined}
                 className="w-full"
               />

@@ -60,7 +60,7 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
   handleNotifyMe,
   children,
 }) => {
-  const { user: currentUser } = authStore();
+  const { user: currentUser, isAuthenticated } = authStore();
 
   // Loading state
   if (isLoading || isCoverLoading || !user) {
@@ -80,7 +80,7 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
   const variant = getUserVariant();
 
   const isIncompleteQwirl = Boolean(
-    !isLoading && pollsLength < CONSTANTS.MIN_QWIRL_POLLS
+    !isLoading && isAuthenticated && pollsLength < CONSTANTS.MIN_QWIRL_POLLS
   );
 
   // Check if there are new unanswered questions (user has completed but owner added more)
@@ -137,6 +137,7 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
               ? "completed"
               : undefined
           }
+          isProfile
         />
       </div>
     );
@@ -164,13 +165,14 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
 
   // Interactive state
   return (
-    <Card className="w-full max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-card/80 backdrop-blur-md border">
+    <Card className="w-full max-w-md mx-auto shadow-2xl rounded-3xl bg-card/80 backdrop-blur-md border">
       <CardHeader className="flex-row items-center justify-between p-4 border-b border-border/50">
         <div className="flex items-center gap-3">
           <UserAvatar
             name={user?.name || "NA"}
-            image="https://avatar.iran.liara.run/public/boy?username="
+            image={user?.avatar || undefined}
             ringed
+            className="shadow rounded-full"
           />
           <div>
             <p className="font-semibold text-foreground capitalize">

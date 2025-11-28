@@ -1,13 +1,13 @@
 import {
-  BarChart3,
   Edit,
   Settings,
   Users,
-  Library,
-  CircleHelp,
+  // Library,
   Home,
-  Waves,
+  HeartPulseIcon,
+  MessageCircleHeart,
 } from "lucide-react";
+import { QwirlLogoIcon } from "@/components/icons/qwirl-logo-icon";
 
 export interface MenuItem {
   title: string;
@@ -37,7 +37,7 @@ export const MENU_SECTIONS: MenuSection[] = [
       },
       {
         title: "My Qwirl",
-        icon: CircleHelp,
+        icon: QwirlLogoIcon,
         type: "group",
         children: [
           {
@@ -47,17 +47,17 @@ export const MENU_SECTIONS: MenuSection[] = [
             icon: Edit,
           },
           {
-            title: "Insights",
-            url: "/qwirls/primary/insights",
+            title: "Responses",
+            url: "/qwirls/primary/responses",
             type: "single",
-            icon: BarChart3,
+            icon: MessageCircleHeart,
           },
         ],
       },
       {
-        title: "Wavelengths",
-        icon: Waves,
-        url: "/wavelengths",
+        title: "Connections",
+        icon: HeartPulseIcon,
+        url: "/connections",
         type: "single",
       },
     ],
@@ -71,12 +71,12 @@ export const MENU_SECTIONS: MenuSection[] = [
         url: "/discover",
         type: "single",
       },
-      {
-        title: "Question Library",
-        icon: Library,
-        url: "/question-library",
-        type: "single",
-      },
+      // {
+      //   title: "Question Library",
+      //   icon: Library,
+      //   url: "/question-library",
+      //   type: "single",
+      // },
       {
         title: "Settings",
         icon: Settings,

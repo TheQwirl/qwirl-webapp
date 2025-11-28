@@ -27,10 +27,7 @@ const SidebarSingleMenuItem = ({ item }: { item: MenuItem }) => {
             {isActive && (
               <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-primary" />
             )}
-            <item.icon
-              className="mr-2"
-              style={{ width: "20px", height: "20px" }}
-            />
+            <item.icon className="mr-2" size={20} />
             <span className="text-sm font-medium">{item.title}</span>
           </div>
         ) : (
@@ -39,10 +36,7 @@ const SidebarSingleMenuItem = ({ item }: { item: MenuItem }) => {
             {isActive && (
               <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-primary" />
             )}
-            <item.icon
-              className="mr-2"
-              style={{ width: "20px", height: "20px" }}
-            />
+            <item.icon className="mr-2" size={20} />
             <span className="text-sm font-medium">{item.title}</span>
           </Link>
         )}

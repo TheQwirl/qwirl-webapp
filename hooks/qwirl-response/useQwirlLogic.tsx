@@ -20,6 +20,22 @@ export function useQwirlLogic({ user }: UseQwirlLogicProps) {
   const { queryKey, userQwirlQuery } = useQwirlSession(user);
   const data = userQwirlQuery.data;
 
+  const userDataQuery = $api.useQuery(
+    "get",
+    "/users/username/{username}",
+    {
+      params: {
+        path: {
+          username: user?.username || "",
+        },
+      },
+    },
+    {
+      enabled: !!user?.username,
+      initialData: user ?? undefined,
+    }
+  );
+
   // Get qwirl cover data
   const qwirlCover = $api.useQuery("get", "/qwirl/{qwirl_id}/cover", {
     params: { path: { qwirl_id: user?.primary_qwirl_id ?? 0 } },
@@ -103,10 +119,11 @@ export function useQwirlLogic({ user }: UseQwirlLogicProps) {
         onSuccess: () => {
           // Refetch to get updated wavelength in the query data
           userQwirlQuery.refetch();
+          userDataQuery?.refetch();
         },
       }
     );
-  }, [finishQwirlSession, data?.session_id, userQwirlQuery]);
+  }, [data?.session_id, finishQwirlSession, userQwirlQuery, userDataQuery]);
 
   const handleVote = useCallback(
     async (selectedAnswer: string) => {
@@ -363,7 +380,7 @@ export function useQwirlLogic({ user }: UseQwirlLogicProps) {
     data,
     polls,
     currentPoll,
-    user,
+    user: userDataQuery.data,
     qwirlCoverData: qwirlCover.data,
 
     // UI State

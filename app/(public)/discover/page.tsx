@@ -195,6 +195,7 @@ const CommunityPage = () => {
                         }
                         className="h-full"
                         variant={"visitor"}
+                        isProfile
                       />
                     </Link>
                   </motion.div>

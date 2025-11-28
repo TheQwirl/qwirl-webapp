@@ -23,14 +23,14 @@ const flattenMenuItems = () => {
         url: item.url ?? "/",
       });
     } else if (item.type === "group" && item?.children) {
-      // For groups, add the first child
-      if (item.children.length > 0) {
+      // For groups, add all children
+      item.children.forEach((child) => {
         items.push({
-          title: item.title,
-          icon: item.icon,
-          url: item?.children?.[0]?.url ?? "/",
+          title: child.title,
+          icon: child.icon,
+          url: child.url ?? "/",
         });
-      }
+      });
     }
   });
 
@@ -67,7 +67,7 @@ export function MobileNavBar() {
                     : "text-foreground"
                 )}
               >
-                <Icon className="h-6 w-6" />
+                <Icon className="h-6 w-6" size={24} />
               </div>
             </Link>
           );

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye } from "lucide-react";
+import { Eye, HeartPulseIcon } from "lucide-react";
 import { Qwirl } from "../types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,6 @@ const QwirlCompletionCard = ({
   userAvatar,
   username,
   userId,
-  // categories,
   backgroundImage,
   onStartReview,
   onStartAnsweringNew,
@@ -46,7 +45,7 @@ const QwirlCompletionCard = ({
   return (
     <Card
       className={cn(
-        "bg-white shadow-lg rounded-lg text-center flex flex-col items-center max-w-2xl mx-auto h-full max-h-[90vh] overflow-hidden relative"
+        "bg-white shadow-lg rounded-lg text-left flex flex-col items-center max-w-2xl mx-auto h-full max-h-[90vh] overflow-hidden relative"
       )}
     >
       {/* Background Image */}
@@ -77,11 +76,15 @@ const QwirlCompletionCard = ({
         />
       </div>
 
-      <h2 className="text-xl font-bold text-gray-900 px-8">
-        {userName || username}
-      </h2>
-
-      <p className="text-gray-600  text-xs px-8">@{username}</p>
+      <div className="flex justify-between items-center w-full px-8 gap-6">
+        <div className="text-right">
+          <h2 className="text-xl font-bold text-gray-900 ">
+            {userName || username}
+          </h2>
+          <p className="text-gray-600  text-xs">@{username}</p>
+        </div>
+        <WavelengthIndicator wavelength={wavelength} />
+      </div>
 
       {/* Categories
       {categories && categories.length > 0 && (
@@ -145,11 +148,6 @@ const QwirlCompletionCard = ({
           <div className="space-y-4">
             <UserSocialsDisplay userId={userId} variant="inline" />
             {/* Wavelength Section */}
-            <WavelengthIndicator
-              wavelength={wavelength}
-              userName={userName ?? ""}
-            />
-
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3 text-center">
               <div className="bg-muted/30 rounded-lg p-3">
@@ -225,7 +223,8 @@ const QwirlCompletionCard = ({
                                 variant="default"
                                 className="text-[10px] px-1.5 py-0 h-4"
                               >
-                                🎯
+                                <HeartPulseIcon className="w-3 h-3 mr-1" />
+                                Both
                               </Badge>
                             ) : (
                               <>
@@ -291,16 +290,12 @@ const QwirlCompletionCard = ({
             size="sm"
             icon={Eye}
             iconPlacement="left"
-            className="flex-1 rounded-full shadow-sm"
+            className="flex-1"
           >
             Review
           </Button>
           {newCount > 0 && (
-            <Button
-              onClick={onStartAnsweringNew}
-              size="sm"
-              className="flex-1 rounded-full shadow-sm"
-            >
+            <Button onClick={onStartAnsweringNew} size="sm" className="flex-1">
               Answer New
             </Button>
           )}

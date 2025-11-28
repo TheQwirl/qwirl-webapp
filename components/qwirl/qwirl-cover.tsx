@@ -2,9 +2,18 @@ import React, { forwardRef, useState } from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import { Card, CardContent } from "../ui/card";
-import { cn } from "@/lib/utils";
+import { cn, shareOrCopy } from "@/lib/utils";
 import { UserAvatar } from "../user-avatar";
-import { Send, Eye, EyeOff } from "lucide-react";
+import {
+  Send,
+  Eye,
+  EyeOff,
+  MessageCircleHeart,
+  SquareArrowOutUpRight,
+  ArrowRight,
+  Telescope,
+  Share2,
+} from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import Link from "next/link";
@@ -39,12 +48,14 @@ interface QwirlCoverProps extends React.HTMLAttributes<HTMLDivElement> {
   hasNewQuestions?: boolean;
   previewOrReview?: "preview" | "review";
   actions?: React.ReactNode;
+  noActions?: boolean;
   showCategories?: boolean;
   categoriesTagSize?: "sm" | "md";
   showTotalPolls?: boolean;
   showVisibility?: boolean;
   visibility?: boolean;
   answeringStatus?: "in_progress" | "completed" | undefined;
+  isProfile?: boolean;
 }
 
 const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
@@ -62,21 +73,21 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
       hasNewQuestions = false,
       previewOrReview = "preview",
       actions,
+      noActions = false,
       showCategories = true,
       categoriesTagSize = "sm",
       showTotalPolls = false,
       showVisibility = false,
       visibility = false,
       answeringStatus,
+      isProfile = false,
       ...rest
     },
     ref
   ) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
-    const description =
-      qwirlCoverData?.description ||
-      "Take this Qwirl to see how well you know me and find out what we have in common. Let's see if we're a match!";
+    const description = qwirlCoverData?.description || "";
 
     // Check if description exceeds approximately 3 lines (roughly 150 characters)
     const needsTruncation = description.length > 150;
@@ -90,7 +101,7 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
         {...rest}
         ref={ref}
         className={cn(
-          "bg-white shadow-lg rounded-lg text-center p-8 flex flex-col items-center max-w-2xl mx-auto h-full relative",
+          "bg-white shadow-lg rounded-lg text-center p-6 flex flex-col items-center max-w-2xl mx-auto h-full relative",
           isIncomplete && "opacity-90",
           rest.className
         )}
@@ -98,7 +109,7 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
         {/* Background Image */}
         <div
           className={cn(
-            "relative w-full h-48 mb-6 rounded-lg overflow-hidden",
+            "relative w-full h-48 mb-6 mt-2 rounded-lg overflow-hidden",
             isIncomplete && "border-4 border-dashed border-gray-400"
           )}
         >
@@ -125,6 +136,32 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
             />
           )}
 
+          {(showTotalPolls && qwirlCoverData?.totalPolls !== undefined) ||
+          (variant === "owner" && !isIncomplete) ? (
+            <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-3 text-white text-xs font-semibold">
+              {showTotalPolls && qwirlCoverData?.totalPolls !== undefined && (
+                <div className="bg-black/40 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                  {qwirlCoverData.totalPolls} polls
+                </div>
+              )}
+              {variant === "owner" && !isIncomplete && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    shareOrCopy(
+                      `${window.location.origin}/qwirl/${user?.username}`
+                    );
+                  }}
+                  className="ml-auto bg-black/40 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5 text-white/90 hover:text-white transition-colors"
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                  Share
+                </button>
+              )}
+            </div>
+          ) : null}
+
           {/* Incomplete overlay text */}
           {isIncomplete && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -135,7 +172,7 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
           )}
         </div>
 
-        <div className={cn("-mt-16 mb-4 z-10 relative")}>
+        <div className={cn("-mt-16  z-10 relative")}>
           <UserAvatar
             image={user?.avatar ?? ""}
             size="xl"
@@ -145,57 +182,59 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
           />
         </div>
 
-        <h2 className="text-xl font-bold text-gray-900">
-          {qwirlCoverData?.name || qwirlCoverData?.title}
-        </h2>
+        {isProfile ? (
+          <h2 className="text-xl font-bold text-gray-900">
+            {user?.name || user?.username}
+          </h2>
+        ) : (
+          <h2 className="text-xl font-bold text-gray-900">
+            {qwirlCoverData?.name || qwirlCoverData?.title}
+          </h2>
+        )}
 
-        <p className="text-gray-600 text-xs">By @{user?.username || "user"}</p>
+        <p className="text-gray-600 text-xs">
+          {!isProfile && "By"} @{user?.username || "user"}
+        </p>
 
-        {variant === "owner" &&
-          (showTotalPolls || showVisibility) &&
-          !isIncomplete && (
-            <div className="flex items-center gap-2 z-20 mt-2">
-              {showTotalPolls && qwirlCoverData?.totalPolls !== undefined && (
-                <Badge
-                  variant="secondary"
-                  className="text-[10px] px-2 py-0.5 flex items-center gap-1"
+        {variant === "owner" && showVisibility && !isIncomplete && (
+          <div className="flex items-center gap-2 z-20 mt-2">
+            {showVisibility && (
+              <div className="flex items-center gap-1.5 bg-secondary rounded-full text-secondary-foreground text-[10px] px-2 py-0.5">
+                {visibility ? (
+                  <Eye className="h-3 w-3" />
+                ) : (
+                  <EyeOff className="h-3 w-3" />
+                )}
+                <span>{visibility ? "Visible" : "Hidden"}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex-grow flex flex-col items-center">
+          {displayDescription && (
+            <div className="mt-2 max-w-md">
+              <p className="text-gray-600 text-sm italic">
+                {displayDescription}
+              </p>
+              {needsTruncation && (
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-primary hover:text-primary/80 text-sm font-medium mt-1 transition-colors"
                 >
-                  {qwirlCoverData.totalPolls} polls
-                </Badge>
-              )}
-              {showVisibility && (
-                <div className="flex items-center gap-1.5 bg-secondary rounded-full text-secondary-foreground text-[10px] px-2 py-0.5">
-                  {visibility ? (
-                    <Eye className="h-3 w-3" />
-                  ) : (
-                    <EyeOff className="h-3 w-3" />
-                  )}
-                  <span>{visibility ? "Visible" : "Hidden"}</span>
-                </div>
+                  {isExpanded ? "Show less" : "Read more..."}
+                </button>
               )}
             </div>
           )}
-
-        <div className="flex-grow flex flex-col items-center">
-          <div className="mt-4 max-w-md">
-            <p className="text-gray-600">{displayDescription}</p>
-            {needsTruncation && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="text-primary hover:text-primary/80 text-sm font-medium mt-1 transition-colors"
-              >
-                {isExpanded ? "Show less" : "Read more..."}
-              </button>
-            )}
-          </div>
 
           {showCategories && user?.categories && user.categories.length > 0 && (
             <div className="flex items-center justify-center flex-wrap gap-2 mt-4">
               {user.categories.slice(0, 3).map((cat) => (
                 <Badge
                   key={cat}
-                  variant="secondary"
-                  className="font-normal text-xs px-3 py-1"
+                  variant="outline"
+                  className="font-normal text-[10px] px-3 py-1 bg-gray-100"
                 >
                   {cat}
                 </Badge>
@@ -204,9 +243,9 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
                 <Popover>
                   <PopoverTrigger asChild>
                     <Badge
-                      variant="secondary"
+                      variant="outline"
                       className={clsx(
-                        "font-normal cursor-pointer hover:bg-secondary/80",
+                        "font-normal cursor-pointer bg-gray-100 hover:bg-gray-200",
                         {
                           "text-[10px] px-2 py-1": categoriesTagSize === "sm",
                           "text-xs px-3 py-1": categoriesTagSize === "md",
@@ -221,8 +260,8 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
                       {user.categories.slice(3).map((cat) => (
                         <Badge
                           key={cat}
-                          variant="secondary"
-                          className="font-normal text-xs px-3 py-1"
+                          variant="outline"
+                          className="font-normal text-[10px] px-3 py-1 bg-gray-100"
                         >
                           {cat}
                         </Badge>
@@ -236,134 +275,138 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
         </div>
 
         {/* Action Button */}
-        <div className="flex flex-col items-center gap-3 mt-auto pt-6">
-          {actions ? (
-            actions
-          ) : (
-            <>
-              {/* Step 1: Qwirl is incomplete */}
-              {isIncomplete && variant === "owner" && (
-                <>
-                  <p className="text-sm text-gray-500 font-medium">
-                    Complete your Qwirl to start receiving responses
-                  </p>
-                  <Link href="/qwirls/primary/edit">
-                    <Button
-                      size="lg"
-                      className="rounded-full shadow-lg hover:shadow-xl transition-all"
-                    >
-                      Complete Qwirl
-                    </Button>
-                  </Link>
-                </>
-              )}
-
-              {isIncomplete && variant === "visitor" && (
-                <>
-                  <p className="text-sm text-gray-500 font-medium">
-                    This Qwirl is still in progress. Do you want to be notified
-                    when it&apos;s complete?
-                  </p>
-                  <Button
-                    size="lg"
-                    className="rounded-full shadow-lg hover:shadow-xl transition-all"
-                    onClick={onNotifyMe}
-                  >
-                    Notify Me
-                  </Button>
-                </>
-              )}
-
-              {/* Step 2: Qwirl is complete and user is owner */}
-              {!isIncomplete && variant === "owner" && (
-                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                  {previewOrReview === "review" ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-full shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
-                      onClick={onReview}
-                    >
-                      Review
-                    </Button>
-                  ) : (
-                    <Link href={`/qwirl/${user?.username}`}>
+        {!noActions && (
+          <div className="flex flex-col w-full items-center gap-3 mt-auto pt-6">
+            {actions ? (
+              actions
+            ) : (
+              <>
+                {/* Step 1: Qwirl is incomplete */}
+                {isIncomplete && variant === "owner" && (
+                  <>
+                    <p className="text-sm text-gray-500 font-medium">
+                      Complete your Qwirl to start receiving responses
+                    </p>
+                    <Link href="/qwirls/primary/edit">
                       <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
+                        asChild
+                        icon={ArrowRight}
+                        iconPlacement="right"
+                        className=""
                       >
-                        Preview
+                        Complete Qwirl
                       </Button>
                     </Link>
-                  )}
-                  <Link href="/qwirls/primary/insights">
-                    <Button
-                      size="sm"
-                      className="rounded-full shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
-                    >
-                      View Insights
-                    </Button>
-                  </Link>
-                </div>
-              )}
+                  </>
+                )}
 
-              {/* Step 3: Qwirl is complete, user is guest */}
-              {!isIncomplete && variant === "guest" && (
-                <Link href="/auth">
-                  <Button
-                    size="lg"
-                    className="rounded-full shadow-lg hover:shadow-xl transition-all"
-                  >
-                    Sign In to Answer
-                  </Button>
-                </Link>
-              )}
-
-              {/* Step 4 & 5: Qwirl is complete, user is visitor (logged in) */}
-              {!isIncomplete && variant === "visitor" && (
-                <>
-                  {/* Show progress info if user has started */}
-                  {answeredCount !== undefined &&
-                    totalQwirlQuestions !== undefined &&
-                    answeredCount > 0 && (
-                      <p className="text-sm text-gray-600 font-medium">
-                        {hasNewQuestions ? (
-                          <>
-                            The Qwirl has been updated with new questions!
-                            <br />
-                            You&apos;ve answered {answeredCount} out of{" "}
-                            {totalQwirlQuestions} questions
-                          </>
-                        ) : (
-                          <>
-                            You&apos;ve answered {answeredCount} out of{" "}
-                            {totalQwirlQuestions} questions
-                          </>
-                        )}
-                      </p>
-                    )}
-
-                  {
+                {isIncomplete && variant === "visitor" && (
+                  <>
+                    <p className="text-sm text-gray-500 font-medium">
+                      This Qwirl is still in progress. Do you want to be
+                      notified when it&apos;s complete?
+                    </p>
                     <Button
                       size="lg"
                       className="rounded-full shadow-lg hover:shadow-xl transition-all"
-                      icon={Send}
-                      iconPlacement="left"
-                      onClick={onButtonClick}
+                      onClick={onNotifyMe}
                     >
-                      {answeringStatus
-                        ? answeringStatus === "completed"
-                          ? "Review"
-                          : "Continue Answering"
-                        : "Start Answering"}
+                      Notify Me
                     </Button>
-                  }
-                </>
-              )}
-            </>
-          )}
-        </div>
+                  </>
+                )}
+
+                {/* Step 2: Qwirl is complete and user is owner */}
+                {!isIncomplete && variant === "owner" && (
+                  <div className="flex flex-col gap-3 w-full">
+                    <Link href="/qwirls/primary/responses">
+                      <Button
+                        // size="sm"
+                        icon={MessageCircleHeart}
+                        iconPlacement="left"
+                        className="w-full"
+                      >
+                        Responses
+                      </Button>
+                    </Link>
+                    {previewOrReview === "review" ? (
+                      <Button
+                        // size="sm"
+                        variant="outline"
+                        icon={Telescope}
+                        iconPlacement="left"
+                        className="w-full"
+                        onClick={onReview}
+                      >
+                        Review Qwirl
+                      </Button>
+                    ) : (
+                      <Link href={`/qwirl/${user?.username}`}>
+                        <Button
+                          icon={SquareArrowOutUpRight}
+                          iconPlacement="left"
+                          // size="sm"
+                          variant="outline"
+                          className="w-full"
+                        >
+                          View
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                )}
+
+                {/* Step 3: Qwirl is complete, user is guest */}
+                {!isIncomplete && variant === "guest" && (
+                  <Link href="/auth">
+                    <Button className=" w-full">Sign In to Answer</Button>
+                  </Link>
+                )}
+
+                {/* Step 4 & 5: Qwirl is complete, user is visitor (logged in) */}
+                {!isIncomplete && variant === "visitor" && (
+                  <>
+                    {/* Show progress info if user has started */}
+                    {answeredCount !== undefined &&
+                      totalQwirlQuestions !== undefined &&
+                      answeredCount > 0 && (
+                        <p className="text-sm text-gray-600 font-medium">
+                          {hasNewQuestions ? (
+                            <>
+                              The Qwirl has been updated with new questions!
+                              <br />
+                              You&apos;ve answered {answeredCount} out of{" "}
+                              {totalQwirlQuestions} questions
+                            </>
+                          ) : (
+                            <>
+                              You&apos;ve answered {answeredCount} out of{" "}
+                              {totalQwirlQuestions} questions
+                            </>
+                          )}
+                        </p>
+                      )}
+
+                    {
+                      <Button
+                        className="w-full"
+                        icon={Send}
+                        iconPlacement="left"
+                        onClick={onButtonClick}
+                      >
+                        {answeringStatus
+                          ? answeringStatus === "completed"
+                            ? "Review"
+                            : "Continue Answering"
+                          : "Start Answering"}
+                      </Button>
+                    }
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </Card>
     );
   }
@@ -398,7 +441,7 @@ export const QwirlCoverSkeleton = ({ className }: { className?: string }) => (
       </div>
 
       {/* Button skeleton */}
-      <Skeleton className="h-12 w-40 rounded-full" />
+      <Skeleton className="h-12 w-full" />
     </CardContent>
   </Card>
 );

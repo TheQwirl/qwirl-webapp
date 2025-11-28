@@ -102,11 +102,16 @@ const PrimaryQwirlInsightsPage = () => {
     <>
       <PageLayout
         rightSidebar={
-          <PrimaryQwirlRightSidebar isLoading={isLoading} polls={polls} />
+          <PrimaryQwirlRightSidebar
+            isLoading={isLoading}
+            polls={polls}
+            cardsToShow={["QwirlStatsSummaryCard"]}
+          />
         }
         backNavigation={{
-          title: "Insights",
-          subtitle: "View insights for my qwirl",
+          title: "Responses",
+          subtitle:
+            "People who answered your Qwirl. See how they answered and reply.",
           hideBackButton: true,
         }}
       >
@@ -114,8 +119,9 @@ const PrimaryQwirlInsightsPage = () => {
           <div className="overflow-hidden col-span-full lg:col-span-full px-4 pb-4 space-y-4">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="details">Details</TabsTrigger>
+                {/* Use a clearer word for people who answered your Qwirl */}
+                <TabsTrigger value="overview">Responders</TabsTrigger>
+                <TabsTrigger value="details">Answers</TabsTrigger>
               </TabsList>
               <TabsContent value="overview" className="mt-6">
                 <InsightsOverviewTab

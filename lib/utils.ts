@@ -76,3 +76,56 @@ export const getInitials = (name: string) => {
     .join("")
     .toUpperCase();
 };
+
+/**
+ * Attempts to share a URL using the Web Share API and falls back to copying
+ * the URL to the clipboard. This is a small convenience wrapper that callers
+ * can use from client-side code to unify sharing behaviour.
+ *
+ * Returns a result string describing what happened:
+ * - "shared" when navigator.share successfully completed
+ * - "copied" when the URL was copied to the clipboard
+ * - "unsupported" when neither API is available in the environment
+ * - { error: string } when an unexpected error occurred
+ */
+export async function shareOrCopy(
+  url: string,
+  title?: string
+): Promise<"shared" | "copied" | "unsupported" | { error: string }> {
+  try {
+    if (typeof navigator === "undefined") return "unsupported";
+
+    // Prefer the Web Share API when available. Use a typed navigator alias to
+    // avoid `any` and satisfy lint rules.
+    type NavigatorWithShare = Navigator & {
+      share?: (data: ShareData) => Promise<void>;
+    };
+    const nav = navigator as NavigatorWithShare;
+    if (typeof nav.share === "function") {
+      // Some environments may not have `document` (SSR) — this function should be
+      // called from client code only. We still guard access just in case.
+      await nav.share({
+        title:
+          title ??
+          (typeof document !== "undefined" ? document.title : undefined),
+        url,
+      });
+      return "shared";
+    }
+
+    // Fallback to clipboard if available
+    if (
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function"
+    ) {
+      await navigator.clipboard.writeText(url);
+      return "copied";
+    }
+
+    return "unsupported";
+  } catch (err: unknown) {
+    // Normalize the error to a simple object for callers to handle
+    const message = err instanceof Error ? err.message : String(err);
+    return { error: message };
+  }
+}

@@ -1,8 +1,9 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, memo, useCallback, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserBadge from "@/components/user-badge";
 import { cn } from "@/lib/utils";
+import { HeartPulseIcon } from "lucide-react";
 
 type User = {
   id: string;
@@ -29,26 +30,22 @@ interface DisplayVariantProps extends BasePollOptionProps {
 interface SelectableVariantProps extends BasePollOptionProps {
   variant: "selectable";
   isSelected: boolean;
-  isMyChoice?: boolean;
+  // isMyChoice?: boolean;
 }
 
 interface ResultsVariantProps extends BasePollOptionProps {
   variant: "results";
   isMyChoice: boolean;
   isOwnerChoice?: boolean;
-  responders: Responder[];
+  responders?: Responder[];
   percentage?: number;
   userName?: string | null;
 }
 
 interface InteractiveVariantProps extends BasePollOptionProps {
   variant: "interactive";
-  isSelected?: boolean;
-  isOwnerChoice?: boolean;
   onSelect: () => void;
   disabled?: boolean;
-  percentage?: number;
-  showPercentage?: boolean;
   userName?: string | null;
 }
 
@@ -58,209 +55,311 @@ export type PollOptionProps =
   | ResultsVariantProps
   | InteractiveVariantProps;
 
-const PollOption = forwardRef<HTMLDivElement, PollOptionProps>((props, ref) => {
-  const { option, optionNumber, variant, className } = props;
+type VariantOptionals = {
+  isSelected?: boolean;
+  isMyChoice?: boolean;
+  isOwnerChoice?: boolean;
+  onSelect?: () => void;
+  disabled?: boolean;
+  responders?: Responder[];
+  percentage?: number;
+  showPercentage?: boolean;
+  userName?: string | null;
+};
 
-  const isSelected = "isSelected" in props ? props.isSelected : false;
-  const isMyChoice = "isMyChoice" in props ? props.isMyChoice : false;
-  const isOwnerChoice = "isOwnerChoice" in props ? props.isOwnerChoice : false;
-  const onSelect = "onSelect" in props ? props.onSelect : undefined;
-  const disabled = "disabled" in props ? props.disabled : false;
-  const responders = "responders" in props ? props.responders : [];
-  const percentage = "percentage" in props ? props.percentage : 0;
-  const showPercentage =
-    "showPercentage" in props ? props.showPercentage : false;
-  const userName = "userName" in props ? props.userName : null;
+const clampPercentage = (value?: number): number | null => {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return null;
+  }
+  return Math.min(100, Math.max(0, value));
+};
 
-  const isHighlighted = isSelected || isMyChoice;
+const baseContainerClasses =
+  "flex items-start gap-3 rounded-xl border px-3 py-2 relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40";
 
-  const getVariantStyles = () => {
-    const baseStyles = {
-      highlighted: "bg-primary/5 border-primary/20 shadow-sm",
-      normal: "bg-muted/40",
-      hover: "hover:bg-gray-100",
-      disabled: "opacity-60 cursor-not-allowed",
-    };
+const variantClassNames = {
+  display: ({ isHighlighted }: { isHighlighted: boolean }) =>
+    cn("bg-muted/40", {
+      "bg-primary/5 border-primary/20 shadow-sm": isHighlighted,
+    }),
+  selectable: ({ isHighlighted }: { isHighlighted: boolean }) =>
+    cn("bg-muted/40", {
+      "bg-primary/5 border-primary/20 shadow-sm": isHighlighted,
+    }),
+  interactive: ({
+    isHighlighted,
+    disabled,
+  }: {
+    isHighlighted: boolean;
+    disabled: boolean;
+  }) =>
+    cn(
+      "cursor-pointer hover:shadow-md transition-all duration-200 bg-muted/40",
+      {
+        "bg-primary/5 border-primary/20 shadow-sm": isHighlighted,
+        "hover:bg-gray-100": !isHighlighted && !disabled,
+        "opacity-60 cursor-not-allowed": disabled,
+      }
+    ),
+  results: ({ isHighlighted }: { isHighlighted: boolean }) =>
+    cn("bg-muted/40", {
+      "bg-primary/5 border-primary/20 shadow-sm": isHighlighted,
+    }),
+};
 
-    switch (variant) {
-      case "display":
-        return cn(baseStyles.normal, {
-          [baseStyles.highlighted]: isHighlighted,
-        });
-      case "selectable":
-        return cn(baseStyles.normal, {
-          [baseStyles.highlighted]: isHighlighted,
-        });
-      case "interactive":
-        return cn(
-          "cursor-pointer hover:shadow-md transition-all duration-200",
-          baseStyles.normal,
-          {
-            [baseStyles.highlighted]: isHighlighted,
-            [baseStyles.hover]: !isHighlighted && !disabled,
-            [baseStyles.disabled]: disabled,
-          }
-        );
-      case "results":
-        return cn(baseStyles.normal, {
-          [baseStyles.highlighted]: isMyChoice,
-        });
-      default:
-        return baseStyles.normal;
-    }
-  };
+const getVariantClassName = (
+  variant: PollOptionProps["variant"],
+  options: { isHighlighted: boolean; disabled: boolean }
+) => {
+  const builder = variantClassNames[variant];
+  if (!builder) return "bg-muted/40";
+  return builder(options);
+};
 
-  const baseClasses =
-    "flex items-start gap-3 rounded-xl border px-3 py-2 relative overflow-hidden";
-  const combinedClasses = cn(baseClasses, getVariantStyles(), className);
+const YouBadge = () => (
+  <Badge
+    variant="outline"
+    className="text-xs bg-background rounded-full flex items-center gap-1"
+  >
+    <div className="rounded-full h-3 w-3 bg-primary" />
+    You
+  </Badge>
+);
 
-  const handleClick = () => {
-    if (variant === "interactive" && onSelect && !disabled) {
-      (onSelect as () => void)();
-    }
-  };
+const OwnerBadge = ({ userName }: { userName: string }) => (
+  <Badge
+    variant="outline"
+    className="text-xs bg-background rounded-full flex items-center gap-1"
+  >
+    <div className="rounded-full h-3 w-3 bg-secondary" />
+    {userName}
+  </Badge>
+);
 
-  const renderBadges = () => {
-    const badges = [];
+const BothBadge = () => (
+  <Badge variant="default" className="flex items-center gap-0.5">
+    <HeartPulseIcon className="w-3 h-3 mr-0.5" />
+    Both
+  </Badge>
+);
 
-    if (isHighlighted) {
-      badges.push(
-        <Badge
-          key="you"
-          variant="outline"
-          className="text-xs bg-background rounded-full flex items-center gap-1"
-        >
-          <div className="rounded-full h-3 w-3 bg-primary" />
-          You
-        </Badge>
+const ResponderBadges = memo(({ responders }: { responders: Responder[] }) => (
+  <>
+    {responders.map((responder) => {
+      if (!responder.user) return null;
+      return (
+        <UserBadge
+          key={responder.user.id}
+          user={{
+            name: responder.user.name ?? responder.user.username,
+            avatar: responder.user.avatar ?? null,
+          }}
+        />
       );
-    }
+    })}
+  </>
+));
+ResponderBadges.displayName = "ResponderBadges";
 
-    if (variant === "interactive" && isOwnerChoice && userName) {
-      badges.push(
-        <Badge
-          key="owner"
-          variant="outline"
-          className="text-xs bg-background rounded-full flex items-center gap-1"
-        >
-          <div className="rounded-full h-3 w-3 bg-secondary" />
-          {userName}
-        </Badge>
-      );
-    }
+const PercentagePill = ({ value }: { value: number }) => (
+  <div className="flex items-center gap-1 text-sm font-semibold bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-primary/20">
+    <span className="text-primary">{value.toFixed(0)}%</span>
+  </div>
+);
 
-    if (variant === "results" && isOwnerChoice && userName) {
-      badges.push(
-        <Badge
-          key="owner"
-          variant="outline"
-          className="text-xs bg-background rounded-full flex items-center gap-1"
-        >
-          <div className="rounded-full h-3 w-3 bg-secondary" />
-          {userName}
-        </Badge>
-      );
-    }
+const PollOptionBase = forwardRef<HTMLDivElement, PollOptionProps>(
+  (rawProps, ref) => {
+    const props = rawProps as PollOptionProps &
+      VariantOptionals &
+      React.HTMLAttributes<HTMLDivElement>;
 
-    if (variant === "results" && responders.length > 0) {
-      responders.forEach((responder) => {
-        if (responder.user) {
-          badges.push(
-            <UserBadge
-              key={responder.user.id}
-              user={{
-                name: responder.user.name ?? responder.user.username,
-                avatar: responder.user.avatar ?? null,
-              }}
-            />
-          );
+    const {
+      option,
+      optionNumber,
+      variant,
+      className,
+      isSelected,
+      isMyChoice,
+      isOwnerChoice,
+      onSelect,
+      disabled,
+      responders,
+      percentage,
+      showPercentage,
+      userName,
+      ...htmlAttributes
+    } = props;
+
+    const {
+      onClick: userOnClick,
+      onKeyDown: userOnKeyDown,
+      tabIndex: userTabIndex,
+      role: userRole,
+      ["aria-pressed"]: userAriaPressed,
+      ["aria-disabled"]: userAriaDisabled,
+      ...restDomProps
+    } = htmlAttributes;
+
+    const isInteractive = variant === "interactive";
+    const isResults = variant === "results";
+    const highlightedSource =
+      variant === "results" ? isMyChoice : isSelected || isMyChoice;
+    const isHighlighted = Boolean(highlightedSource);
+    const normalizedDisabled = isInteractive ? Boolean(disabled) : false;
+
+    const safePercentage = useMemo(
+      () =>
+        clampPercentage(isInteractive || isResults ? percentage : undefined),
+      [isInteractive, isResults, percentage]
+    );
+
+    const variantClassName = useMemo(
+      () =>
+        getVariantClassName(variant, {
+          isHighlighted,
+          disabled: normalizedDisabled,
+        }),
+      [variant, isHighlighted, normalizedDisabled]
+    );
+
+    const combinedClasses = useMemo(
+      () => cn(baseContainerClasses, variantClassName, className),
+      [variantClassName, className]
+    );
+
+    const responderBadges = useMemo(
+      () => (isResults && responders ? responders : []),
+      [isResults, responders]
+    );
+
+    const hasResponderOverlap = Boolean(
+      isResults &&
+        isHighlighted &&
+        (responderBadges.length > 0 || isOwnerChoice)
+    );
+
+    const showOwnerBadge = Boolean(
+      (isInteractive || isResults) &&
+        isOwnerChoice &&
+        userName &&
+        !hasResponderOverlap
+    );
+
+    const percentageBarStyle = useMemo(() => {
+      if (safePercentage === null) return undefined;
+      const radius = safePercentage === 100 ? "0.75rem" : "0.5rem";
+      return {
+        width: `${safePercentage}%`,
+        borderTopRightRadius: radius,
+        borderBottomRightRadius: radius,
+      } as React.CSSProperties;
+    }, [safePercentage]);
+
+    const triggerSelect = useCallback(() => {
+      if (!isInteractive || normalizedDisabled || !onSelect) return;
+      onSelect();
+    }, [isInteractive, normalizedDisabled, onSelect]);
+
+    const handleClick = useCallback(
+      (event: React.MouseEvent<HTMLDivElement>) => {
+        if (isInteractive && !normalizedDisabled) {
+          triggerSelect();
         }
-      });
-    }
+        userOnClick?.(event);
+      },
+      [isInteractive, normalizedDisabled, triggerSelect, userOnClick]
+    );
 
-    return badges;
-  };
-
-  return (
-    <div
-      ref={ref}
-      // {...rest}
-      className={combinedClasses}
-      onClick={handleClick}
-      role={variant === "interactive" ? "button" : undefined}
-      tabIndex={variant === "interactive" ? 0 : undefined}
-      onKeyDown={(e) => {
-        if (variant === "interactive" && (e.key === "Enter" || e.key === " ")) {
-          e.preventDefault();
-          handleClick();
+    const handleKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (
+          isInteractive &&
+          !normalizedDisabled &&
+          (event.key === "Enter" || event.key === " ")
+        ) {
+          event.preventDefault();
+          triggerSelect();
         }
-      }}
-    >
-      {/* Background percentage bar */}
-      {(variant === "interactive" || variant === "results") &&
-        (percentage ?? 0) >= 0 && (
+        userOnKeyDown?.(event);
+      },
+      [isInteractive, normalizedDisabled, triggerSelect, userOnKeyDown]
+    );
+
+    const showInteractivePercentage = Boolean(
+      isInteractive && showPercentage && safePercentage !== null
+    );
+    const showResultsPercentage = Boolean(isResults && safePercentage !== null);
+
+    return (
+      <div
+        ref={ref}
+        {...restDomProps}
+        className={combinedClasses}
+        role={isInteractive ? "button" : userRole}
+        tabIndex={isInteractive ? userTabIndex ?? 0 : userTabIndex}
+        aria-pressed={
+          isInteractive ? !!isSelected : userAriaPressed ?? undefined
+        }
+        aria-disabled={
+          isInteractive ? normalizedDisabled : userAriaDisabled ?? undefined
+        }
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+      >
+        {(isInteractive || isResults) && safePercentage !== null && (
           <div
             className="absolute inset-0 bg-primary/10 transition-all duration-500 ease-out"
-            style={{
-              width: `${percentage ?? 0}%`,
-              borderTopRightRadius:
-                (percentage ?? 0) === 100 ? "0.75rem" : "0.5rem",
-              borderBottomRightRadius:
-                (percentage ?? 0) === 100 ? "0.75rem" : "0.5rem",
-            }}
+            style={percentageBarStyle}
+            aria-hidden="true"
           />
         )}
 
-      {/* Option Number */}
-      <div className="relative z-10 mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
-        {optionNumber}
-      </div>
+        <div className="relative z-10 mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+          {optionNumber}
+        </div>
 
-      {/* Content Area */}
-      <div className="relative z-10 flex items-center justify-between w-full">
-        <span
-          className={cn(
-            "font-medium text-sm",
+        <div className="relative z-10 flex items-center gap-1 justify-between w-full">
+          <span
+            className={cn(
+              "font-medium text-sm",
+              isHighlighted && variant !== "interactive"
+                ? "text-primary"
+                : "text-foreground",
+              variant === "display" && !isHighlighted && "text-muted-foreground"
+            )}
+          >
+            {option}
+          </span>
 
-            isHighlighted && variant !== "interactive"
-              ? "text-primary"
-              : "text-foreground",
+          <div className="flex items-center gap-2">
+            {hasResponderOverlap ? (
+              <BothBadge />
+            ) : (
+              isHighlighted && <YouBadge />
+            )}
+            {showOwnerBadge && userName && <OwnerBadge userName={userName} />}
+            {isResults &&
+              responderBadges.length > 0 &&
+              !hasResponderOverlap && (
+                <ResponderBadges responders={responderBadges} />
+              )}
 
-            variant === "display" && !isHighlighted && "text-muted-foreground"
-          )}
-        >
-          {option}
-        </span>
-
-        {/* Badges and Percentage */}
-        <div className="flex items-center gap-2">
-          {renderBadges()}
-
-          {/* Show percentage for interactive variant */}
-          {variant === "interactive" &&
-            showPercentage &&
-            (percentage ?? 0) >= 0 && (
-              <div className="flex items-center gap-1 text-sm font-semibold bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-primary/20">
-                <span className="text-primary">
-                  {(percentage ?? 0).toFixed(0)}%
-                </span>
-              </div>
+            {showInteractivePercentage && safePercentage !== null && (
+              <PercentagePill value={safePercentage} />
             )}
 
-          {/* Show percentage for results variant */}
-          {variant === "results" && (percentage ?? 0) >= 0 && (
-            <div className="flex items-center gap-1 text-sm font-semibold bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-primary/20">
-              <span className="text-primary">
-                {(percentage ?? 0).toFixed(0)}%
-              </span>
-            </div>
-          )}
+            {showResultsPercentage && safePercentage !== null && (
+              <PercentagePill value={safePercentage} />
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
+PollOptionBase.displayName = "PollOptionBase";
 
+const PollOption = memo(PollOptionBase);
 PollOption.displayName = "PollOption";
 
 interface PollOptionLoadingProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -269,15 +368,12 @@ interface PollOptionLoadingProps extends React.HTMLAttributes<HTMLDivElement> {
   showPercentage?: boolean;
 }
 
-const PollOptionLoading = forwardRef<HTMLDivElement, PollOptionLoadingProps>(
+const PollOptionLoadingBase = forwardRef<
+  HTMLDivElement,
+  PollOptionLoadingProps
+>(
   (
-    {
-      optionNumber,
-      showBadges = false,
-      showPercentage = false,
-      className,
-      // ...rest
-    },
+    { optionNumber, showBadges = false, showPercentage = false, className },
     ref
   ) => {
     const baseClasses =
@@ -286,17 +382,13 @@ const PollOptionLoading = forwardRef<HTMLDivElement, PollOptionLoadingProps>(
 
     return (
       <div ref={ref} className={combinedClasses}>
-        {/* Option Number */}
         <div className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
           {optionNumber}
         </div>
 
-        {/* Content Area */}
         <div className="relative flex items-center justify-between w-full">
-          {/* Option Text Skeleton */}
           <Skeleton className="h-4 w-24 rounded" />
 
-          {/* Badges and Percentage Area */}
           <div className="flex items-center gap-2">
             {showBadges && (
               <>
@@ -312,7 +404,9 @@ const PollOptionLoading = forwardRef<HTMLDivElement, PollOptionLoadingProps>(
     );
   }
 );
+PollOptionLoadingBase.displayName = "PollOptionLoadingBase";
 
+const PollOptionLoading = memo(PollOptionLoadingBase);
 PollOptionLoading.displayName = "PollOptionLoading";
 
 export default PollOption;

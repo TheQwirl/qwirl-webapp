@@ -1,13 +1,12 @@
 "use client";
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import WavelengthIndicator from "@/components/wavelength-indicator";
+import { Button } from "@/components/ui/button";
+import { ArrowRightIcon } from "lucide-react";
 
 type ResponderData = {
   id: number;
@@ -36,19 +35,32 @@ export const ResponderCard: React.FC<ResponderCardProps> = ({
   total_qwirl_polls,
 }) => {
   const router = useRouter();
-  const isCompleted = responder.status === "completed";
+  // const isCompleted = responder.status === "completed";
 
   const handleCardClick = () => {
     if (onClick) {
       onClick(responder.id);
     } else {
-      router.push(`/qwirls/primary/insights?responder=${responder.id}`);
+      router.push(`/qwirls/primary/responses?responder=${responder.id}`);
     }
   };
 
-  const completedTimeAgo = responder.completed_at
-    ? formatDistanceToNow(new Date(responder.completed_at), { addSuffix: true })
-    : null;
+  const progressTotal = Math.max(total_qwirl_polls, 0);
+  const answeredCopy = `${responder.response_count} / ${progressTotal} answered`;
+
+  // const activityDate = responder.completed_at || responder.started_at;
+  // const formattedActivityDate = React.useMemo(() => {
+  //   if (!activityDate) return null;
+  //   const parsed = new Date(activityDate);
+  //   if (Number.isNaN(parsed.getTime())) return null;
+  //   return new Intl.DateTimeFormat(undefined, {
+  //     month: "short",
+  //     day: "numeric",
+  //     year: "numeric",
+  //   }).format(parsed);
+  // }, [activityDate]);
+
+  const displayName = responder.name || responder.username;
 
   return (
     <motion.div
@@ -60,74 +72,48 @@ export const ResponderCard: React.FC<ResponderCardProps> = ({
       className="cursor-pointer w-full"
       onClick={handleCardClick}
     >
-      <Card className="w-full bg-card border border-border/80 hover:border-primary/50 hover:shadow-lg transition-all duration-300 shadow-sm group overflow-hidden">
-        <div className="p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
-            {/* Left section - User info */}
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-              <div className="flex-shrink-0">
-                <UserAvatar
-                  image={responder.avatar || ""}
-                  name={responder.name || responder.username}
-                  size="lg"
-                  ringed
-                  className="transition-all duration-300"
-                />
-              </div>
-
-              <div className="flex flex-col min-w-0 flex-1">
-                <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">
-                    {responder.name || responder.username}
-                  </h3>
+      <Card className="group relative w-full overflow-hidden border border-border/70 bg-card/95 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-lg">
+        <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" />
+        </div>
+        <div className="relative flex flex-col gap-6 p-4 sm:p-5">
+          <div className="flex gap-2 items-start justify-between">
+            <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+              <UserAvatar
+                image={responder.avatar || ""}
+                name={displayName}
+                size="md"
+                ringed
+                className="transition-all duration-300 group-hover:ring-primary"
+              />
+              <div className="min-w-0">
+                <h3 className="truncate text-base font-semibold text-foreground sm:text-lg">
+                  {displayName}
+                </h3>
+                <div className=" flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
                   {responder.name && (
-                    <span className="text-xs sm:text-sm text-muted-foreground truncate">
-                      @{responder.username}
-                    </span>
+                    <span className="truncate">@{responder.username}</span>
                   )}
-                </div>
-
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                  <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                    {responder.response_count} / {total_qwirl_polls} Responses
-                  </div>
-                  {completedTimeAgo && (
-                    <>
-                      <span className="hidden sm:inline text-muted-foreground">
-                        •
-                      </span>
-                      <div className="text-xs sm:text-sm text-muted-foreground">
-                        Completed {completedTimeAgo}
-                      </div>
-                    </>
-                  )}
+                  <span className="font-medium text-foreground/80">
+                    {answeredCopy}
+                  </span>
                 </div>
               </div>
             </div>
-
-            {/* Right section - Wavelength and action */}
-            <div className="flex items-center gap-4 sm:gap-6 self-end sm:self-auto">
-              {/* Wavelength indicator - only show if completed */}
-              {isCompleted && (
+            {responder.wavelength && (
+              <div className="flex flex-col-reverse items-start gap-3 text-left sm:flex-col sm:items-end sm:text-right">
                 <WavelengthIndicator
-                  userName={responder.username}
                   wavelength={responder.wavelength}
-                  variant="compact-horizontal"
+                  variant="badge"
                 />
-              )}
-
-              {/* Action button */}
-              <Button
-                variant="ghost"
-                className="h-10 w-10 sm:h-12 sm:w-12 p-0 rounded-full border group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCardClick();
-                }}
-              >
-                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
-              </Button>
-            </div>
+              </div>
+            )}
+            <Button
+              className="sm:hidden absolute right-4 bottom-4"
+              size={"icon"}
+            >
+              <ArrowRightIcon />
+            </Button>
           </div>
         </div>
       </Card>

@@ -182,10 +182,10 @@ export const InsightsOverviewTab: React.FC<InsightsOverviewTabProps> = ({
                 <EmptyMedia variant="icon">
                   <Users />
                 </EmptyMedia>
-                <EmptyTitle>No responses yet</EmptyTitle>
+                <EmptyTitle>No responders yet</EmptyTitle>
                 <EmptyDescription>
-                  When people start responding to your Qwirl, you&apos;ll see
-                  their cards here. Share your Qwirl to get started!
+                  No one has answered your Qwirl yet. Share your Qwirl to invite
+                  answers.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

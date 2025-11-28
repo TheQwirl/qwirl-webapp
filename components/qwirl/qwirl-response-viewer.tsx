@@ -20,7 +20,6 @@ import PollQuestion from "./qwirl-view/poll-question";
 import PollOptionsDistribution from "./qwirl-view/poll-options-distribution";
 import PollStats from "./qwirl-view/poll-stats";
 import QwirlComments from "./qwirl-comments";
-import { SingleCardNavigationDots } from "./single-card-navigation-dots";
 
 import { QwirlResponder } from "@/types/qwirl";
 import SelectedResponderCard from "./qwirl-edit/selected-responder-card";
@@ -62,21 +61,33 @@ const ResponderStatus = memo(
     }
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
         {skippedResponders.length > 0 && (
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span>Skipped by:</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:text-sm">
+            <span className="font-medium text-foreground">Skipped by</span>
             {skippedResponders.map((responder) => (
-              <UserBadge key={responder.user?.id} user={responder.user!} />
+              <div
+                key={responder.user?.id}
+                className="rounded-full border border-border/50 bg-background"
+              >
+                <UserBadge user={responder.user!} />
+              </div>
             ))}
           </div>
         )}
 
         {notAnsweredResponders.length > 0 && (
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <span>Not answered yet:</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:text-sm">
+            <span className="font-medium text-foreground">
+              Not Answered yet:
+            </span>
             {notAnsweredResponders.map((responder) => (
-              <UserBadge key={responder.user?.id} user={responder.user!} />
+              <div
+                key={responder.user?.id}
+                className="rounded-full border border-dashed border-border/60"
+              >
+                <UserBadge user={responder.user!} />
+              </div>
             ))}
           </div>
         )}
@@ -431,11 +442,22 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
   return (
     <div className="space-y-4">
       <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Users className="h-5 w-5 text-muted-foreground" />
-              <span className="font-medium">Show responses from:</span>
+        <CardContent className="space-y-4 p-4 sm:p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-sm font-semibold text-foreground sm:text-base">
+                  Show responders from
+                </span>
+                <span className="text-xs text-muted-foreground sm:text-sm">
+                  Select responders to compare how they answered your Qwirl.
+                </span>
+              </div>
+            </div>
+            <div className="w-full sm:w-auto">
               <ResponderSelector
                 responders={qwirlRespondersQuery?.data?.responders || []}
                 onResponderToggle={handleResponderToggle}
@@ -443,7 +465,7 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
             </div>
           </div>
           {selectedResponders && selectedResponders.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t">
+            <div className="mt-2 flex flex-wrap gap-2 border-t pt-4 sm:mt-0">
               {selectedResponders.map((responder) => (
                 <SelectedResponderCard
                   key={responder.id}
@@ -457,19 +479,21 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
       </Card>
 
       <Card>
-        <CardContent className="p-8">
-          <div className="space-y-6">
-            <PollNavigation
-              currentIndex={currentIndex}
-              totalPolls={polls.length}
-              onPrevious={goToPrevious}
-              onNext={goToNext}
-              onMoveUp={handleMoveUp}
-              onMoveDown={handleMoveDown}
-              onDelete={handlingDelete}
-              canMoveUp={currentIndex > 0}
-              canMoveDown={currentIndex < polls.length - 1}
-            />
+        <CardContent className="p-4 sm:p-6 lg:p-8">
+          <div className="space-y-5 sm:space-y-6">
+            <div className="sticky top-4 z-20 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-b border-border/40 pb-4">
+              <PollNavigation
+                currentIndex={currentIndex}
+                totalPolls={polls.length}
+                onPrevious={goToPrevious}
+                onNext={goToNext}
+                onMoveUp={handleMoveUp}
+                onMoveDown={handleMoveDown}
+                onDelete={handlingDelete}
+                canMoveUp={currentIndex > 0}
+                canMoveDown={currentIndex < polls.length - 1}
+              />
+            </div>
 
             <AnimatePresence mode="wait">
               {currentPoll && (
@@ -509,14 +533,6 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            <div className="pt-4">
-              <SingleCardNavigationDots
-                polls={polls}
-                currentIndex={currentIndex}
-                setCurrentPollId={setCurrentPollId}
-              />
-            </div>
           </div>
         </CardContent>
       </Card>

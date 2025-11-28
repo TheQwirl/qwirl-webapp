@@ -66,9 +66,8 @@ const WavelengthsPage = () => {
     <PageLayout
       rightSidebar={null}
       backNavigation={{
-        title: "Wavelengths",
-        subtitle:
-          "See who’s on your frequency across every Qwirl you’ve shared",
+        title: "Connections",
+        subtitle: "Who you reached, who reached you, and who's in sync.",
         hideBackButton: true,
         rightContent: headingBadge ? (
           <Badge
@@ -360,7 +359,7 @@ const WavelengthConnectionCard = ({
             {emphasize ? (
               <Badge
                 variant="secondary"
-                className="rounded-full bg-primary/10 text-xs font-medium text-primary"
+                className="rounded-full bg-primary/10 text-xs font-medium whitespace-nowrap truncate text-primary"
               >
                 Closest match
               </Badge>

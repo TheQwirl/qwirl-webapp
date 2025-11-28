@@ -18,32 +18,27 @@ export const ResponderLoadingSkeleton: React.FC<
       transition={{ delay: index * 0.1 }}
       className="w-full"
     >
-      <Card className="w-full">
-        <div className="p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
-            {/* Left section */}
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-              <Skeleton className="h-12 w-12 rounded-full flex-shrink-0" />
-              <div className="flex flex-col gap-2 min-w-0 flex-1">
-                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                  <Skeleton className="h-4 sm:h-5 w-24 sm:w-32" />
-                  <Skeleton className="h-3 sm:h-4 w-16 sm:w-20" />
+      <Card className="group relative w-full overflow-hidden border border-border/70 bg-card/95 shadow-sm">
+        <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" />
+        </div>
+        <div className="relative flex flex-col gap-6 p-4 sm:p-5">
+          <div className="flex gap-2 items-start justify-between">
+            <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="min-w-0 space-y-2">
+                <Skeleton className="h-4 w-32 sm:h-5" />
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-28" />
                 </div>
-                <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                  <Skeleton className="h-3 sm:h-4 w-28 sm:w-32" />
-                  <Skeleton className="h-3 sm:h-4 w-24 sm:w-28" />
-                </div>
+                <Skeleton className="h-3 w-40" />
               </div>
             </div>
-
-            {/* Right section */}
-            <div className="flex items-center gap-4 sm:gap-6 self-end sm:self-auto">
-              <div className="flex flex-col items-center">
-                <Skeleton className="h-8 sm:h-9 w-12 sm:w-16" />
-                <Skeleton className="h-2 sm:h-3 w-16 sm:w-20 mt-1" />
-              </div>
-              <Skeleton className="h-10 w-10 sm:h-12 sm:w-12 rounded-full" />
+            <div className="flex flex-col-reverse items-start gap-3 text-left sm:flex-col sm:items-end sm:text-right">
+              <Skeleton className="h-6 w-24 rounded-full" />
             </div>
+            <Skeleton className="sm:hidden absolute right-4 bottom-4 h-10 w-10 rounded-full" />
           </div>
         </div>
       </Card>

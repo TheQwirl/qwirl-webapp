@@ -1162,7 +1162,8 @@ export interface paths {
         };
         /**
          * Get User Followers
-         * @description Get user's followers with optimized performance
+         * @description Get users who have answered my Qwirl (followers in the new model).
+         *     These are people who have completed the authenticated user's Qwirl.
          */
         get: operations["get_user_followers_api_v1_user_follows_followers_get"];
         put?: never;
@@ -1182,7 +1183,8 @@ export interface paths {
         };
         /**
          * Get User Following
-         * @description Get list of users that the current user is following - optimized
+         * @description Get users whose Qwirl I have answered (following in the new model).
+         *     These are people whose Qwirl the authenticated user has completed.
          */
         get: operations["get_user_following_api_v1_user_follows_following_get"];
         put?: never;
@@ -1202,7 +1204,8 @@ export interface paths {
         };
         /**
          * Get User Friends
-         * @description Get list of user's friends - optimized with subquery
+         * @description Get users where both have answered each other's Qwirls (mutual completions).
+         *     These are people who have completed my Qwirl AND I have completed theirs.
          */
         get: operations["get_user_friends_api_v1_user_follows_friends_get"];
         put?: never;
@@ -1517,6 +1520,11 @@ export interface components {
             name?: string | null;
             /** Avatar */
             avatar?: string | null;
+            /**
+             * Wavelength
+             * @default 0
+             */
+            wavelength: number;
         };
         /**
          * ActivityListResponse
@@ -1535,8 +1543,7 @@ export interface components {
         ActivityResponse: {
             /** Id */
             id: number;
-            /** Type */
-            type: string;
+            type: components["schemas"]["ActivityType"];
             /** Is Read */
             is_read: boolean;
             /**
@@ -1561,6 +1568,12 @@ export interface components {
             /** Type */
             type: string;
         };
+        /**
+         * ActivityType
+         * @description Activity types for the feed
+         * @enum {string}
+         */
+        ActivityType: "QWIRL_COMPLETED_BY_OTHER" | "QWIRL_COMPLETED_BY_ME" | "QWIRL_UPDATED_BY_OTHER" | "QWIRL_MUTUAL_COMPLETION";
         /** AuthResponse */
         AuthResponse: {
             user: components["schemas"]["api__user__schemas__UserResponse"];

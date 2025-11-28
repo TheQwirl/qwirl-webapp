@@ -42,8 +42,8 @@ const qwirlHeaderSchema = z.object({
     .max(60, "Title must be less than 60 characters"),
   description: z
     .string()
-    .min(10, "Description must be at least 10 characters")
-    .max(100, "Description must be less than 100 characters"),
+    .max(100, "Description must be less than 100 characters")
+    .optional(),
   background_image: z.string().nullable().optional(),
 });
 
@@ -51,10 +51,12 @@ type QwirlHeaderFormData = z.infer<typeof qwirlHeaderSchema>;
 
 interface EditableQwirlCoverProps {
   className?: string;
+  isProfile?: boolean;
 }
 
 const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
   className,
+  isProfile = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
@@ -240,24 +242,26 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="What kind of person am I?"
-                          {...field}
-                          maxLength={60}
-                          className="text-lg"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {!isProfile && (
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Title</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="What kind of person am I?"
+                            {...field}
+                            maxLength={60}
+                            className="text-lg"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <FormField
                   control={form.control}
@@ -348,6 +352,7 @@ const EditableQwirlCover: React.FC<EditableQwirlCoverProps> = ({
           </Button>
         </div>
       }
+      isProfile={isProfile}
     />
   );
 };

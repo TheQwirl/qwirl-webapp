@@ -24,7 +24,7 @@ const ResponderSelector: React.FC<ResponderSelectorProps> = ({
       onValueChange={(value) => onResponderToggle(Number(value))}
     >
       <SelectTrigger className="w-48">
-        <SelectValue placeholder="Choose a responder" />
+        <SelectValue placeholder="Select responder" />
       </SelectTrigger>
       <SelectContent>
         {responders?.length ? (

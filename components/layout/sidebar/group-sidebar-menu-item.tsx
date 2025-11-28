@@ -47,10 +47,7 @@ const GroupSidebarMenuItem = ({ item }: GroupSidebarMenuItemProps) => {
             {isAnyChildActive && (
               <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-primary" />
             )}
-            <item.icon
-              style={{ width: "20px", height: "20px" }}
-              className="mr-2"
-            />
+            <item.icon size={20} className="mr-2" />
             <span className="text-sm font-medium text-nowrap">
               {item.title}
             </span>
@@ -84,10 +81,7 @@ const GroupSidebarMenuItem = ({ item }: GroupSidebarMenuItemProps) => {
                       {isSubItemActive && (
                         <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-primary" />
                       )}
-                      <subItem.icon
-                        className="mr-2"
-                        style={{ width: "16px", height: "16px" }}
-                      />
+                      <subItem.icon className="mr-2" size={16} />
                       <span className="text-sm">{subItem.title}</span>
                     </Link>
                   </SidebarMenuSubButton>

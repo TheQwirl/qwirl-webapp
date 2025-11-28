@@ -25,7 +25,7 @@ const SelectedResponderCard: React.FC<SelectedResponderCardProps> = ({
         image={responder.avatar ?? ""}
         name={responder.name ?? ""}
         size={"sm"}
-        linkTo={`/profile/${responder.id}`}
+        linkTo={`/qwirl/${responder.username}`}
       />
 
       {/* Main content */}

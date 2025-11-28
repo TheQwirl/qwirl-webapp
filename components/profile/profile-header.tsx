@@ -286,10 +286,7 @@ const ProfileHeader = ({
                 {isDataLoading ? (
                   <Skeleton className="h-10 w-full" />
                 ) : (
-                  <WavelengthIndicator
-                    wavelength={wavelength}
-                    userName={user?.name ?? ""}
-                  />
+                  <WavelengthIndicator wavelength={wavelength} />
                 )}
               </div>
             )}
