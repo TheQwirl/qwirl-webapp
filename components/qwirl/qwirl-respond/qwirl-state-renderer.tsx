@@ -72,12 +72,13 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
   }
 
   const getUserVariant = () => {
-    if (!currentUser) return "guest";
-    if (currentUser.id === user.id) return "owner";
+    if (!isAuthenticated) return "guest";
+    if (currentUser && currentUser.id === user.id) return "owner";
     return "visitor";
   };
 
   const variant = getUserVariant();
+  const isGuestUser = variant === "guest";
 
   const isIncompleteQwirl = Boolean(
     !isLoading && isAuthenticated && pollsLength < CONSTANTS.MIN_QWIRL_POLLS
@@ -94,6 +95,7 @@ const QwirlStateRenderer: React.FC<QwirlStateRendererProps> = ({
   // 2. User hasn't started yet (!showInteractive) AND not completed AND not in review mode
   // 3. There are new unanswered questions added by owner
   const shouldShowCover =
+    isGuestUser ||
     isIncompleteQwirl ||
     (!showInteractive && !isCompleted && !isReviewMode) ||
     (hasNewUnansweredQuestions && !isReviewMode && !isAnsweringNew);
