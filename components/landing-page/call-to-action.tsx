@@ -23,7 +23,7 @@ export default function CallToAction() {
                 </div>
                 <div className="flex gap-3">
                   <Button size="lg" className="rounded-2xl" asChild>
-                    <Link href="/create" className="flex items-center gap-2">
+                    <Link href="/auth" className="flex items-center gap-2">
                       Create your Qwirl <ArrowRight className="size-4" />
                     </Link>
                   </Button>
@@ -33,7 +33,7 @@ export default function CallToAction() {
                     className="rounded-2xl"
                     asChild
                   >
-                    <Link href="/signin">Sign in</Link>
+                    <Link href="/auth">Sign in</Link>
                   </Button>
                 </div>
               </div>
