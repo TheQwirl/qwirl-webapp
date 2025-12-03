@@ -167,7 +167,7 @@ const CommunityPage = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className="group flex h-full"
+                    className="group flex h-full w-full"
                   >
                     <Link
                       href={`/qwirl/${qwirl.user?.username}`}

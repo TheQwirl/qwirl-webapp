@@ -34,7 +34,7 @@ export function WhatQwirlIsNotSection() {
             What Qwirl Is Not
           </Badge>
           <p className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Guardrails that keep Qwirl intentional.
+            What Qwirl is not designed to be.
           </p>
         </div>
 

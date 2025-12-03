@@ -2,13 +2,14 @@ import { Badge } from "../ui/badge";
 
 const statements = [
   "Every person is a set of questions and their answers.",
-  "Qwirl turns this idea into a simple tool: choose the questions that define you, answer them, and let others do the same.",
+  "Qwirl turns this idea into a simple tool: construct the questions that define you, answer them, and let others do the same.",
+  "We believe: you are what you ask.",
   "A single interaction reveals more than bios, feeds, or small talk ever can.",
 ];
 
 export function PhilosophySection() {
   return (
-    <section className="bg-gradient-to-b from-background via-background to-muted/30 py-24 px-4">
+    <section className="bg-gradient-to-b from-background via-background to-muted/30 py-24 px-4 min-h-screen">
       <div className="mx-auto flex max-w-4xl flex-col gap-10 text-center">
         <div className="space-y-4">
           <Badge

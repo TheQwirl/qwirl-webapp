@@ -138,11 +138,11 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
 
           {(showTotalPolls && qwirlCoverData?.totalPolls !== undefined) ||
           (variant === "owner" && !isIncomplete) ? (
-            <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-3 text-white text-xs font-semibold">
+            <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-3 text-gray-700 text-xs font-semibold">
               {showTotalPolls && qwirlCoverData?.totalPolls !== undefined && (
-                <div className="bg-black/40 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-300" />
-                  {qwirlCoverData.totalPolls} polls
+                <div className="bg-white/20 backdrop-blur-md rounded-full px-3 py-1 flex text-gray-500 items-center gap-1 border border-white/30 shadow-lg shadow-black/10">
+                  <span className="w-2 h-2 rounded-full bg-primary shadow-sm shadow-emerald-500/50" />
+                  {qwirlCoverData.totalPolls} questions
                 </div>
               )}
               {variant === "owner" && !isIncomplete && (
@@ -153,7 +153,7 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
                       `${window.location.origin}/qwirl/${user?.username}`
                     );
                   }}
-                  className="ml-auto bg-black/40 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5 text-white/90 hover:text-white transition-colors"
+                  className="ml-auto bg-white/20 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-1.5 border border-white/30 shadow-lg shadow-black/10 text-gray-500 hover:text-white hover:bg-white/30 transition-all"
                 >
                   <Share2 className="h-3.5 w-3.5" />
                   Share

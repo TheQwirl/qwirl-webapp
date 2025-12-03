@@ -38,9 +38,9 @@ const WAVELENGTH_STATES: WavelengthState[] = [
   {
     min: 50,
     label: "Some Resonance",
-    background: "bg-secondary/10 border-secondary/20",
-    accent: "text-secondary",
-    iconBg: "bg-secondary/20 text-secondary",
+    background: "bg-secondary/50 border-secondary/20",
+    accent: "text-secondary-foreground",
+    iconBg: "bg-secondary/50 text-secondary-foreground",
     glowBg: "bg-secondary/40",
   },
   {
