@@ -193,7 +193,7 @@ const CommunityPage = () => {
                             ? "completed"
                             : undefined
                         }
-                        className="h-full"
+                        className="h-full w-full"
                         variant={"visitor"}
                         isProfile
                       />
