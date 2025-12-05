@@ -48,6 +48,8 @@ export async function middleware(request: NextRequest) {
     const newTokens = await attemptTokenRefresh(refreshToken, response.cookies);
     if (newTokens) {
       accessToken = newTokens.access_token;
+      // Pass the refreshed token to downstream handlers via headers
+      response.headers.set("x-access-token", newTokens.access_token);
       console.log(
         `Middleware: Token refresh successful for public route "${pathname}"`
       );
@@ -72,6 +74,8 @@ export async function middleware(request: NextRequest) {
       ); // Pass response.cookies for setting
       if (newTokens) {
         accessToken = newTokens.access_token;
+        // Pass the refreshed token to downstream handlers via headers
+        response.headers.set("x-access-token", newTokens.access_token);
         console.log(
           `Middleware: Refresh successful for "${pathname}". Proceeding.`
         );

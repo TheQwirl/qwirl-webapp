@@ -4,9 +4,12 @@ import { attemptTokenRefresh } from "@/lib/auth/refreshToken";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: Request) {
   const cookieStore = await cookies();
-  let accessToken = cookieStore.get("access-token")?.value;
+  // Check for token from middleware first (if refresh happened in middleware)
+  let accessToken =
+    request.headers.get("x-access-token") ||
+    cookieStore.get("access-token")?.value;
 
   if (!accessToken) {
     const refreshToken = cookieStore.get("refresh-token")?.value;

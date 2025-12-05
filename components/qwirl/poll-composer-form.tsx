@@ -11,8 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const QUESTION_MAX_LENGTH = 80;
-const OPTION_MAX_LENGTH = 40;
+const QUESTION_MAX_LENGTH = 160;
+const OPTION_MAX_LENGTH = 80;
 const MIN_OPTIONS = 2;
 const MAX_OPTIONS = 6;
 
