@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { cn, shareOrCopy } from "@/lib/utils";
 import type { MyUser } from "@/components/profile/types";
 import type {
-  ActivityResponse,
   WavelengthUserResponse,
   QwirlCoverResponse,
   QwirlResponseStats,
@@ -18,6 +17,7 @@ import HomeActionFooter from "./home-action-footer";
 import QwirlCover, { QwirlCoverSkeleton } from "@/components/qwirl/qwirl-cover";
 // import TopMatchSpotlight from "./top-match-spotlight";
 import Link from "next/link";
+import $api from "@/lib/api/client";
 
 interface QwirlOverviewSectionProps {
   user: MyUser;
@@ -25,8 +25,6 @@ interface QwirlOverviewSectionProps {
   qwirlStats: QwirlResponseStats | undefined;
   isLoadingCover: boolean;
   isLoadingStats: boolean;
-  recentActivities: ActivityResponse[] | undefined;
-  isLoadingActivity: boolean;
   topMatches: WavelengthUserResponse[] | undefined;
   topMatchesCount: number;
   isLoadingMatches: boolean;
@@ -38,14 +36,28 @@ export function QwirlOverviewSection({
   qwirlStats,
   isLoadingCover,
   isLoadingStats,
-  recentActivities,
-  isLoadingActivity,
   // topMatches,
   topMatchesCount,
 }: // isLoadingMatches,
 // ,
 QwirlOverviewSectionProps) {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+
+  const { data: recentActivity } = $api.useQuery(
+    "get",
+    "/activities/me/recent-activity",
+    {
+      params: {
+        query: {
+          limit: 10,
+          type: "all",
+        },
+      },
+    },
+    {
+      enabled: !!user?.id,
+    }
+  );
 
   useEffect(() => {
     if (typeof window === "undefined" || !user?.username) {
@@ -81,7 +93,7 @@ QwirlOverviewSectionProps) {
   //   [topMatches]
   // );
 
-  const hasRecentActivity = (recentActivities?.length ?? 0) > 0;
+  const hasRecentActivity = (recentActivity?.activities?.length ?? 0) > 0;
   const hasMatches = topMatchesCount > 0;
 
   const handleShare = useCallback(async () => {
@@ -184,11 +196,7 @@ QwirlOverviewSectionProps) {
               </div>
 
               <div className="flex-1 min-h-0">
-                <RecentActivitiesList
-                  activities={recentActivities}
-                  isLoading={isLoadingActivity}
-                  className="flex h-full flex-col"
-                />
+                <RecentActivitiesList className="flex h-full flex-col" />
               </div>
             </div>
 

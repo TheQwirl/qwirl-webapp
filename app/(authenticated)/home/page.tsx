@@ -36,22 +36,6 @@ const HomePage = () => {
     }
   );
 
-  const { data: recentActivity, isLoading: isLoadingActivity } = $api.useQuery(
-    "get",
-    "/activities/me/recent-activity",
-    {
-      params: {
-        query: {
-          limit: 10,
-          type: "all",
-        },
-      },
-    },
-    {
-      enabled: !!user?.id,
-    }
-  );
-
   const hasQwirl = !!user?.primary_qwirl_id;
 
   const { data: topWavelengths, isLoading: isLoadingWavelengths } =
@@ -95,8 +79,6 @@ const HomePage = () => {
             user={user}
             isLoadingCover={isLoadingCover}
             isLoadingStats={isLoadingStats}
-            recentActivities={recentActivity?.activities}
-            isLoadingActivity={isLoadingActivity}
             topMatches={topWavelengths?.users}
             topMatchesCount={topWavelengths?.total_count ?? 0}
             isLoadingMatches={isLoadingWavelengths}
