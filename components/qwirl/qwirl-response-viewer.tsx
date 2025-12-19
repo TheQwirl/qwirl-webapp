@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useCallback, useState, useMemo, memo } from "react";
+import React, { useCallback, useEffect, useMemo, memo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, Users } from "lucide-react";
 
 import { useQwirlEditor } from "@/hooks/qwirl/useQwirlEditor";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
+import { useDebounce } from "@/hooks/useDebounce";
 
 import $api from "@/lib/api/client";
 import { authStore } from "@/stores/useAuthStore";
@@ -23,6 +24,8 @@ import QwirlComments from "./qwirl-comments";
 
 import { QwirlResponder } from "@/types/qwirl";
 import SelectedResponderCard from "./qwirl-edit/selected-responder-card";
+import { components } from "@/lib/api/v1-client-side";
+import { mergeResponder } from "./qwirl-response-viewer.utils";
 
 type ResponderAnswer = {
   user:
@@ -154,8 +157,13 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     QwirlResponder[] | null
   >(null);
   const [currentPollId, setCurrentPollId] = useState<number | null>(null);
+  const [responderSearch, setResponderSearch] = useState<string>("");
 
-  const qwirlRespondersQuery = $api.useQuery(
+  const [debouncedResponderSearch] = useDebounce(responderSearch, 300);
+
+  const limit = 12;
+
+  const respondersInfiniteQuery = $api.useInfiniteQuery(
     "get",
     "/qwirl-responses/qwirls/{qwirl_id}/responders",
     {
@@ -164,29 +172,89 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
           qwirl_id: user?.primary_qwirl_id ?? 0,
         },
         query: {
-          limit: 3,
+          limit,
+          skip: 0,
+          search: debouncedResponderSearch || undefined,
         },
       },
     },
     {
       enabled: !!user?.primary_qwirl_id,
+      initialPageParam: 0,
+      pageParamName: "skip",
+      getNextPageParam: (
+        lastPage: components["schemas"]["QwirlRespondersResponse"],
+        allPages: components["schemas"]["QwirlRespondersResponse"][]
+      ) => {
+        const currentCount = allPages.reduce(
+          (sum, page) => sum + (page.responders?.length || 0),
+          0
+        );
+        console.log({ currentCount, total: lastPage.total_count });
+        if (currentCount >= (lastPage.total_count || 0)) return undefined;
+        return currentCount;
+      },
     }
   );
 
-  React.useEffect(() => {
-    if (!responder_id) return;
+  const responderOptions = useMemo(
+    () =>
+      respondersInfiniteQuery.data?.pages.flatMap((p) => p.responders) ?? [],
+    [respondersInfiniteQuery.data?.pages]
+  );
 
-    const responder = qwirlRespondersQuery?.data?.responders.find(
-      (r) => r.id === responder_id
-    );
+  const hasMoreResponderOptions = !!respondersInfiniteQuery.hasNextPage;
 
-    if (responder) {
-      setSelectedResponders((prev) => [
-        responder,
-        ...(prev || []).filter((r) => r.id !== responder_id),
-      ]);
+  const selectedResponderIds = useMemo(
+    () => new Set((selectedResponders ?? []).map((r) => r.id)),
+    [selectedResponders]
+  );
+
+  const responderIdNeedsFetch = useMemo(() => {
+    if (!responder_id) return false;
+    if (selectedResponderIds.has(responder_id)) return false;
+    if (responderOptions.some((r) => r.id === responder_id)) return false;
+    return true;
+  }, [responder_id, responderOptions, selectedResponderIds]);
+
+  const responderByIdsQuery = $api.useQuery(
+    "get",
+    "/qwirl-responses/qwirls/{qwirl_id}/responders/by-ids",
+    {
+      params: {
+        path: {
+          qwirl_id: user?.primary_qwirl_id ?? 0,
+        },
+        query: {
+          ids: responder_id ? [responder_id] : [],
+        },
+      },
+    },
+    {
+      enabled:
+        !!user?.primary_qwirl_id && !!responder_id && responderIdNeedsFetch,
     }
-  }, [responder_id, qwirlRespondersQuery?.data?.responders]);
+  );
+
+  const mergeSelectedResponder = useCallback((responder: QwirlResponder) => {
+    setSelectedResponders((prev) => mergeResponder(prev, responder));
+  }, []);
+
+  useEffect(() => {
+    if (!responder_id) return;
+    const responder = responderOptions.find((r) => r.id === responder_id);
+    if (responder) mergeSelectedResponder(responder);
+  }, [mergeSelectedResponder, responderOptions, responder_id]);
+
+  useEffect(() => {
+    if (!responder_id) return;
+    const responder = responderByIdsQuery.data?.responders?.[0];
+    if (responder) mergeSelectedResponder(responder);
+  }, [
+    mergeSelectedResponder,
+    responderByIdsQuery.data?.responders,
+    responder_id,
+  ]);
 
   const qwirlResponsesByUsersQuery = $api.useQuery(
     "get",
@@ -393,9 +461,7 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
     (responderId: number) => {
       setSelectedResponders((prev) => {
         if (!prev) {
-          const responder = qwirlRespondersQuery?.data?.responders.find(
-            (r) => r.id === responderId
-          );
+          const responder = responderOptions.find((r) => r.id === responderId);
           return responder ? [responder] : [];
         }
 
@@ -403,14 +469,12 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
         if (exists) {
           return prev.filter((r) => r.id !== responderId);
         } else {
-          const responder = qwirlRespondersQuery?.data?.responders.find(
-            (r) => r.id === responderId
-          );
+          const responder = responderOptions.find((r) => r.id === responderId);
           return responder ? [...prev, responder] : prev;
         }
       });
     },
-    [qwirlRespondersQuery?.data?.responders]
+    [responderOptions]
   );
 
   const removeResponder = useCallback((responderId: number) => {
@@ -459,8 +523,18 @@ const QwirlResponsesViewer = ({ responder_id }: QwirlResponsesViewerProps) => {
             </div>
             <div className="w-full sm:w-auto">
               <ResponderSelector
-                responders={qwirlRespondersQuery?.data?.responders || []}
+                responders={responderOptions}
                 onResponderToggle={handleResponderToggle}
+                search={responderSearch}
+                onSearchChange={setResponderSearch}
+                hasMore={hasMoreResponderOptions}
+                isFetchingNextPage={respondersInfiniteQuery.isFetchingNextPage}
+                fetchNextPage={
+                  hasMoreResponderOptions
+                    ? () => respondersInfiniteQuery.fetchNextPage()
+                    : undefined
+                }
+                isLoading={respondersInfiniteQuery.isLoading}
               />
             </div>
           </div>

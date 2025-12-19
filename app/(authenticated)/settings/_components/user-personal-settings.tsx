@@ -27,6 +27,7 @@ import $api from "@/lib/api/client";
 import { toast } from "sonner";
 import { useUserSync } from "@/hooks/useUserSync";
 import { EditableUserAvatar } from "@/components/editable-user-avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -46,6 +47,10 @@ export function UserPersonalSettings() {
   const user = userQuery?.data;
   const categoriesQuery = $api.useQuery("get", "/question-categories");
   const { syncUser } = useUserSync();
+
+  const isUserLoading = userQuery?.isLoading;
+  const isCategoriesLoading = categoriesQuery?.isLoading;
+  const isInitialLoading = Boolean(isUserLoading);
 
   const updateUserMutation = $api.useMutation("patch", "/users/me", {
     onSuccess: async (response) => {
@@ -71,6 +76,7 @@ export function UserPersonalSettings() {
   });
 
   useEffect(() => {
+    if (!user) return;
     form.reset({
       name: user?.name ?? "",
       phone: user?.phone ?? null,
@@ -110,14 +116,24 @@ export function UserPersonalSettings() {
     <div className="max-w-xl mx-auto">
       {/* Avatar Section */}
       <div className="flex flex-col items-center gap-2 mb-8">
-        <EditableUserAvatar
-          name={user?.name ?? undefined}
-          image={user?.avatar ?? undefined}
-          size="xl"
-          className="mb-2"
-        />
-        <div className="text-lg font-semibold">{user?.name}</div>
-        <div className="text-sm text-muted-foreground">@{user?.username}</div>
+        {isInitialLoading ? (
+          <div className="flex flex-col items-center gap-2 w-full">
+            <Skeleton className="h-24 w-24 rounded-full mb-2" />
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-28" />
+          </div>
+        ) : (
+          <>
+            <EditableUserAvatar
+              name={user?.name ?? undefined}
+              image={user?.avatar ?? undefined}
+              size="xl"
+              className="mb-2"
+            />
+            <div className="text-lg font-semibold">{user?.name}</div>
+            <div className="text-sm text-muted-foreground">@{user?.username}</div>
+          </>
+        )}
       </div>
       <div className="border-b border-border/40 mb-8" />
 
@@ -135,7 +151,11 @@ export function UserPersonalSettings() {
                     Full Name
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    {isInitialLoading ? (
+                      <Skeleton className="h-10 w-full" />
+                    ) : (
+                      <Input placeholder="John Doe" {...field} />
+                    )}
                   </FormControl>
                   <FormDescription>
                     This is your display name that others will see
@@ -155,7 +175,11 @@ export function UserPersonalSettings() {
                     Username
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="johndoe" {...field} />
+                    {isInitialLoading ? (
+                      <Skeleton className="h-10 w-full" />
+                    ) : (
+                      <Input placeholder="johndoe" {...field} />
+                    )}
                   </FormControl>
                   <FormDescription>
                     Your unique username for sharing Qwirls
@@ -176,13 +200,17 @@ export function UserPersonalSettings() {
                   Phone Number
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="+1234567890"
-                    {...field}
-                    value={field.value || ""}
-                    type="tel"
-                    maxLength={15}
-                  />
+                  {isInitialLoading ? (
+                    <Skeleton className="h-10 w-full" />
+                  ) : (
+                    <Input
+                      placeholder="+1234567890"
+                      {...field}
+                      value={field.value || ""}
+                      type="tel"
+                      maxLength={15}
+                    />
+                  )}
                 </FormControl>
                 <FormDescription>
                   Optional: Used for account verification and security
@@ -202,28 +230,61 @@ export function UserPersonalSettings() {
                   Interests (max 5)
                 </FormLabel>
                 <div className="flex gap-2">
-                  <Select
-                    disabled={field.value?.length === 5}
-                    onValueChange={handleAddCategory}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select your interests" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(categoriesQuery?.data as string[])?.map((category) => (
-                        <SelectItem
-                          disabled={field.value?.includes(category)}
-                          key={category}
-                          value={category}
-                        >
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {isInitialLoading ? (
+                    <Skeleton className="h-10 w-full" />
+                  ) : (
+                    <Select
+                      disabled={
+                        isCategoriesLoading ||
+                        field.value?.length === 5 ||
+                        updateUserMutation.isPending
+                      }
+                      onValueChange={handleAddCategory}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue
+                          placeholder={
+                            isCategoriesLoading
+                              ? "Loading interests…"
+                              : "Select your interests"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {isCategoriesLoading ? (
+                          <div className="px-2 py-2">
+                            <div className="space-y-2">
+                              <Skeleton className="h-8 w-full" />
+                              <Skeleton className="h-8 w-full" />
+                              <Skeleton className="h-8 w-full" />
+                            </div>
+                          </div>
+                        ) : (
+                          ((categoriesQuery?.data as string[]) ?? []).map(
+                            (category) => (
+                              <SelectItem
+                                disabled={field.value?.includes(category)}
+                                key={category}
+                                value={category}
+                              >
+                                {category}
+                              </SelectItem>
+                            )
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {field.value?.map((category) => (
+                  {isInitialLoading
+                    ? Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton
+                          key={i}
+                          className="h-6 w-20 rounded-full"
+                        />
+                      ))
+                    : field.value?.map((category) => (
                     <Badge
                       key={category}
                       variant="secondary"
@@ -234,6 +295,7 @@ export function UserPersonalSettings() {
                         type="button"
                         onClick={() => handleRemoveCategory(category)}
                         className="ml-1"
+                        disabled={updateUserMutation.isPending}
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -249,13 +311,18 @@ export function UserPersonalSettings() {
           />
 
           <div className="flex justify-end">
-            <Button
-              type="submit"
-              loading={updateUserMutation.isPending}
-              className="min-w-[120px]"
-            >
-              Save Changes
-            </Button>
+            {isInitialLoading ? (
+              <Skeleton className="h-10 w-[120px]" />
+            ) : (
+              <Button
+                type="submit"
+                loading={updateUserMutation.isPending}
+                className="min-w-[120px]"
+                disabled={updateUserMutation.isPending}
+              >
+                Save Changes
+              </Button>
+            )}
           </div>
         </form>
       </Form>

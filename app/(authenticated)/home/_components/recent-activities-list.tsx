@@ -96,8 +96,8 @@ export default function RecentActivitiesList({ className }: Props) {
             <Skeleton className="h-16 rounded-2xl" />
           </div>
         ) : activities.length > 0 ? (
-          <ScrollArea className="h-[300px] pr-4">
-            <div className="space-y-3">
+          <ScrollArea className="h-[400px]">
+            <div className="space-y-3 px-1">
               {activities.map((activity, index) => {
                 const isLast = index === activities.length - 1;
                 return (

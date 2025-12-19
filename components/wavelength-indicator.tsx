@@ -21,7 +21,7 @@ type WavelengthState = {
 const WAVELENGTH_STATES: WavelengthState[] = [
   {
     min: 90,
-    label: "Matched Wavelength",
+    label: "Matching Wavelengths",
     background: "bg-primary/10 border-primary/20",
     accent: "text-primary",
     iconBg: "bg-primary/20 text-primary",
@@ -68,15 +68,16 @@ const getWavelengthState = (value: number) => {
   );
 };
 
-const subtlePulse = {
-  scale: [1, 1.04, 1],
-  opacity: [0.4, 0.15, 0.4],
+const ripplePulse = {
+  scale: [1, 1.5, 1],
+  opacity: [0.6, 0, 0.6],
 };
 
-const subtlePulseTransition = {
-  duration: 3.2,
+const ripplePulseTransition = {
+  duration: 2,
   repeat: Number.POSITIVE_INFINITY,
-  ease: "easeInOut",
+  ease: "easeOut",
+  repeatDelay: 0.5,
 };
 
 const WavelengthIndicator = ({
@@ -95,13 +96,16 @@ const WavelengthIndicator = ({
         <div
           className={`relative flex h-5 w-5 items-center justify-center rounded-full ${state.iconBg}`}
         >
+          {/* Static background */}
+          <div className={`absolute inset-0 rounded-full ${state.iconBg}`} />
+          {/* Pulsating ripple */}
           <motion.span
             className={`absolute inset-0 rounded-full ${state.glowBg}`}
-            animate={subtlePulse}
-            transition={subtlePulseTransition}
+            animate={ripplePulse}
+            transition={ripplePulseTransition}
             aria-hidden
           />
-          <HeartPulseIcon className="h-3 w-3" />
+          <HeartPulseIcon className="h-4 w-4 relative z-10" />
         </div>
         <span className="tabular-nums">{formattedWavelength}%</span>
         <span
@@ -119,9 +123,18 @@ const WavelengthIndicator = ({
     >
       <div className="flex items-center gap-1 justify-center">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full ${state.iconBg}`}
+          className={`relative flex h-10 w-10 items-center justify-center rounded-full ${state.iconBg}`}
         >
-          <HeartPulseIcon className="h-7 w-7" />
+          {/* Static background */}
+          <div className={`absolute inset-0 rounded-full ${state.iconBg}`} />
+          {/* Pulsating ripple */}
+          <motion.span
+            className={`absolute inset-0 rounded-full ${state.glowBg}`}
+            animate={ripplePulse}
+            transition={ripplePulseTransition}
+            aria-hidden
+          />
+          <HeartPulseIcon className="h-7 w-7 relative z-10" />
         </div>
         <div className="flex flex-col items-start">
           <span className="text-2xl leading-none font-semibold tracking-wide">

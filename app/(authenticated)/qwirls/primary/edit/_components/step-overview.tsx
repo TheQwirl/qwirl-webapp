@@ -104,7 +104,7 @@ const FeaturedStepCard = ({ card }: { card: StepCardState }) => {
   return (
     <Link
       href={card.href}
-      className="group relative flex w-full flex-col overflow-hidden rounded-2xl border-2 border-primary/30 bg-card text-card-foreground p-6 text-left shadow-lg shadow-primary/10 transition hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] sm:p-8"
+      className="group relative flex w-full flex-col overflow-hidden rounded-2xl border-2 border-primary/30 bg-background text-card-foreground p-6 text-left shadow-lg shadow-primary/10 transition hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] sm:p-8"
     >
       {/* Header */}
       <div className="mb-4 flex items-start justify-between gap-3">
@@ -134,11 +134,11 @@ const FeaturedStepCard = ({ card }: { card: StepCardState }) => {
 
       {/* CTA Button */}
       <div className="flex items-center gap-3">
-        <span className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-md transition group-hover:translate-x-1 group-hover:shadow-lg">
+        <span className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-md transition group-hover:shadow-lg">
           {card.statusType === "complete"
             ? "Review questions"
             : "Start building"}
-          <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+          <ArrowRight className="h-4 w-4 transition" />
         </span>
       </div>
 

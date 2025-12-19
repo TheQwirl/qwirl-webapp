@@ -909,6 +909,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/qwirl-responses/qwirls/{qwirl_id}/responders/by-ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Qwirl Responders By Ids
+         * @description Return responder summaries for a specific set of responder IDs.
+         *
+         *     Contract:
+         *     - Access control: same as `/qwirls/{qwirl_id}/responders` (Qwirl owner only)
+         *     - Validation: all requested `ids` must have a session for this qwirl
+         *     - Response: `{ responders: QwirlResponderSummary[] }` (no pagination / total_count)
+         */
+        get: operations["get_qwirl_responders_by_ids_api_v1_qwirl_responses_qwirls__qwirl_id__responders_by_ids_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/qwirl-responses/responses/by-users": {
         parameters: {
             query?: never;
@@ -2217,6 +2242,11 @@ export interface components {
             response_count: number;
             /** Wavelength */
             wavelength: number;
+        };
+        /** QwirlRespondersByIdsResponse */
+        QwirlRespondersByIdsResponse: {
+            /** Responders */
+            responders: components["schemas"]["QwirlResponderSummary"][];
         };
         /** QwirlRespondersResponse */
         QwirlRespondersResponse: {
@@ -3989,6 +4019,8 @@ export interface operations {
             query?: {
                 /** @description Filter by session status */
                 status?: components["schemas"]["SessionStatusEnum"] | null;
+                /** @description Search responders by name or username */
+                search?: string | null;
                 /** @description Number of records to skip */
                 skip?: number;
                 /** @description Maximum number of records to return */
@@ -4013,6 +4045,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["QwirlRespondersResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_qwirl_responders_by_ids_api_v1_qwirl_responses_qwirls__qwirl_id__responders_by_ids_get: {
+        parameters: {
+            query: {
+                /** @description Responder user IDs to include */
+                ids: number[];
+                /** @description Search responders by name or username */
+                search?: string | null;
+            };
+            header?: never;
+            path: {
+                qwirl_id: number;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QwirlRespondersByIdsResponse"];
                 };
             };
             /** @description Validation Error */
