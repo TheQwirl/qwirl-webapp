@@ -21,7 +21,17 @@ export const config = {
   ],
 };
 
-const PROTECTED_ROUTES = ["/settings"];
+// Treat the entire authenticated app surface as protected.
+// If this list is too broad, narrow it later, but protecting these prevents the
+// "stuck on an authenticated page with unauthenticated API calls" state.
+const PROTECTED_ROUTES = [
+  "/home",
+  "/feed",
+  "/profile",
+  "/settings",
+  "/qwirls",
+  "/posts",
+];
 const PUBLIC_ROUTES = ["/qwirl", "/question-library", "/discover"];
 const AUTH_PATH = "/auth";
 
@@ -112,9 +122,11 @@ export async function middleware(request: NextRequest) {
       PROTECTED_ROUTES.some((path) => pathname.startsWith(path)) &&
       !isApiPath
     ) {
-      console.log(
-        `Middleware: Still no access token for protected UI path "${pathname}". Redirecting to login.`
-      );
+      if (process.env.NODE_ENV !== "production") {
+        console.log(
+          `Middleware: No access token for protected UI path "${pathname}". Redirecting to login.`
+        );
+      }
       const loginUrl = new URL(AUTH_PATH, base);
       loginUrl.searchParams.set("redirect_from", pathname);
       return NextResponse.redirect(loginUrl, { headers: response.headers });

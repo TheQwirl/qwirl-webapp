@@ -26,6 +26,7 @@ export function InteractiveOnboardingProvider({
   } = useOnboardingStore();
 
   const [showOnborda, setShowOnborda] = useState(false);
+  const [activeSteps, setActiveSteps] = useState(onboardingSteps);
 
   // Additional logging for showOnborda changes
   useEffect(() => {
@@ -62,22 +63,46 @@ export function InteractiveOnboardingProvider({
     if (shouldStart && !tourActive) {
       console.log("Tour conditions met! Starting in 1.5s...");
 
-      // Check if target elements exist
-      const checkElements = () => {
-        const welcomeEl = document.querySelector("#onboarding-welcome");
-        const addPollBtn = document.querySelector("#add-poll-button");
-        const libraryBtn = document.querySelector("#add-from-library-button");
-        console.log("Target elements check:", {
-          welcomeEl: !!welcomeEl,
-          addPollBtn: !!addPollBtn,
-          libraryBtn: !!libraryBtn,
-        });
-      };
-
       // Increased delay to ensure DOM elements are ready
       const timer = setTimeout(() => {
-        checkElements();
-        console.log("🎉 Starting tour NOW!");
+        const missing: string[] = [];
+
+        // Build filtered steps: remove steps whose selectors are missing
+        const filtered = onboardingSteps.map((group) => {
+          const kept = group.steps.filter((s) => {
+            if (!s.selector) return true;
+            const el = document.querySelector(s.selector as string);
+            if (!el) {
+              missing.push(s.selector as string);
+              return false;
+            }
+            return true;
+          });
+          return { ...group, steps: kept };
+        });
+
+        if (missing.length > 0) {
+          console.warn(
+            "Onboarding: missing step targets, these will be skipped:",
+            missing
+          );
+        }
+
+        // If every group's steps would be empty, don't start the tour
+        const hasAny = filtered.some((g) => g.steps.length > 0);
+        if (!hasAny) {
+          console.warn(
+            "Onboarding: No valid steps found in the DOM, aborting tour start."
+          );
+          return;
+        }
+
+        // Save and start
+        setActiveSteps(filtered);
+        console.log(
+          "🎉 Starting tour NOW! filtered step counts:",
+          filtered.map((g) => g.steps.length)
+        );
         console.log("Setting tourActive to true and showOnborda to true");
         startTour();
         // Force set showOnborda immediately
@@ -118,7 +143,7 @@ export function InteractiveOnboardingProvider({
   return (
     <OnbordaProvider>
       <Onborda
-        steps={onboardingSteps}
+        steps={activeSteps}
         showOnborda={showOnborda}
         shadowRgb="0,0,0"
         shadowOpacity="0.3"

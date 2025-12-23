@@ -47,6 +47,11 @@ export async function GET(request: Request) {
   });
 
   if (!userResponse.response?.ok) {
+    if (process.env.NODE_ENV !== "production") {
+      console.log(
+        `/api/me: backend /users/me returned ${userResponse.response.status}; treating as unauthenticated`
+      );
+    }
     console.log(userResponse?.error?.detail);
     return NextResponse.json(
       { user: null, isAuthenticated: false },

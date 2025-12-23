@@ -3,7 +3,6 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import React, { useEffect, useRef } from "react";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { useIsMobile } from "../../hooks/use-mobile";
-import ComingSoon from "@/components/coming-soon";
 import { MobileNavBar } from "@/components/layout/mobile-navbar";
 import PageLoader from "@/components/page-loader";
 import { authStore } from "@/stores/useAuthStore";
@@ -18,7 +17,7 @@ import { FloatingCartButton } from "@/components/layout/cart-button";
 
 const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
-  const { checkSession, isLoading } = authStore();
+  const { checkSession } = authStore();
 
   const isInitialLoad = useRef(true);
 
@@ -30,11 +29,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
     }
   }, [checkSession]);
 
-  const resolvedContent = isLoading ? (
-    <PageLoader />
-  ) : (
-    children || <ComingSoon />
-  );
+  // const resolvedContent = isLoading ? <PageLoader /> : children;
 
   const desktopLayout = (
     <SidebarProvider
@@ -47,16 +42,14 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
       }
     >
       <AppSidebar collapsible="none" className="sticky top-0 h-screen" />
-      <div className="flex-1">
-        <main>{resolvedContent}</main>
-      </div>
+      <div className="flex-1">{children}</div>
     </SidebarProvider>
   );
 
   const mobileLayout = (
     <>
       <div className="flex min-h-screen flex-col pb-[calc(3.75rem+env(safe-area-inset-bottom))]">
-        <main className="flex-1 sm:p-4">{resolvedContent}</main>
+        <main className="flex-1 sm:p-4">{children}</main>
       </div>
       <MobileNavBar />
     </>

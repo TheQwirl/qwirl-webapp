@@ -1,5 +1,4 @@
 import { MyUser } from "@/components/profile/types";
-import { redirect } from "next/navigation";
 import { create } from "zustand";
 
 interface AuthState {
@@ -62,14 +61,12 @@ export const authStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error("Error during logout:", error);
     } finally {
-      // Ensure redirection even if API call fails
-      // redirect("/auth?logged_out=true");
+      // Ensure redirection even if API call fails.
+      // Note: `next/navigation`'s `redirect()` is primarily for Server Components.
+      // In client-side Zustand actions it can be unreliable, so use a hard navigation.
       if (typeof window !== "undefined") {
-        if (wasAuthenticated) {
-          // Only redirect if they were actually logged in
-          redirect("/auth?logged_out=true");
-        }
-        redirect("/auth?logged_out=true");
+        const url = wasAuthenticated ? "/auth?logged_out=true" : "/auth";
+        window.location.assign(url);
       }
     }
   },

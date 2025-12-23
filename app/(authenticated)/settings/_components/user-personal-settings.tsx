@@ -131,7 +131,9 @@ export function UserPersonalSettings() {
               className="mb-2"
             />
             <div className="text-lg font-semibold">{user?.name}</div>
-            <div className="text-sm text-muted-foreground">@{user?.username}</div>
+            <div className="text-sm text-muted-foreground">
+              @{user?.username}
+            </div>
           </>
         )}
       </div>
@@ -279,28 +281,25 @@ export function UserPersonalSettings() {
                 <div className="mt-2 flex flex-wrap gap-2">
                   {isInitialLoading
                     ? Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton
-                          key={i}
-                          className="h-6 w-20 rounded-full"
-                        />
+                        <Skeleton key={i} className="h-6 w-20 rounded-full" />
                       ))
                     : field.value?.map((category) => (
-                    <Badge
-                      key={category}
-                      variant="secondary"
-                      className="flex items-center gap-1"
-                    >
-                      {category}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCategory(category)}
-                        className="ml-1"
-                        disabled={updateUserMutation.isPending}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
+                        <Badge
+                          key={category}
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          {category}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCategory(category)}
+                            className="ml-1"
+                            disabled={updateUserMutation.isPending}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
                 </div>
                 <FormDescription>
                   Help others discover you through shared interests

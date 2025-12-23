@@ -44,47 +44,34 @@ export const StepOverview = () => {
   const mainCard = stepCards[2];
 
   return (
-    <section aria-labelledby="qwirl-editor-intro" className="space-y-6">
-      <div className="w-full bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-6">
-        <div className="mb-6 space-y-3">
-          <div className="inline-flex items-center gap-2 text-primary">
-            <span className="text-xs font-semibold uppercase tracking-wide">
-              Primary qwirl
-            </span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Follow the steps below to set up your Qwirl, add some personal
-            touches, and create a question set that feels like you.
-          </p>
-        </div>
+    <section
+      aria-labelledby="qwirl-editor-intro"
+      className="space-y-6 p-6 lg:p-8"
+    >
+      {mainCard && <FeaturedStepCard card={mainCard} />}
 
-        {/* Setup Steps - Compact */}
-        <div className="mb-4 grid gap-3 sm:grid-cols-2">
-          {setupCards.map((card) => (
-            <CompactStepCard key={card.key} card={card} />
-          ))}
-        </div>
-
-        {/* Main Action Card - Prominent */}
-        {mainCard && <FeaturedStepCard card={mainCard} />}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {setupCards.map((card) => (
+          <CompactStepCard key={card.key} card={card} />
+        ))}
       </div>
     </section>
   );
 };
 
-// Compact card for setup steps (Steps 1 & 2)
+// Compact cards for supporting setup (Cover + Socials)
 const CompactStepCard = ({ card }: { card: StepCardState }) => {
   const statusVisual = STATUS_CONFIG[card.statusType];
 
   return (
     <Link
       href={card.href}
-      className="group relative flex h-full w-full flex-col rounded-lg border bg-background p-3 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99]"
+      className="group relative flex h-full w-full flex-col rounded-xl border border-border/60 bg-background p-4 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99]"
     >
       <div className="mb-2 flex items-start justify-between gap-2">
         <Badge
           variant="secondary"
-          className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+          className="rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-semibold text-foreground"
         >
           {card.stepLabel}
         </Badge>
@@ -92,25 +79,25 @@ const CompactStepCard = ({ card }: { card: StepCardState }) => {
       </div>
       <p className="text-sm font-semibold text-foreground">{card.title}</p>
       <p className="mt-1 text-xs text-muted-foreground">{card.description}</p>
-      <p className="mt-2 text-xs text-muted-foreground">{card.statusDetail}</p>
+      <p className="mt-3 text-xs text-muted-foreground">{card.statusDetail}</p>
     </Link>
   );
 };
 
-// Featured card for main action (Step 3 - Questions)
+// Featured card for the primary action (Questions)
 const FeaturedStepCard = ({ card }: { card: StepCardState }) => {
   const statusVisual = STATUS_CONFIG[card.statusType];
 
   return (
     <Link
       href={card.href}
-      className="group relative flex w-full flex-col overflow-hidden rounded-2xl border-2 border-primary/30 bg-background text-card-foreground p-6 text-left shadow-lg shadow-primary/10 transition hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] sm:p-8"
+      className="group relative flex w-full flex-col overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/5 via-background to-background p-6 text-left shadow-lg shadow-primary/10 transition hover:border-primary/45 hover:shadow-xl hover:shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] sm:p-8"
     >
       {/* Header */}
       <div className="mb-4 flex items-start justify-between gap-3">
         <Badge
           variant="secondary"
-          className="rounded-full bg-primary/20 px-3 py-1 text-xs font-bold text-primary"
+          className="rounded-full bg-primary/15 px-3 py-1 text-xs font-bold text-primary"
         >
           {card.stepLabel}
         </Badge>
@@ -119,11 +106,15 @@ const FeaturedStepCard = ({ card }: { card: StepCardState }) => {
 
       {/* Title & Description */}
       <div className="mb-4 space-y-2">
-        <h3 className="text-xl font-bold text-foreground sm:text-2xl">
+        <h3
+          id="qwirl-editor-intro"
+          className="text-2xl font-bold text-foreground sm:text-3xl"
+        >
           {card.title}
         </h3>
         <p className="text-sm text-muted-foreground sm:text-base">
-          {card.description}
+          Questions define your voice. Add your own prompts or pull from curated
+          sets to assemble a Qwirl that feels unmistakably you.
         </p>
       </div>
 
@@ -133,12 +124,13 @@ const FeaturedStepCard = ({ card }: { card: StepCardState }) => {
       </p>
 
       {/* CTA Button */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap lg:flex-nowrap">
         <span className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-md transition group-hover:shadow-lg">
-          {card.statusType === "complete"
-            ? "Review questions"
-            : "Start building"}
+          {card.statusType === "complete" ? "View questions" : "Add questions"}
           <ArrowRight className="h-4 w-4 transition" />
+        </span>
+        <span className="text-xs text-muted-foreground">
+          You can edit the cover + socials anytime.
         </span>
       </div>
 

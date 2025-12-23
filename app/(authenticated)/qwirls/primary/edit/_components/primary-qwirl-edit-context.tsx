@@ -209,7 +209,7 @@ export const PrimaryQwirlEditProvider = ({
 
       const statusDetail = (() => {
         if (definition.key === "cover") {
-          if (statusType === "complete") return "Cover is ready to share.";
+          if (statusType === "complete") return "Cover is ready.";
           if (statusType === "in-progress")
             return "Finish your intro to help people connect.";
           if (statusType === "loading") return "Checking your cover details…";

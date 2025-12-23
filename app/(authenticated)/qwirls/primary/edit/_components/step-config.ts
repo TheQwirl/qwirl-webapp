@@ -20,23 +20,23 @@ export const POLL_TARGET = 15;
 export const STEP_DEFINITIONS: StepDefinition[] = [
   {
     key: "cover",
-    stepLabel: "Step 1",
+    stepLabel: "Cover",
     title: "Set up your cover",
     description: "Pair a photo with a short intro that sounds like you.",
     href: "/qwirls/primary/edit/cover",
   },
   {
     key: "socials",
-    stepLabel: "Step 2",
+    stepLabel: "Socials",
     title: "Add socials (optional)",
     description: "Share a couple links or details friends usually ask for.",
     href: "/qwirls/primary/edit/socials",
   },
   {
     key: "questions",
-    stepLabel: "Step 3",
-    title: "Build your question set",
-    description: "Aim for 15 questions to unlock sharing.",
+    stepLabel: "Questions",
+    title: "Add questions to Qwirl",
+    description: "Add at least 15 questions.",
     href: "/qwirls/primary/edit/questions",
   },
 ];

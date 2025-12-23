@@ -44,9 +44,21 @@ const ResponderSelector: React.FC<ResponderSelectorProps> = ({
 }) => {
   const observer = useRef<IntersectionObserver | null>(null);
 
+  // Treat any non-empty search as a "filtered" state.
+  // In that state, we should NOT auto-page, otherwise the sentinel can remain
+  // visible (especially with short filtered lists) and repeatedly trigger fetches.
+  const isSearching = search.trim().length > 0;
+
   const lastItemRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (isLoading) return;
+
+      // Disable infinite scroll while actively searching.
+      if (isSearching) {
+        observer.current?.disconnect();
+        return;
+      }
+
       if (observer.current) observer.current.disconnect();
 
       observer.current = new IntersectionObserver((entries) => {
@@ -62,13 +74,13 @@ const ResponderSelector: React.FC<ResponderSelectorProps> = ({
 
       if (node) observer.current.observe(node);
     },
-    [isLoading, hasMore, isFetchingNextPage, fetchNextPage]
+    [isLoading, isSearching, hasMore, isFetchingNextPage, fetchNextPage]
   );
 
-  // When search changes, ensure we don't keep observing stale nodes.
+  // When relevant state changes, ensure we don't keep observing stale nodes.
   useEffect(() => {
     return () => observer.current?.disconnect();
-  }, [search]);
+  }, [search, hasMore, isFetchingNextPage, isLoading]);
 
   return (
     <Popover>
@@ -96,11 +108,9 @@ const ResponderSelector: React.FC<ResponderSelectorProps> = ({
               {isLoading ? "Loading responders..." : "No responders found."}
             </CommandEmpty>
             <CommandGroup>
-              {responders.map((user, index) => {
-                const isLast = index === responders.length - 1;
-
+              {responders.map((user) => {
                 return (
-                  <div key={user.id} ref={isLast ? lastItemRef : undefined}>
+                  <div key={user.id}>
                     <CommandItem
                       value={user.id.toString()}
                       onSelect={() => onResponderToggle(user.id)}
@@ -128,6 +138,12 @@ const ResponderSelector: React.FC<ResponderSelectorProps> = ({
                 );
               })}
             </CommandGroup>
+
+            {/* Sentinel used for infinite scroll. Using a dedicated element is more reliable than
+                observing a list item wrapper that changes identity across search/pagination. */}
+            {!isSearching && responders.length > 0 ? (
+              <div ref={lastItemRef} className="h-px" />
+            ) : null}
 
             {isFetchingNextPage ? (
               <div className="border-t px-3 py-2 text-xs text-muted-foreground">

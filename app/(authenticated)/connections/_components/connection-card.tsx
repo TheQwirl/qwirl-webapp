@@ -162,6 +162,12 @@ const ConnectionCard: React.FC<ConnectionCardProps> = ({
               href: responderAnswersHref,
               icon: MessageSquareText,
             })}
+            {renderActionButton({
+              label: "Answer their qwirl",
+              href: qwirlHref,
+              icon: ArrowUpRight,
+              iconPlacement: "right",
+            })}
           </div>
         ) : (
           <div className="w-full">
