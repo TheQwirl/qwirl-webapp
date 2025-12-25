@@ -53,7 +53,7 @@ export default function TopMatchSpotlight({
         ) : match ? (
           <div className="space-y-4">
             <Link
-              href={`/qwirl/${match.username}`}
+              href={`/${match.username}`}
               className="relative block rounded-2xl border border-border/40 bg-primary/5 p-4 transition-all hover:border-primary/50 hover:bg-primary/10"
             >
               <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 text-primary" />

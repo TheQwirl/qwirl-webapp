@@ -1,6 +1,14 @@
 import React from "react";
 
-export const onboardingSteps = [
+// Control the onboarding steps exported to the app using an environment
+// variable. This prevents the tour from running in production accidentally
+// while allowing easy testing during development.
+// - NEXT_PUBLIC_ONBOARDING_MODE=off     -> [] (default)
+// - NEXT_PUBLIC_ONBOARDING_MODE=partial -> only first two steps
+// - NEXT_PUBLIC_ONBOARDING_MODE=full    -> all steps
+const MODE = process.env.NEXT_PUBLIC_ONBOARDING_MODE ?? "off";
+
+const FULL_STEPS = [
   {
     tour: "qwirl-editor-tour",
     steps: [
@@ -125,3 +133,56 @@ export const onboardingSteps = [
     ],
   },
 ];
+
+const PARTIAL_STEPS = [
+  {
+    tour: "qwirl-editor-tour",
+    steps: [
+      {
+        icon: <>👋</>,
+        title: "Welcome to Your Qwirl!",
+        content: (
+          <div className="space-y-2">
+            <p>
+              Let&apos;s get you started with building your Qwirl! A Qwirl is a
+              collection of polls that help others discover who you are.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              We&apos;ll show you how to add and manage questions.
+            </p>
+          </div>
+        ),
+        selector: "#onboarding-welcome",
+        side: "bottom" as const,
+        showControls: true,
+        pointerPadding: 10,
+        pointerRadius: 12,
+      },
+      {
+        icon: <>➕</>,
+        title: "Add Your First Poll",
+        content: (
+          <div className="space-y-2">
+            <p>
+              Click the <strong>&quot;Add Poll&quot;</strong> button to create a
+              custom question or browse from our question bank.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Try creating a custom question first!
+            </p>
+          </div>
+        ),
+        selector: "#add-poll-button",
+        side: "left" as const,
+        showControls: true,
+        pointerPadding: 10,
+        pointerRadius: 12,
+      },
+    ],
+  },
+];
+
+export const onboardingSteps =
+  MODE === "full" ? FULL_STEPS : MODE === "partial" ? PARTIAL_STEPS : [];
+
+export const ONBOARDING_MODE = MODE;

@@ -126,9 +126,7 @@ const InSyncTab = () => {
             <div className="flex w-full flex-wrap justify-center gap-3">
               <Button
                 onClick={() =>
-                  shareOrCopy(
-                    `${window.location.origin}/qwirl/${user?.username}`
-                  )
+                  shareOrCopy(`${window.location.origin}/${user?.username}`)
                 }
                 icon={Share2}
                 iconPlacement="left"

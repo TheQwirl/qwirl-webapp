@@ -8,13 +8,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import type { FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QwirlPollData, QwirlPollSchema } from "./schema";
 import PollComposerForm from "./poll-composer-form";
 import { Lightbulb, X } from "lucide-react";
+import { categoryMeta } from "@/constants/categories";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import $api from "@/lib/api/client";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 interface Props {
   isModalOpen: boolean;
@@ -47,6 +56,23 @@ const AddPollDialog: React.FC<Props> = ({
     setFocus,
     formState: { isValid, isSubmitting: formIsSubmitting, errors, submitCount },
   } = methods;
+
+  // Fetch categories for the category select
+  const { data: categoriesData, isLoading: categoriesLoading } = $api.useQuery(
+    "get",
+    "/question-categories"
+  );
+
+  // When categories load, set default category_id if not set
+  useEffect(() => {
+    if (!categoriesData || categoriesData?.length === 0) return;
+    const firstId = categoriesData?.[0]?.id;
+    // If current form has no category_id, set it to first
+    const current = methods.getValues();
+    if (!current.category_id) {
+      methods.reset({ ...current, category_id: firstId });
+    }
+  }, [categoriesData, methods]);
 
   const isBusy = isSubmitting || formIsSubmitting;
   const [showTips, setShowTips] = useState(false);
@@ -139,6 +165,79 @@ const AddPollDialog: React.FC<Props> = ({
             <form onSubmit={onSubmit} className="flex h-full flex-col">
               <ScrollArea className="flex-1 px-4 py-5 sm:px-5">
                 <div className="space-y-5 pb-2">
+                  {/* Category selector (required) */}
+                  <div>
+                    <label className="text-sm font-medium block mb-2">
+                      Category
+                    </label>
+                    <Controller
+                      name="category_id"
+                      control={methods.control}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={(v) => field.onChange(Number(v))}
+                          value={field.value ? String(field.value) : undefined}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue
+                              placeholder={
+                                categoriesLoading
+                                  ? "Loading categories..."
+                                  : "Select a category"
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categoriesData &&
+                              categoriesData?.map((category) => {
+                                const meta =
+                                  categoryMeta[
+                                    category.name as keyof typeof categoryMeta
+                                  ];
+                                const Icon = meta?.icon;
+
+                                return (
+                                  <SelectItem
+                                    key={category.id}
+                                    value={String(category.id)}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      {meta ? (
+                                        <span
+                                          className="inline-flex h-6 w-6 items-center justify-center rounded-full"
+                                          style={{
+                                            backgroundColor: meta.bg,
+                                            color: meta.fg,
+                                          }}
+                                        >
+                                          <Icon className="h-3 w-3" />
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                                          <Lightbulb className="h-3 w-3" />
+                                        </span>
+                                      )}
+
+                                      <span
+                                        className="truncate"
+                                        style={{ color: meta?.fg }}
+                                      >
+                                        {category.name}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {methods.formState.errors.category_id && (
+                      <p className="text-xs text-destructive mt-1">
+                        {methods.formState.errors.category_id.message}
+                      </p>
+                    )}
+                  </div>
                   <PollComposerForm showTips={showTips} />
                   {rootErrorMessage ? (
                     <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">

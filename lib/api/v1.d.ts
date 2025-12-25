@@ -1059,10 +1059,7 @@ export interface paths {
         };
         /**
          * Get Categories
-         * @description Get all categories
-         *
-         *     Returns:
-         *         Categories
+         * @description Get all categories as list of {id, name} objects
          */
         get: operations["get_categories_api_v1_question_categories_get"];
         put?: never;
@@ -1615,6 +1612,20 @@ export interface components {
              */
             file: string;
         };
+        /** Category */
+        Category: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /** CategoryItem */
+        CategoryItem: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
         /** FeedBase */
         FeedBase: {
             /**
@@ -2129,6 +2140,8 @@ export interface components {
             options: string[];
             /** Owner Answer */
             owner_answer: string;
+            /** Category Id */
+            category_id: number;
         };
         /** QwirlItemDetail */
         QwirlItemDetail: {
@@ -2155,6 +2168,7 @@ export interface components {
             option_statistics?: components["schemas"]["OptionStatistics"];
             user_response?: components["schemas"]["QwirlItemUserResponse"] | null;
             status?: components["schemas"]["ResponseStatus"] | null;
+            category?: components["schemas"]["Category"] | null;
         };
         /** QwirlItemUpdate */
         QwirlItemUpdate: {
@@ -2166,6 +2180,8 @@ export interface components {
             owner_answer?: string | null;
             /** Is Soft Deleted */
             is_soft_deleted?: boolean | null;
+            /** Category Id */
+            category_id?: number | null;
         };
         /** QwirlItemUserResponse */
         QwirlItemUserResponse: {
@@ -2188,7 +2204,7 @@ export interface components {
          */
         QwirlItemsFlexibleResponse: {
             /** Items */
-            items: components["schemas"]["QwirlQuestion"] | components["schemas"]["QwirlQuestion"][];
+            items: components["schemas"]["api__qwirl__schemas__QwirlQuestion"] | components["schemas"]["api__qwirl__schemas__QwirlQuestion"][];
             /** Total Created */
             total_created: number;
             /** Message */
@@ -2203,20 +2219,6 @@ export interface components {
             qwirl_id: number;
             /** Total Items */
             total_items: number;
-        };
-        /** QwirlQuestion */
-        QwirlQuestion: {
-            /** Id */
-            id: number | null;
-            /** Text */
-            text: string | null;
-            /** Options */
-            options: string[];
-            /**
-             * Is Deleted
-             * @default false
-             */
-            is_deleted: boolean | null;
         };
         /** QwirlResponderSummary */
         QwirlResponderSummary: {
@@ -2260,7 +2262,7 @@ export interface components {
             /** Id */
             id: number;
             /** Questions */
-            questions: components["schemas"]["QwirlQuestion"][] | null;
+            questions: components["schemas"]["api__user__schemas__QwirlQuestion"][] | null;
             /** Tags */
             tags: string[] | null;
             /** Created By */
@@ -2744,6 +2746,21 @@ export interface components {
             /** Header Img */
             header_img: string | null;
         };
+        /** QwirlQuestion */
+        api__qwirl__schemas__QwirlQuestion: {
+            /** Id */
+            id: number | null;
+            /** Text */
+            text: string | null;
+            /** Options */
+            options: string[];
+            /**
+             * Is Deleted
+             * @default false
+             */
+            is_deleted: boolean | null;
+            category?: components["schemas"]["Category"] | null;
+        };
         /** QwirlUser */
         api__qwirl__schemas__QwirlUser: {
             /** Name */
@@ -2767,6 +2784,20 @@ export interface components {
             id: number | null;
             /** Avatar */
             avatar: string | null;
+        };
+        /** QwirlQuestion */
+        api__user__schemas__QwirlQuestion: {
+            /** Id */
+            id: number | null;
+            /** Text */
+            text: string | null;
+            /** Options */
+            options: string[];
+            /**
+             * Is Deleted
+             * @default false
+             */
+            is_deleted: boolean | null;
         };
         /** UserResponse */
         api__user__schemas__UserResponse: {
@@ -3690,7 +3721,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QwirlQuestion"];
+                    "application/json": components["schemas"]["api__qwirl__schemas__QwirlQuestion"];
                 };
             };
             /** @description Validation Error */
@@ -4259,7 +4290,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["CategoryItem"][];
                 };
             };
         };

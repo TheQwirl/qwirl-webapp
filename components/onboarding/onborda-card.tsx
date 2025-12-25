@@ -26,13 +26,6 @@ export const OnbordaCard = ({
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === totalSteps - 1;
 
-  // Debug output to trace which steps render and when navigation occurs
-  console.log("OnbordaCard render", {
-    currentStep,
-    totalSteps,
-    title: step?.title,
-  });
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -75,10 +68,7 @@ export const OnbordaCard = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              console.log("Onborda: prevStep clicked", { currentStep });
-              prevStep();
-            }}
+            onClick={prevStep}
             disabled={isFirstStep}
             className="gap-1"
           >
@@ -86,14 +76,7 @@ export const OnbordaCard = ({
             Back
           </Button>
 
-          <Button
-            size="sm"
-            onClick={() => {
-              console.log("Onborda: nextStep clicked", { currentStep });
-              nextStep();
-            }}
-            className="gap-1"
-          >
+          <Button size="sm" onClick={nextStep} className="gap-1">
             {isLastStep ? (
               <>
                 Finish

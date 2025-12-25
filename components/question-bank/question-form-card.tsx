@@ -11,6 +11,7 @@ import type { components } from "@/lib/api/v1-client-side";
 import type { QwirlPollData } from "@/components/qwirl/schema";
 import { QwirlPollSchema } from "@/components/qwirl/schema";
 import { Check } from "lucide-react";
+import { categoryMeta } from "@/constants/categories";
 
 type Question = components["schemas"]["QuestionSearchResponse"];
 
@@ -24,7 +25,6 @@ export function QuestionFormCard({
   onAddPoll,
 }: QuestionFormCardProps) {
   const questionCategory = question.category_name;
-  //   const questionTags = (question).tags ?? [];
   const questionOwnerAnswerIndex =
     (
       question as {
@@ -51,10 +51,6 @@ export function QuestionFormCard({
   } = methods;
 
   const [hasJustAdded, setHasJustAdded] = useState(false);
-
-  //   const options = methods.watch("options") ?? [];
-  //   const ownerAnswerIndex = methods.watch("owner_answer_index") ?? 0;
-  //   const selectedOwnerAnswer = options[ownerAnswerIndex];
 
   const onSubmit = handleSubmit(async (data: QwirlPollData) => {
     clearErrors("root");
@@ -84,28 +80,36 @@ export function QuestionFormCard({
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
-            {questionCategory && (
-              <Badge variant={"secondary"} className="text-xs font-medium">
-                {questionCategory}
-              </Badge>
-            )}
-            {/* {questionTags.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5 text-[10px] text-muted-foreground">
-                {questionTags.slice(0, 3).map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-muted px-2 py-0.5 font-semibold"
+            {questionCategory &&
+              (() => {
+                const metaEntry = Object.entries(categoryMeta).find(
+                  ([key]) =>
+                    key.toLowerCase() === questionCategory.toLowerCase()
+                );
+                if (!metaEntry) {
+                  return (
+                    <Badge className="text-[10px] font-normal">
+                      {questionCategory}
+                    </Badge>
+                  );
+                }
+
+                const [label, meta] = metaEntry as [
+                  string,
+                  { bg: string; fg: string; icon: React.ElementType }
+                ];
+                const Icon = meta.icon;
+
+                return (
+                  <Badge
+                    className="inline-flex items-center gap-2 text-[10px] font-normal"
+                    style={{ backgroundColor: meta.bg, color: meta.fg }}
                   >
-                    {tag}
-                  </span>
-                ))}
-                {questionTags.length > 3 ? (
-                  <span className="rounded-full bg-muted/40 px-2 py-0.5 font-semibold text-muted-foreground/70">
-                    +{questionTags.length - 3}
-                  </span>
-                ) : null}
-              </div>
-            ) : null} */}
+                    <Icon className="h-3 w-3" />
+                    {label}
+                  </Badge>
+                );
+              })()}
           </div>
           {hasJustAdded ? (
             <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
@@ -115,14 +119,6 @@ export function QuestionFormCard({
         </div>
 
         <CompactQuestionCardEditable bare />
-
-        {/* <div className="space-y-2 text-xs text-muted-foreground">
-          {selectedOwnerAnswer ? (
-            <p className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-[11px] font-semibold text-primary">
-              Your current choice: {selectedOwnerAnswer}
-            </p>
-          ) : null}
-        </div> */}
 
         {errors.root ? (
           <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">

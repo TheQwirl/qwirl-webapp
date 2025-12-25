@@ -31,6 +31,7 @@ export function useQwirlEditor() {
               options: pollData.options,
               question_text: pollData.question_text,
               owner_answer: ownerAnswer,
+              category_id: pollData.category_id,
             },
           ],
         },

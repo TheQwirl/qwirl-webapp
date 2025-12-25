@@ -14,6 +14,7 @@ export interface CartQuestion {
   owner_answer_index: number;
   isEdited: boolean; // Track if edited from original
   addedAt: number; // Timestamp for ordering
+  categories_id: number;
 }
 
 interface QuestionCartState {
@@ -70,6 +71,7 @@ export const useQuestionCart = create<QuestionCartState>()(
             "owner_answer_index" in question ? question.owner_answer_index : 0,
           isEdited: "isEdited" in question ? question.isEdited : false,
           addedAt: Date.now(),
+          categories_id: question.categories_id,
         };
 
         set((state) => ({

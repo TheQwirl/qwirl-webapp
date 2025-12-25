@@ -141,7 +141,7 @@ const buildActionButtons = (
   sessionMeta?: SessionMetadata
 ): ActionButtonConfig[] => {
   const buttons: ActionButtonConfig[] = [];
-  const qwirlHref = actor?.username ? `/qwirl/${actor.username}` : undefined;
+  const qwirlHref = actor?.username ? `/${actor.username}` : undefined;
   const responderAnswersHref = actor?.id
     ? `/qwirls/primary/responses?responder=${actor.id}`
     : undefined;
@@ -259,7 +259,7 @@ export default function ActivityRow({ activity }: Props) {
           name={actor?.name || "Responder"}
           image={actor?.avatar ?? undefined}
           size="sm"
-          linkTo={actor?.username ? `/qwirl/${actor.username}` : undefined}
+          linkTo={actor?.username ? `/${actor.username}` : undefined}
         />
       );
     }
@@ -280,7 +280,7 @@ export default function ActivityRow({ activity }: Props) {
             size="sm"
             ringed
             className={clsx(!primaryIsUser ? "border-white" : "border-border")}
-            linkTo={actor?.username ? `/qwirl/${actor.username}` : undefined}
+            linkTo={actor?.username ? `/${actor.username}` : undefined}
           />
         </div>
         <div
@@ -295,7 +295,7 @@ export default function ActivityRow({ activity }: Props) {
             size="sm"
             ringed
             className={clsx(primaryIsUser ? "border-white" : "border-border")}
-            linkTo={user?.username ? `/qwirl/${user.username}` : undefined}
+            linkTo={user?.username ? `/${user.username}` : undefined}
           />
         </div>
       </div>

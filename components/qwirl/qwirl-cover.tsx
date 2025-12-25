@@ -149,9 +149,7 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
                 <button
                   type="button"
                   onClick={() => {
-                    shareOrCopy(
-                      `${window.location.origin}/qwirl/${user?.username}`
-                    );
+                    shareOrCopy(`${window.location.origin}/${user?.username}`);
                   }}
                   className="ml-auto bg-white/20 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-1.5 border border-white/30 shadow-lg shadow-black/10 text-gray-500 hover:text-white hover:bg-white/30 transition-all"
                 >
@@ -341,7 +339,7 @@ const QwirlCover = forwardRef<HTMLDivElement, QwirlCoverProps>(
                         Review Qwirl
                       </Button>
                     ) : (
-                      <Link href={`/qwirl/${user?.username}`}>
+                      <Link href={`/${user?.username}`}>
                         <Button
                           icon={SquareArrowOutUpRight}
                           iconPlacement="left"

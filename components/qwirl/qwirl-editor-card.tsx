@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React from "react";
+import React, { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { QwirlItem } from "./types";
 import { Card, CardContent } from "../ui/card";
@@ -15,6 +15,7 @@ import clsx from "clsx";
 import { Skeleton } from "../ui/skeleton";
 import PollOption from "./poll-option";
 import { useSortableItemContext } from "./sortable-qwirl-card";
+import { categoryMeta } from "@/constants/categories";
 
 type Props = {
   poll: QwirlItem;
@@ -73,6 +74,41 @@ const QwirlEditorCard: React.FC<Props> = ({
   disableMoveUp,
   disableMoveDown,
 }) => {
+  const categoryBadge = useMemo(() => {
+    const categoryName = poll?.category?.name;
+    if (!categoryName) return null;
+    if (categoryName.toLowerCase() === "uncategorized") return null;
+
+    const metaEntry = Object.entries(categoryMeta).find(
+      ([key]) => key.toLowerCase() === categoryName.toLowerCase()
+    );
+
+    if (!metaEntry) {
+      return (
+        <Badge variant="secondary" className="text-[10px] font-normal">
+          {categoryName}
+        </Badge>
+      );
+    }
+
+    const [label, meta] = metaEntry as [
+      string,
+      { bg: string; fg: string; icon: React.ElementType }
+    ];
+    const Icon = meta.icon;
+
+    return (
+      <Badge
+        variant="secondary"
+        className="inline-flex items-center gap-2 text-[10px] font-normal"
+        style={{ backgroundColor: meta.bg, color: meta.fg }}
+      >
+        <Icon className="h-3 w-3" />
+        {label}
+      </Badge>
+    );
+  }, [poll]);
+
   return (
     <Card
       className={clsx(
@@ -128,6 +164,8 @@ const QwirlEditorCard: React.FC<Props> = ({
             </div>
 
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+              {/** Category badge (if present and not Uncategorized) */}
+              {categoryBadge}
               <Badge variant="outline" className="text-xs">
                 #{poll.position}
               </Badge>

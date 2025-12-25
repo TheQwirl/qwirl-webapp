@@ -36,7 +36,7 @@ const SidebarCoverPreviewCard = () => {
   const title = cover?.name || cover?.title || "Untitled Qwirl";
   const description = cover?.description || FALLBACK_DESCRIPTION;
   const hasBackground = Boolean(cover?.background_image);
-  const previewHref = user?.username ? `/qwirl/${user.username}` : undefined;
+  const previewHref = user?.username ? `/${user.username}` : undefined;
 
   return (
     <CollapsibleCard

@@ -68,7 +68,7 @@ const ConnectionCard: React.FC<ConnectionCardProps> = ({
   const connectionName = connection?.name ?? connection?.username;
   const meta = VARIANT_META[variant];
   const qwirlHref = connection?.username
-    ? `/qwirl/${connection.username}`
+    ? `/${connection.username}`
     : undefined;
   const responderAnswersHref = connection?.id
     ? `/qwirls/primary/responses?responder=${connection.id}`
@@ -88,20 +88,37 @@ const ConnectionCard: React.FC<ConnectionCardProps> = ({
     iconPlacement?: "left" | "right";
     variant?: "default" | "outline" | "secondary";
   }) => {
-    const content = (
+    const Icon = icon;
+    if (href) {
+      return (
+        <Link href={href} className="w-full">
+          <Button asChild variant={buttonVariant} className="w-full">
+            <span className="inline-flex w-full items-center justify-center gap-2">
+              {iconPlacement === "left" && Icon ? (
+                <Icon className="h-4 w-4" />
+              ) : null}
+              {label}
+              {iconPlacement === "right" && Icon ? (
+                <Icon className="h-4 w-4" />
+              ) : null}
+            </span>
+          </Button>
+        </Link>
+      );
+    }
+
+    // No href -> render a disabled Button (or interactive if href not required)
+    return (
       <Button
         iconPlacement={iconPlacement}
         icon={icon}
         className="w-full"
         variant={buttonVariant}
         disabled={!href}
-        {...(href ? { asChild: true } : {})}
       >
-        {href ? <Link href={href}>{label}</Link> : label}
+        {label}
       </Button>
     );
-
-    return content;
   };
 
   return (
@@ -136,7 +153,7 @@ const ConnectionCard: React.FC<ConnectionCardProps> = ({
       </CardHeader>
       <CardContent className="space-y-2">
         <div>
-          <p className="text-sm ">{meta.highlight}</p>
+          <p className="text-sm text-muted-foreground">{meta.highlight}</p>
         </div>
       </CardContent>
       <CardFooter className="mt-auto w-full">
@@ -146,7 +163,7 @@ const ConnectionCard: React.FC<ConnectionCardProps> = ({
               label: "View answers",
               href: responderAnswersHref,
               icon: MessageSquareText,
-              variant: "secondary",
+              variant: "outline",
             })}
             {renderActionButton({
               label: "Visit their qwirl",
@@ -161,6 +178,7 @@ const ConnectionCard: React.FC<ConnectionCardProps> = ({
               label: "View their answers",
               href: responderAnswersHref,
               icon: MessageSquareText,
+              variant: "outline",
             })}
             {renderActionButton({
               label: "Answer their qwirl",
@@ -170,7 +188,7 @@ const ConnectionCard: React.FC<ConnectionCardProps> = ({
             })}
           </div>
         ) : (
-          <div className="w-full">
+          <div className="max-w-md w-full">
             {renderActionButton({
               label: "View their qwirl",
               href: qwirlHref,

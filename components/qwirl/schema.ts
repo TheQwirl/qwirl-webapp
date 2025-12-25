@@ -13,6 +13,10 @@ export const QwirlPollSchema = z
       .number()
       .int("Answer index must be a whole number")
       .nonnegative("Answer index cannot be negative"),
+    category_id: z
+      .number()
+      .int("Category id must be a whole number")
+      .positive("Category id is required"),
   })
   // refine to check that owner_answer_index is within the bounds of options array
   .refine((data) => {

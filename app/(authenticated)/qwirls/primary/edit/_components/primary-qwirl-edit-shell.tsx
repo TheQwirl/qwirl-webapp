@@ -14,8 +14,7 @@ import { STEP_DEFINITION_MAP, StepKey } from "./step-config";
 import PrimaryQwirlRightSidebar from "../../../_components/primary-qwirl-right-sidebar";
 
 const OVERVIEW_TITLE = "Assemble primary qwirl";
-const OVERVIEW_SUBTITLE =
-  "Shape a question-first experience that feels like you";
+const OVERVIEW_SUBTITLE = "Shape the qwirl that feels most like you";
 
 export const PrimaryQwirlEditShell = ({
   children,

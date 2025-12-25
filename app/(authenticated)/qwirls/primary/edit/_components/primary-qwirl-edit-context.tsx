@@ -63,6 +63,7 @@ export type PrimaryQwirlEditContextValue = {
     question_text: string;
     options: string[];
     owner_answer_index: number;
+    category_id: number;
   }) => Promise<void>;
   qwirlCoverQuery: ReturnType<typeof $api.useQuery>;
   socialsQuery: ReturnType<typeof $api.useQuery>;
@@ -290,6 +291,7 @@ export const PrimaryQwirlEditProvider = ({
             question_text: question.question_text,
             options: question.options,
             owner_answer_index: question.owner_answer_index,
+            category_id: question.categories_id,
           });
         }
         toast.success(`Added ${questions.length} polls to Qwirl`, {
@@ -321,6 +323,7 @@ export const PrimaryQwirlEditProvider = ({
       question_text: string;
       options: string[];
       owner_answer_index: number;
+      category_id: number;
     }) => {
       await handleAddPoll(pollData);
       setLastLibraryAdd(pollData.question_text);

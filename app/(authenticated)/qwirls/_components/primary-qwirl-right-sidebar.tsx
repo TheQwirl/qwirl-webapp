@@ -53,7 +53,7 @@ const PrimaryQwirlRightSidebar = ({
         key="QwirlStatusCard"
         pollCount={pollCount}
         isLoading={isLoading}
-        qwirlUrl={`${process.env.NEXT_PUBLIC_BASE_URL}/qwirl/${user?.username}`}
+        qwirlUrl={`${process.env.NEXT_PUBLIC_BASE_URL}/${user?.username}`}
       />
     ),
     SidebarCoverPreviewCard: (
@@ -65,7 +65,7 @@ const PrimaryQwirlRightSidebar = ({
     QuickActionsCard: (
       <QuickActionsCard
         key="QuickActionsCard"
-        qwirlUrl={`${process.env.NEXT_PUBLIC_BASE_URL}/qwirl/${user?.username}`}
+        qwirlUrl={`${process.env.NEXT_PUBLIC_BASE_URL}/${user?.username}`}
       />
     ),
     TipsGuideCard: <TipsGuideCard key="TipsGuideCard" />,

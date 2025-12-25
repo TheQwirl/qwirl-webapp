@@ -29,7 +29,7 @@ export default function HomeActionFooter({
 }: Props) {
   type ActionElement = React.ReactElement<ButtonProps & ButtonIconProps>;
   const actions: ActionElement[] = [];
-  const previewHref = username ? `/qwirl/${username}` : "/";
+  const previewHref = username ? `/${username}` : "/";
 
   if (isIncomplete) {
     actions.push(

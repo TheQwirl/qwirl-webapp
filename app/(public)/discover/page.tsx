@@ -170,7 +170,7 @@ const CommunityPage = () => {
                     className="group flex h-full w-full"
                   >
                     <Link
-                      href={`/qwirl/${qwirl.user?.username}`}
+                      href={`/${qwirl.user?.username}`}
                       className="flex w-full h-full"
                     >
                       <QwirlCover
